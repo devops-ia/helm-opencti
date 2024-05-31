@@ -1,0 +1,59 @@
+# {{ template "chart.name" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+## Prerequisites
+
+* Helm 3+
+
+{{ template "chart.requirementsSection" . }}
+
+## Add repository
+
+```console
+helm repo add opencti https://devops-ia.github.io/helm-opencti
+helm repo update
+```
+
+## Install Helm chart
+
+```console
+helm install [RELEASE_NAME] opencti/{{ template "chart.name" . }}
+```
+
+This install all the Kubernetes components associated with the chart and creates the release.
+
+_See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation._
+
+## Uninstall Helm chart
+
+```console
+# Helm
+helm uninstall [RELEASE_NAME]
+```
+
+This removes all the Kubernetes components associated with the chart and deletes the release.
+
+_See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation._
+
+## OpenCTI
+
+* [Environment configuration](https://docs.opencti.io/5.12.X/deployment/configuration/#platform)
+* [Connectors](https://github.com/OpenCTI-Platform/connectors/tree/master). Review `docker-compose.yaml` with the properly config
+* Check connectors samples on `connector-examples` folder
+
+## Basic installation and examples
+
+See [basic installation](docs/configuration.md) and [examples](docs/examples.md).
+
+## Configuration
+
+See [Customizing the chart before installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with comments:
+
+```console
+helm show values devops-ia/{{ template "chart.name" . }}
+```
+
+{{ template "chart.valuesSection" . }}

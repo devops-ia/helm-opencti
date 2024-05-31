@@ -1,0 +1,67 @@
+name: Release charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Get chart verison
+        id: chart_version
+        run: |
+          echo "CHART_VERSION=$(cat opencti/Chart.yaml | awk -F"[ ',]+" '/version:/{print $2}' | head -1)" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: tag_exists
+        run: |
+          TAG_EXISTS=true
+          if ! [ $(git tag -l "v${{ steps.chart_version.outputs.CHART_VERSION }}") ]; then
+              TAG_EXISTS=false
+          fi
+          echo TAG_EXISTS=$TAG_EXISTS >> $GITHUB_OUTPUT
+
+      - name: Tag release
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          custom_tag: ${{ steps.chart_version.outputs.CHART_VERSION }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: v
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+
+      - name: Add repositories
+        run: |
+            helm dependency list opencti 2> /dev/null | tail +2 | head -n -1 | awk '{ print "helm repo add " $1 " " $3 }' | while read cmd; do $cmd; done
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          body: ${{ steps.tag_version.outputs.changelog }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          prerelease: ${{ contains(steps.chart_version.outputs.CHART_VERSION, '-') }}
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+
+      - name: Publish Helm chart
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          branch: gh-pages
+          charts_dir: .
+          charts_url: https://devops-ia.github.io/helm-opencti
+          linting: true
+          target_dir: .
+          token: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'

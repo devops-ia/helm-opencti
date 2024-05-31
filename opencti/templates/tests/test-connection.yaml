@@ -1,0 +1,17 @@
+{{ if .Values.testConnection }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "opencti.fullname" . }}-test-connection"
+  labels:
+    {{- include "opencti.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "opencti.fullname" . }}:{{ .Values.service.targetPort | default .Values.service.port }}']
+  restartPolicy: Never
+{{ end }}
