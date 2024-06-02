@@ -50,6 +50,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           body: ${{ steps.tag_version.outputs.changelog }}
+          generateReleaseNotes: true
           name: ${{ steps.tag_version.outputs.new_tag }}
           prerelease: ${{ contains(steps.chart_version.outputs.CHART_VERSION, '-') }}
           tag: ${{ steps.tag_version.outputs.new_tag }}
@@ -61,7 +62,10 @@ jobs:
           branch: gh-pages
           charts_dir: .
           charts_url: https://devops-ia.github.io/helm-opencti
+          index_dir: .
           linting: true
+          owner: devops-ia
+          repository: helm-opencti
           target_dir: .
           token: ${{ secrets.GITHUB_TOKEN }}
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
