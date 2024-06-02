@@ -3,7 +3,7 @@
 See [Customizing the chart before installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with comments:
 
 ```console
-helm show values devops-ia/opencti
+helm show values opencti/opencti
 ```
 
 You may also helm show values on this chart's dependencies for additional options.
