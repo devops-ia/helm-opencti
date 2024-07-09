@@ -8,29 +8,29 @@ maintainers:
     url: https://ialejandro.rocks
 sources:
   - https://github.com/OpenCTI-Platform/opencti
-version: 1.2.4
-appVersion: "6.1.6"
+version: 1.2.5
+appVersion: "6.2.3"
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:
   - opencti
 dependencies:
   - name: elasticsearch
-    version: 21.1.*
+    version: 21.2.*
     repository: https://charts.bitnami.com/bitnami
     condition: elasticsearch.enabled
   - name: minio
     version: 14.6.*
-    repository: https://charts.bitnami.com/bitnami
+    repository: https://charts.bitnami.com/bitnami 
     condition: minio.enabled
   - name: opensearch
-    version: 2.20.*
+    version: 2.21.*
     repository: https://opensearch-project.github.io/helm-charts/
     condition: opensearch.enabled
   - name: rabbitmq
-    version: 14.3.*
+    version: 14.5.*
     repository: https://charts.bitnami.com/bitnami
     condition: rabbitmq.enabled
   - name: redis
-    version: 19.5.*
+    version: 19.6.*
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
