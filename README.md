@@ -16,11 +16,11 @@ A Helm chart to deploy open cyber threat intelligence platform
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | elasticsearch | 21.1.* |
+| https://charts.bitnami.com/bitnami | elasticsearch | 21.2.* |
 | https://charts.bitnami.com/bitnami | minio | 14.6.* |
-| https://charts.bitnami.com/bitnami | rabbitmq | 14.3.* |
-| https://charts.bitnami.com/bitnami | redis | 19.5.* |
-| https://opensearch-project.github.io/helm-charts/ | opensearch | 2.20.* |
+| https://charts.bitnami.com/bitnami | rabbitmq | 14.5.* |
+| https://charts.bitnami.com/bitnami | redis | 19.6.* |
+| https://opensearch-project.github.io/helm-charts/ | opensearch | 2.21.* |
 
 ## Add repository
 
@@ -65,7 +65,7 @@ See [basic installation](opencti/docs/configuration.md) and [examples](opencti/d
 See [Customizing the chart before installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with comments:
 
 ```console
-helm show values devops-ia/opencti
+helm show values opencti/opencti
 ```
 
 ## Values

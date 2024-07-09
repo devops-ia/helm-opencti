@@ -39,10 +39,9 @@ worker:
 elasticsearch:
   fullnameOverride: opencti-ci-elasticsearch
   master:
-    resourcesPreset: "nano"
+    resourcesPreset: "medium"
   data:
-    resourcesPreset: "nano"
-    heapSize: 128m
+    resourcesPreset: "medium"
 
 minio:
   fullnameOverride: opencti-ci-minio
