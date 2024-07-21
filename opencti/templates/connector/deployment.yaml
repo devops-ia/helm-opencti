@@ -69,7 +69,7 @@ spec:
           {{- end }}
 
           # Special handling for OPENCTI_URL which is constructed from other values
-          {{- if not (hasKey $envList "OPENCTI_URL") }}
+          {{- if not (hasKey .env "OPENCTI_URL") }}
           {{- if eq $.Values.env.APP__BASE_PATH "/" }}
           - name: OPENCTI_URL
             value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}"
@@ -79,7 +79,8 @@ spec:
           {{- end }}
           {{- end }}
 
-          {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) ($.Values.env.APP__ADMIN__TOKEN) }}
+          # Special handling for OPENCTI_TOKEN which is constructed from other values
+          {{- if and (not (hasKey .env "OPENCTI_TOKEN")) ($.Values.env.APP__ADMIN__TOKEN) }}
           - name: OPENCTI_TOKEN
             value: "{{ $.Values.env.APP__ADMIN__TOKEN }}"
           {{- end }}
