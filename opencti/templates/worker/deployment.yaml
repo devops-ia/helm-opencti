@@ -65,7 +65,6 @@ spec:
             {{- end }}
           env:
           # Variables from secrets have precedence
-
           {{- $envList := dict -}}
 
           {{- if .Values.worker.envFromSecrets }}
@@ -90,6 +89,7 @@ spec:
           {{- end }}
           {{- end }}
 
+          # Special handling for OPENCTI_TOKEN which is constructed from other values
           {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (.Values.env.APP__ADMIN__TOKEN) }}
           - name: OPENCTI_TOKEN
             value: "{{ .Values.env.APP__ADMIN__TOKEN }}"

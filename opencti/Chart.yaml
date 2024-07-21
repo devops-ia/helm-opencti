@@ -8,7 +8,7 @@ maintainers:
     url: https://ialejandro.rocks
 sources:
   - https://github.com/OpenCTI-Platform/opencti
-version: 1.2.6
+version: 1.2.7
 appVersion: "6.2.6"
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:
@@ -20,7 +20,7 @@ dependencies:
     condition: elasticsearch.enabled
   - name: minio
     version: 14.6.*
-    repository: https://charts.bitnami.com/bitnami 
+    repository: https://charts.bitnami.com/bitnami
     condition: minio.enabled
   - name: opensearch
     version: 2.21.*
