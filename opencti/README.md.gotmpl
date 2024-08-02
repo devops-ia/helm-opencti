@@ -17,7 +17,7 @@ helm repo add opencti https://devops-ia.github.io/helm-opencti
 helm repo update
 ```
 
-## Install Helm chart
+## Install Helm chart (repository mode)
 
 ```console
 helm install [RELEASE_NAME] opencti/{{ template "chart.name" . }}
@@ -27,10 +27,17 @@ This install all the Kubernetes components associated with the chart and creates
 
 _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation._
 
+## Install Helm chart (OCI mode)
+
+Charts are also available in OCI format. The list of available charts can be found [here](https://github.com/devops-ia/helm-opencti/pkgs/container/helm-opencti%2Fopencti).
+
+```console
+helm install [RELEASE_NAME] oci://ghcr.io/devops-ia/helm-opencti/opencti --version=[version]
+```
+
 ## Uninstall Helm chart
 
 ```console
-# Helm
 helm uninstall [RELEASE_NAME]
 ```
 
@@ -46,7 +53,7 @@ _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command doc
 
 ## Basic installation and examples
 
-See [basic installation](opencti/docs/configuration.md) and [examples](opencti/docs/examples.md).
+See [basic installation](docs/configuration.md) and [examples](docs/examples.md).
 
 ## Configuration
 

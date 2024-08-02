@@ -42,19 +42,12 @@ jobs:
           fi
           echo TAG_EXISTS=$TAG_EXISTS >> $GITHUB_OUTPUT
 
-      - name: Tag release
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          custom_tag: ${{ steps.chart_version.outputs.CHART_VERSION }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_prefix: v
-
       - name: Run chart-releaser
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
         uses: helm/chart-releaser-action@v1.6.0
         with:
           config: cr.yaml
+          charts_dir: .
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 

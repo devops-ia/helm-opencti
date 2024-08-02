@@ -30,12 +30,12 @@ _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documen
 
 ### OCI Registry
 
-Charts are also available in OCI format. The list of available charts can be found [here](https://github.com/orgs/devops-ia/packages?repo_name=charts).
+Charts are also available in OCI format. The list of available charts can be found [here](https://github.com/devops-ia/helm-opencti/pkgs/container/helm-opencti%2Fopencti).
 
 #### Install Helm chart
 
 ```console
-helm install [RELEASE_NAME] oci://ghcr.io/opencti/charts/opencti --version=[version]
+helm install [RELEASE_NAME] oci://ghcr.io/devops-ia/helm-opencti/opencti --version=[version]
 ```
 
 ## OpenCTI chart
