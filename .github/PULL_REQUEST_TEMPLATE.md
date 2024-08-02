@@ -1,7 +1,7 @@
 <!--
 Before you submit this PR we'd like to make sure you are aware of our technical requirements and best practices:
 
-* https://github.com/devops-ia/helm-charts/blob/main/CONTRIBUTING.md#technical-requirements
+* https://github.com/devops-ia/helm-opencti/blob/main/CONTRIBUTING.md#technical-requirements
 * https://helm.sh/docs/chart_best_practices/
 
 Following our best practices right from the start will accelerate the review process and help get your PR merged quicker.

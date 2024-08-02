@@ -1,9 +1,10 @@
 # See https://github.com/helm/chart-testing#configuration
+check-version-increment: true
+debug: false
+helm-extra-args: --timeout 900s
 remote: origin
 target-branch: main
-helm-extra-args: --timeout 900s
-debug: false
-check-version-increment: true
 upgrade: true
 validate-chart-schema: true
+validate-maintainers: false
 validate-yaml: true

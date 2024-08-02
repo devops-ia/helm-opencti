@@ -1,13 +1,22 @@
 name: Release charts
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+    paths:
+      - "opencti/**"
 
 jobs:
   release:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -40,32 +49,43 @@ jobs:
           custom_tag: ${{ steps.chart_version.outputs.CHART_VERSION }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: v
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
 
-      - name: Add repositories
+      - name: Run chart-releaser
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        uses: helm/chart-releaser-action@v1.6.0
+        with:
+          config: cr.yaml
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Login in to the Container registry
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Cosign
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Install Oras
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        uses: oras-project/setup-oras@v1
+
+      # ref: https://github.com/backstage/charts/blob/88240ce7a0726e3773ee0e4866fbe6325c15267b/.github/workflows/release.yml#L50
+      - name: Publish and Sign OCI Charts
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
         run: |
-            helm dependency list opencti 2> /dev/null | tail +2 | head -n -1 | awk '{ print "helm repo add " $1 " " $3 }' | while read cmd; do $cmd; done
+          for chart in `find .cr-release-packages -name '*.tgz' -print`; do
+            helm push ${chart} oci://ghcr.io/${GITHUB_REPOSITORY} |& tee helm-push-output.log
+            file_name=${chart##*/}
+            chart_name=${file_name%-*}
+            digest=$(awk -F "[, ]+" '/Digest/{print $NF}' < helm-push-output.log)
+            cosign sign -y "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}@${digest}"
 
-      - name: Create release
-        uses: ncipollo/release-action@v1
-        with:
-          body: ${{ steps.tag_version.outputs.changelog }}
-          generateReleaseNotes: true
-          name: ${{ steps.tag_version.outputs.new_tag }}
-          prerelease: ${{ contains(steps.chart_version.outputs.CHART_VERSION, '-') }}
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-
-      - name: Publish Helm chart
-        uses: stefanprodan/helm-gh-pages@master
-        with:
-          branch: gh-pages
-          charts_dir: .
-          charts_url: https://devops-ia.github.io/helm-opencti
-          index_dir: .
-          linting: true
-          owner: devops-ia
-          repository: helm-opencti
-          target_dir: .
-          token: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+            oras push "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}:${{ steps.chart_version.outputs.CHART_VERSION }}"
+          done
+        env:
+          COSIGN_EXPERIMENTAL: 1
