@@ -1,6 +1,6 @@
 # opencti
 
-A Helm chart to deploy open cyber threat intelligence platform
+A Helm chart to deploy Open Cyber Threat Intelligence platform
 
 ## Maintainers
 
