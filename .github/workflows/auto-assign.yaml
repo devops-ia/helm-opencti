@@ -1,4 +1,4 @@
-name: Auto assign
+name: Auto-assign Issue
 on:
   issues:
     types: [opened]
@@ -12,9 +12,8 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: 'Auto-assign issue'
+      - name: 'auto-assign issue'
         uses: pozil/auto-assign-issue@v2
         with:
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
-            assignees: ialejandro
-            numOfAssignee: 1
+            repo-token: ${{ secrets.PAT_GITHUB }}
+            teams: devops-ia
