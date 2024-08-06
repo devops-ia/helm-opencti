@@ -3,7 +3,7 @@ on:
   issues:
     types: [opened]
   pull_request:
-    types: [opened]
+    types: [opened, edited, synchronize, reopened]
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -15,5 +15,6 @@ jobs:
       - name: 'auto-assign issue'
         uses: pozil/auto-assign-issue@v2
         with:
-            repo-token: ${{ secrets.PAT_GITHUB }}
-            teams: devops-ia
+          repo-token: ${{ secrets.PAT_GITHUB }}
+          teams: devops-ia
+          removePreviousAssignees: true

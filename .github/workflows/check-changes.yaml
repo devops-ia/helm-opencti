@@ -52,7 +52,7 @@ jobs:
         if: steps.check_changes.outputs.version_changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHB_PERSONAL_TOKEN }}
+          token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: bump OpenCTI version to ${{ steps.latest_version.outputs.latest_version }}"
           signoff: true
           branch: fix/upgrade-opencti-appversion-${{ steps.latest_version.outputs.latest_version }}
