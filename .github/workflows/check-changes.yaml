@@ -1,4 +1,4 @@
-name: Check OpenCTI updates
+name: Check OpenCTI new releases
 
 on:
   workflow_dispatch:
@@ -14,56 +14,54 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get latest version
+      - name: Get latest release
         id: latest_version
         run: |
           # latest
           latest_version=$(curl -s https://api.github.com/repos/opencti-platform/opencti/tags | jq -r '.[0].name')
           echo "latest_version=$latest_version" >> $GITHUB_OUTPUT
 
-      - name: Get current appVersion
+      - name: Get current release
         id: current_version
         run: |
           # current
           current_version=$(grep appVersion opencti/Chart.yaml | awk '{ print $2 }')
           echo "current_version=$current_version" >> $GITHUB_OUTPUT
 
-      - name: Check if exists changes
+      - name: Check if release changed
         id: check_changes
         run: |
           if [ ${{ steps.latest_version.outputs.latest_version }} != ${{ steps.current_version.outputs.current_version }} ]; then
-            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "release_changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update appVersion
-        if: steps.check_changes.outputs.version_changed == 'true'
+      - name: Set new Chat.yaml appVersion
+        if: steps.check_changes.outputs.release_changed == 'true'
         run: |
-          # update appVersion
           sed -i "s/appVersion: .*/appVersion: ${{ steps.latest_version.outputs.latest_version }}/g" opencti/Chart.yaml
 
-      - name: Update helm chart README.md
-        if: steps.check_changes.outputs.version_changed == 'true'
+      - name: Update README.md Helm Chart
+        if: steps.check_changes.outputs.release_changed == 'true'
         uses: losisin/helm-docs-github-action@v1
         with:
           chart-search-root: opencti
 
-      - name: Create Pull Request
-        if: steps.check_changes.outputs.version_changed == 'true'
+      - name: Create PR with changes
+        if: steps.check_changes.outputs.release_changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.PAT_GITHUB }}
-          commit-message: "fix: bump OpenCTI version to ${{ steps.latest_version.outputs.latest_version }}"
+          commit-message: "fix: update OpenCTI version to ${{ steps.latest_version.outputs.latest_version }}"
           signoff: false
           branch: fix/upgrade-opencti-appversion-${{ steps.latest_version.outputs.latest_version }}
           delete-branch: true
-          title: '[opencti] Bump version to ${{ steps.latest_version.outputs.latest_version }}'
+          title: '[opencti] new release: ${{ steps.latest_version.outputs.latest_version }}'
           body: |
-            Bump OpenCTI version:
+            OpenCTI version:
             - :information_source: Current: `${{ steps.current_version.outputs.current_version }}`
             - :up: Upgrade: `${{ steps.latest_version.outputs.latest_version }}`
 
             Changelog: https://github.com/OpenCTI-Platform/opencti/releases/tag/${{ steps.latest_version.outputs.latest_version }}
           labels: |
             auto-pr-bump-version
-          assignees: ialejandro
-          reviewers: ialejandro
+          team-reviewers: devops-ia
