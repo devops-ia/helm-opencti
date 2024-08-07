@@ -28,10 +28,20 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Get chart verison
+      - name: Semantic Release 
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic_release
+        with:
+          dry_run: true
+          branch: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Chart verison
         id: chart_version
         run: |
-          echo "CHART_VERSION=$(cat opencti/Chart.yaml | awk -F"[ ',]+" '/version:/{print $2}' | head -1)" >> $GITHUB_OUTPUT
+          sed -i 's/version: .*/version: ${{ steps.semantic_release.outputs.new_release_git_tag }}/g' opencti/Chart.yaml
+          echo "CHART_VERSION=${{ steps.semantic_release.outputs.new_release_git_tag }}" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists
         id: tag_exists
