@@ -34,13 +34,14 @@ jobs:
         with:
           dry_run: true
           branch: main
+          tag_format: ${version}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Chart verison
         id: chart_version
         run: |
-          sed -i 's/version: .*/version: ${{ steps.semantic_release.outputs.new_release_git_tag }}/g' opencti/Chart.yaml
+          sed -i 's/^version: .*/version: ${{ steps.semantic_release.outputs.new_release_git_tag }}/g' opencti/Chart.yaml
           echo "CHART_VERSION=${{ steps.semantic_release.outputs.new_release_git_tag }}" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists

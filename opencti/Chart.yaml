@@ -8,7 +8,7 @@ maintainers:
     url: https://ialejandro.rocks
 sources:
   - https://github.com/OpenCTI-Platform/opencti
-version: 1.2.8
+version: 1.2.8 # replace by CI/CD
 appVersion: 6.2.12
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:

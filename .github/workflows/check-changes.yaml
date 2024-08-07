@@ -53,7 +53,7 @@ jobs:
         with:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: bump OpenCTI version to ${{ steps.latest_version.outputs.latest_version }}"
-          signoff: true
+          signoff: false
           branch: fix/upgrade-opencti-appversion-${{ steps.latest_version.outputs.latest_version }}
           delete-branch: true
           title: '[opencti] Bump version to ${{ steps.latest_version.outputs.latest_version }}'
