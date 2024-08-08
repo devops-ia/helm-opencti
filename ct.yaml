@@ -1,4 +1,5 @@
 # See https://github.com/helm/chart-testing#configuration
+chart-dirs: charts
 check-version-increment: true
 debug: false
 helm-extra-args: --timeout 900s
