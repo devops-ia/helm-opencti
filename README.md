@@ -40,5 +40,5 @@ helm install [RELEASE_NAME] oci://ghcr.io/devops-ia/helm-opencti/opencti --versi
 
 ## OpenCTI chart
 
-Can be found in [opencti chart](https://github.com/devops-ia/helm-opencti/tree/main/opencti).
+Can be found in [opencti chart](https://github.com/devops-ia/helm-opencti/tree/main/charts/opencti).
 
