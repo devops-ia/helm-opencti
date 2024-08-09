@@ -40,7 +40,7 @@ serviceAccount:
   automountServiceAccountToken: false
 
 # -- Environment variables to configure application
-# Ref: https://docs.opencti.io/5.12.X/deployment/configuration/#platform
+# Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
 env:
   # Plain vars
   # foo: bar
@@ -307,7 +307,7 @@ worker:
     tag: ""
 
   # -- Environment variables to configure application
-  # Ref: https://docs.opencti.io/5.12.X/deployment/configuration/#platform
+  # Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
   env:
     # Plain vars
     # foo: bar
