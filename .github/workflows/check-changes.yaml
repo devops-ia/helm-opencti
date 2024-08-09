@@ -15,30 +15,28 @@ jobs:
           fetch-depth: 0
 
       - name: Get latest release
-        id: latest_version
+        id: latest_release
         run: |
-          # latest
-          latest_version=$(curl -s https://api.github.com/repos/opencti-platform/opencti/tags | jq -r '.[0].name')
-          echo "latest_version=$latest_version" >> $GITHUB_OUTPUT
+          latest_release=$(curl -s https://api.github.com/repos/opencti-platform/opencti/tags | jq -r '.[0].name')
+          echo "latest_release=$latest_release" >> $GITHUB_OUTPUT
 
       - name: Get current release
-        id: current_version
+        id: current_release
         run: |
-          # current
-          current_version=$(grep appVersion charts/opencti/Chart.yaml | awk '{ print $2 }')
-          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+          current_release=$(grep appVersion charts/opencti/Chart.yaml | awk '{ print $2 }')
+          echo "current_release=$current_release" >> $GITHUB_OUTPUT
 
       - name: Check if release changed
         id: check_changes
         run: |
-          if [ ${{ steps.latest_version.outputs.latest_version }} != ${{ steps.current_version.outputs.current_version }} ]; then
+          if [ ${{ steps.latest_release.outputs.latest_release }} != ${{ steps.current_release.outputs.current_release }} ]; then
             echo "release_changed=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Set new Chat.yaml appVersion
         if: steps.check_changes.outputs.release_changed == 'true'
         run: |
-          sed -i "s/appVersion: .*/appVersion: ${{ steps.latest_version.outputs.latest_version }}/g" charts/opencti/Chart.yaml
+          sed -i "s/appVersion: .*/appVersion: ${{ steps.latest_release.outputs.latest_release }}/g" charts/opencti/Chart.yaml
 
       - name: Update README.md Helm Chart
         if: steps.check_changes.outputs.release_changed == 'true'
@@ -51,17 +49,17 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.PAT_GITHUB }}
-          commit-message: "fix: update OpenCTI version to ${{ steps.latest_version.outputs.latest_version }}"
+          commit-message: "fix: update OpenCTI version to ${{ steps.latest_release.outputs.latest_release }}"
           signoff: false
-          branch: fix/upgrade-opencti-appversion-${{ steps.latest_version.outputs.latest_version }}
+          branch: fix/upgrade-opencti-appversion-${{ steps.latest_release.outputs.latest_release }}
           delete-branch: true
-          title: '[opencti] new release: ${{ steps.latest_version.outputs.latest_version }}'
+          title: '[opencti] new release: ${{ steps.latest_release.outputs.latest_release }}'
           body: |
             OpenCTI version:
-            - :information_source: Current: `${{ steps.current_version.outputs.current_version }}`
-            - :up: Upgrade: `${{ steps.latest_version.outputs.latest_version }}`
+            - :information_source: Current: `${{ steps.current_release.outputs.current_release }}`
+            - :up: Upgrade: `${{ steps.latest_release.outputs.latest_release }}`
 
-            Changelog: https://github.com/OpenCTI-Platform/opencti/releases/tag/${{ steps.latest_version.outputs.latest_version }}
+            Changelog: https://github.com/OpenCTI-Platform/opencti/releases/tag/${{ steps.latest_release.outputs.latest_release }}
           labels: |
             auto-pr-bump-version
           team-reviewers: devops-ia
