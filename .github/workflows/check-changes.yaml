@@ -6,7 +6,103 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  check-and-release:
+  get-dependencies:
+    runs-on: ubuntu-latest
+    outputs:
+      dependencies: ${{ steps.dependencies.outputs.dependencies }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # default install latest (stable)
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Get dependencies
+        id: dependencies
+        run: |
+          echo "dependencies=$(yq eval -o=json '.dependencies[] | .name' charts/opencti/Chart.yaml | jq -s -c '.')" >> $GITHUB_OUTPUT
+
+  check-and-update-dependencies:
+    runs-on: ubuntu-latest
+    needs: get-dependencies
+    strategy:
+      matrix:
+        dependency: ${{ fromJSON(needs.get-dependencies.outputs.dependencies) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Save dependencies version
+        id: dependencies
+        env:
+          dependency: ${{ matrix.dependency }}
+        run: |
+          # get repository
+          repository=$(yq eval -o=json '.dependencies[] | select(.name == "$dependency") | .repository' charts/opencti/Chart.yaml)
+
+          # add repository
+          helm repo add $dependency $repository
+          helm repo update $dependency
+
+          # save state
+          echo "$dependency_current_version=$(yq eval -o=json '.dependencies[] | select(.name == "$dependency") | .version' charts/opencti/Chart.yaml)" >> $GITHUB_OUTPUT
+          echo "$dependency_latest_version=$(helm search repo $repository -ojson | jq -r '.[] | select(.name | endswith("/$dependency")) | .version')" >> $GITHUB_OUTPUT
+
+      - name: Compare version
+        uses: madhead/semver-utils@latest
+        id: version
+        env:
+          dependency: ${{ matrix.dependency }}
+        with:
+          version: ${{ steps.dependencies.outputs[format('{}_current_version', matrix.dependency)] }}
+          compare-to: ${{ steps.dependencies.outputs[format('{}_latest_version', matrix.dependency)] }}
+          satisfies: "*"
+
+      - name: Update version
+        env:
+          dependency: ${{ matrix.dependency }}
+        if: steps.version.outputs.comparison-result == '<'
+        run: |
+          yq eval '.dependencies[] |= (select(.name == "$dependency") .version = "${{ steps.dependencies.outputs[format('{}_latest_version', matrix.dependency)] }}")' -i charts/opencti/Chart.yaml
+
+      - name: Update README.md Helm Chart
+        if: steps.version.outputs.comparison-result == '<'
+        uses: losisin/helm-docs-github-action@v1
+        with:
+          chart-search-root: charts/opencti
+
+      - name: Get current date
+        id: date
+        run: |
+          echo "date=$(date -I)" >> $GITHUB_OUTPUT
+
+      - name: Create PR with changes
+        if: steps.version.outputs.comparison-result == '<'
+        uses: peter-evans/create-pull-request@v6
+        env:
+          dependency: ${{ matrix.dependency }}
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+          commit-message: "fix: update dependencies version"
+          signoff: false
+          branch: fix/upgrade-opencti-dependency-$dependency-${{ steps.date.outputs.date }}
+          delete-branch: true
+          title: '[opencti] upgrade dependency $dependency at ${{ steps.date.outputs.date }}'
+          body: |
+            $dependency version:
+            - :information_source: Current: `${{ steps.dependencies.outputs[format('{}_current_version', matrix.dependency)] }}`
+            - :up: Upgrade: `${{ steps.dependencies.outputs[format('{}_latest_version', matrix.dependency)] }}`
+
+            Changelog: https://github.com/bitnami/charts/releases/tag/$dependency/${{ steps.dependencies.outputs[format('{}_latest_version', matrix.dependency)] }}
+          labels: |
+            auto-pr-bump-version
+
+  check-and-update-opencti:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -62,4 +158,3 @@ jobs:
             Changelog: https://github.com/OpenCTI-Platform/opencti/releases/tag/${{ steps.latest_release.outputs.latest_release }}
           labels: |
             auto-pr-bump-version
-          team-reviewers: devops-ia
