@@ -3,10 +3,10 @@ name: Check OpenCTI new releases
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *' # every day
 
 jobs:
-  check-and-release:
+  check-and-update-opencti:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -17,7 +17,7 @@ jobs:
       - name: Get latest release
         id: latest_release
         run: |
-          latest_release=$(curl -s https://api.github.com/repos/opencti-platform/opencti/tags | jq -r '.[0].name')
+          latest_release=$(curl -s https://api.github.com/repos/opencti-platform/opencti/releases | jq -r '.[0].name' | cut -d' ' -f 2)
           echo "latest_release=$latest_release" >> $GITHUB_OUTPUT
 
       - name: Get current release
@@ -29,7 +29,9 @@ jobs:
       - name: Check if release changed
         id: check_changes
         run: |
-          if [ ${{ steps.latest_release.outputs.latest_release }} != ${{ steps.current_release.outputs.current_release }} ]; then
+          if [ -z ${{ steps.latest_release.outputs.latest_release }} ]; then
+            echo "release_changed=false" >> $GITHUB_OUTPUT
+          elif [ ${{ steps.latest_release.outputs.latest_release }} != ${{ steps.current_release.outputs.current_release }} ]; then
             echo "release_changed=true" >> $GITHUB_OUTPUT
           fi
 
@@ -62,4 +64,3 @@ jobs:
             Changelog: https://github.com/OpenCTI-Platform/opencti/releases/tag/${{ steps.latest_release.outputs.latest_release }}
           labels: |
             auto-pr-bump-version
-          team-reviewers: devops-ia

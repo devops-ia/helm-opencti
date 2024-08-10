@@ -15,22 +15,22 @@ keywords:
   - opencti
 dependencies:
   - name: elasticsearch
-    version: 21.2.*
+    version: 21.2.8
     repository: https://charts.bitnami.com/bitnami
     condition: elasticsearch.enabled
   - name: minio
-    version: 14.6.*
+    version: 14.6.31
     repository: https://charts.bitnami.com/bitnami
     condition: minio.enabled
   - name: opensearch
-    version: 2.21.*
+    version: 2.21.0
     repository: https://opensearch-project.github.io/helm-charts/
     condition: opensearch.enabled
   - name: rabbitmq
-    version: 14.5.*
+    version: 14.5.0
     repository: https://charts.bitnami.com/bitnami
     condition: rabbitmq.enabled
   - name: redis
-    version: 19.6.*
+    version: 19.6.4
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
