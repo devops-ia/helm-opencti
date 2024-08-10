@@ -1,0 +1,61 @@
+name: Check OpenCTI minor dependencies releases
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1' # every monday
+
+jobs:
+  check-and-update-minor-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare updatecli configuration
+        id: dependencies
+        run: |
+          # get name dependencies
+          dependencies=($(yq eval -o=json '.dependencies[] | .name' charts/opencti/Chart.yaml | xargs))
+
+          # replace version
+          for dependency in "${dependencies[@]}"; do
+            version="~$(yq eval -r ".dependencies[] | select(.name == \"${dependency}\") | .version" charts/opencti/Chart.yaml | cut -d'.' -f1)"
+            yq eval -i ".sources.${dependency}.spec.versionFilter.pattern = \"${version}\"" .github/updatecli/helm-dependencies.yaml
+          done
+
+      - name: Install updatecli
+        uses: updatecli/updatecli-action@v2
+
+      - name: Update dependencies
+        run: |
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > tmp-minor-output.log
+          awk '/TARGETS/{flag=1;next}/ACTIONS/{flag=0}flag' tmp-minor-output.log > minor-output.log
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update README.md Helm Chart
+        uses: losisin/helm-docs-github-action@v1
+        with:
+          chart-search-root: charts/opencti
+
+      - name: Get current date
+        id: date
+        run: |
+          echo "date=$(date -I)" >> $GITHUB_OUTPUT
+
+      - name: Create PR with changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          add-paths: charts/opencti
+          token: ${{ secrets.PAT_GITHUB }}
+          commit-message: "fix: update minor dependencies version"
+          signoff: false
+          branch: fix/upgrade-opencti-minor-dependencies-${{ steps.date.outputs.date }}
+          delete-branch: true
+          title: '[opencti] upgrade minor dependencies (${{ steps.date.outputs.date }})'
+          body-path: minor-output.log
+          labels: |
+            auto-pr-bump-version
