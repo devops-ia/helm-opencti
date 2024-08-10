@@ -1,0 +1,83 @@
+sources:
+  elasticsearch:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: elasticsearch
+      versionFilter:
+        kind: semver
+        pattern: '*' # replace with CI/CD updatecli
+    sourceid: elasticsearch
+  minio:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: minio
+      versionFilter:
+        kind: semver
+        pattern: '*' # replace with CI/CD updatecli
+    sourceid: minio
+  opensearch:
+    kind: helmchart
+    spec:
+      url: https://opensearch-project.github.io/helm-charts/
+      name: opensearch
+      versionFilter:
+        kind: semver
+        pattern: '*' # replace with CI/CD updatecli
+    sourceid: opensearch
+  rabbitmq:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: rabbitmq
+      versionFilter:
+        kind: semver
+        pattern: '*' # replace with CI/CD updatecli
+    sourceid: rabbitmq
+  redis:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: redis
+      versionFilter:
+        kind: semver
+        pattern: '*' # replace with CI/CD updatecli
+    sourceid: redis
+conditions: {}
+targets:
+  elasticsearch:
+    name: bump chart dependencies
+    kind: yaml
+    spec:
+      file: charts/opencti/Chart.yaml
+      key: $.dependencies[0].version
+    sourceid: elasticsearch
+  minio:
+    name: bump chart dependencies
+    kind: yaml
+    spec:
+      file: charts/opencti/Chart.yaml
+      key: $.dependencies[1].version
+    sourceid: minio
+  opensearch:
+    name: bump chart dependencies
+    kind: yaml
+    spec:
+      file: charts/opencti/Chart.yaml
+      key: $.dependencies[2].version
+    sourceid: opensearch
+  rabbitmq:
+    name: bump chart dependencies
+    kind: yaml
+    spec:
+      file: charts/opencti/Chart.yaml
+      key: $.dependencies[3].version
+    sourceid: rabbitmq
+  redis:
+    name: bump chart dependencies
+    kind: yaml
+    spec:
+      file: charts/opencti/Chart.yaml
+      key: $.dependencies[4].version
+    sourceid: redis
