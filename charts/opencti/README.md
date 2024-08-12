@@ -16,11 +16,11 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | elasticsearch | 21.2.* |
-| https://charts.bitnami.com/bitnami | minio | 14.6.* |
-| https://charts.bitnami.com/bitnami | rabbitmq | 14.5.* |
-| https://charts.bitnami.com/bitnami | redis | 19.6.* |
-| https://opensearch-project.github.io/helm-charts/ | opensearch | 2.21.* |
+| https://charts.bitnami.com/bitnami | elasticsearch | 21.3.6 |
+| https://charts.bitnami.com/bitnami | minio | 14.6.32 |
+| https://charts.bitnami.com/bitnami | rabbitmq | 14.6.6 |
+| https://charts.bitnami.com/bitnami | redis | 19.6.4 |
+| https://opensearch-project.github.io/helm-charts/ | opensearch | 2.22.0 |
 
 ## Add repository
 
