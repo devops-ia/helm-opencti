@@ -30,8 +30,14 @@ jobs:
 
       - name: Update dependencies
         run: |
-          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > tmp-major-output.log
-          awk '/TARGETS/{flag=1;next}/ACTIONS/{flag=0}flag' tmp-major-output.log > major-output.log
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > $GITHUB_WORKSPACE/tmp-major-output.log
+          awk '/TARGETS/{flag=1;next}/ACTIONS/{flag=0}flag' $GITHUB_WORKSPACE/tmp-major-output.log > $GITHUB_WORKSPACE/clean-major-output.log
+          chmod +x .github/hack/prepare_body_pr.sh
+          $GITHUB_WORKSPACE/.github/hack/prepare_body_pr.sh $GITHUB_WORKSPACE/clean-major-output.log > $GITHUB_WORKSPACE/major-output.log
+
+          # show PR body
+          cat major-output.log
+        shell: bash
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -45,12 +51,29 @@ jobs:
         run: |
           echo "date=$(date -I)" >> $GITHUB_OUTPUT
 
-      - name: Create PR with changes
+      - name: Create PR with changes (dry-run)
         uses: peter-evans/create-pull-request@v6
+        if: github.event_name == 'workflow_dispatch'
         with:
           add-paths: charts/opencti
           token: ${{ secrets.PAT_GITHUB }}
-          commit-message: "fix: update mayor dependencies version"
+          commit-message: "fix: update major dependencies version"
+          signoff: false
+          branch: fix/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
+          delete-branch: true
+          title: '[opencti] upgrade major dependencies (${{ steps.date.outputs.date }})'
+          body-path: major-output.log
+          draft: true
+          labels: |
+            auto-pr-bump-version
+
+      - name: Create PR with changes
+        uses: peter-evans/create-pull-request@v6
+        if: github.event_name == 'schedule'
+        with:
+          add-paths: charts/opencti
+          token: ${{ secrets.PAT_GITHUB }}
+          commit-message: "fix: update major dependencies version"
           signoff: false
           branch: fix/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
           delete-branch: true
