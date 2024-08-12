@@ -31,7 +31,12 @@ jobs:
       - name: Update dependencies
         run: |
           updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > tmp-major-output.log
-          awk '/TARGETS/{flag=1;next}/ACTIONS/{flag=0}flag' tmp-major-output.log > major-output.log
+          awk '/TARGETS/{flag=1;next}/ACTIONS/{flag=0}flag' tmp-major-output.log > clean-major-output.log
+          # clean output
+          chmod +x .github/hack/prepare_body_pr.sh
+          .github/hack/prepare_body_pr.sh clean-major-output.log > major-output.log
+          cat major-output.log
+        shell: bash
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
