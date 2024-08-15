@@ -1,4 +1,4 @@
-name: Release charts
+name: Release OpenCTI chart
 
 on:
   workflow_dispatch:
