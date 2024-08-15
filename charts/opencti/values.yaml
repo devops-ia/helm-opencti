@@ -39,6 +39,9 @@ serviceAccount:
   # a ServiceAccount's API credentials
   automountServiceAccountToken: false
 
+# -- Enable or disable test connection
+testConnection: false
+
 # -- Environment variables to configure application
 # Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
 env:

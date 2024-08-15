@@ -162,6 +162,7 @@ helm show values opencti/opencti
 | serviceMonitor.enabled | bool | `false` | Enable or disable |
 | startupProbe | object | `{"enabled":true,"failureThreshold":30,"initialDelaySeconds":180,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | Configure startupProbe checker Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | startupProbeCustom | object | `{}` | Custom startupProbe |
+| testConnection | bool | `false` | Enable or disable test connection |
 | tolerations | list | `[]` | Tolerations for pod assignment |
 | worker | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"enabled":true,"env":{"WORKER_LOG_LEVEL":"info","WORKER_TELEMETRY_ENABLED":true},"envFromSecrets":{},"image":{"pullPolicy":"IfNotPresent","repository":"opencti/worker","tag":""},"nodeSelector":{},"readyChecker":{"enabled":true,"retries":30,"timeout":5},"replicaCount":1,"resources":{},"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"},"tolerations":[]}` | OpenCTI worker deployment configuration |
 | worker.affinity | object | `{}` | Affinity for pod assignment |
