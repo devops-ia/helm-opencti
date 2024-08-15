@@ -10,7 +10,11 @@ metadata:
 spec:
   containers:
     - name: wget
+      {{- if .Values.global.imageRegistry }}
+      image: "{{ .Values.global.imageRegistry }}/busybox"
+      {{- else }}
       image: busybox
+      {{- end }}
       command: ['wget']
       args: ['{{ include "opencti.fullname" . }}:{{ .Values.service.targetPort | default .Values.service.port }}']
   restartPolicy: Never
