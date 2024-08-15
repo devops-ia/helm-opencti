@@ -42,9 +42,9 @@ spec:
       initContainers:
       - name: ready-checker-server
         {{- if $.Values.global.imageRegistry }}
-        image: "{{ $.Values.global.imageRegistry }}/busybox:latest"
+        image: "{{ $.Values.global.imageRegistry }}/busybox"
         {{- else }}
-        image: busybox:latest
+        image: busybox
         {{- end }}
         command:
           - 'sh'

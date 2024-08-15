@@ -67,7 +67,7 @@ In deep this config are deployed as a initial container which check the services
       initContainers:
       {{- range $service := .Values.readyChecker.services }}
       - name: ready-checker-{{ $service.name }}
-        image: busybox:latest
+        image: busybox
         command:
           - 'sh'
           - '-c'
@@ -81,25 +81,25 @@ Output:
 ...
       initContainers:
       - name: ready-checker-elasticsearch
-        image: busybox:latest
+        image: busybox
         command:
           - 'sh'
           - '-c'
           - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-elasticsearch 9200 && break; echo "[$RETRY/30] waiting service opencti-ci-elasticsearch:9200 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
       - name: ready-checker-minio
-        image: busybox:latest
+        image: busybox
         command:
           - 'sh'
           - '-c'
           - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-minio 9000 && break; echo "[$RETRY/30] waiting service opencti-ci-minio:9000 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
       - name: ready-checker-rabbitmq
-        image: busybox:latest
+        image: busybox
         command:
           - 'sh'
           - '-c'
           - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-rabbitmq 5672 && break; echo "[$RETRY/30] waiting service opencti-ci-rabbitmq:5672 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
       - name: ready-checker-redis-master
-        image: busybox:latest
+        image: busybox
         command:
           - 'sh'
           - '-c'
