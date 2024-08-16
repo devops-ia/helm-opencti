@@ -15,8 +15,8 @@ spec:
       {{- include "opencti.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-        checksum/config: {{ include (print $.Template.BasePath "/server/configmap.yaml") . | sha256sum }}
-      {{- with .Values.caldera.podAnnotations }}
+      {{- with .Values.podAnnotations }}
+      annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
