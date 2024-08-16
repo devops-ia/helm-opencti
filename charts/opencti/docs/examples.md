@@ -5,7 +5,7 @@
 Use `secrets` to create secrets to reference with `envFromSecrets`. By default the secret is created in the same namespace of the release.
 
 > [!IMPORTANT]
-> Secrets are hashed with base64.
+> Secrets are encoded with base64.
 
 Name template `{{ include "opencti.fullname" . }}-credentials`. For example if release name is `opencti-ci` the secret name will be `opencti-ci-credentials`.
 
