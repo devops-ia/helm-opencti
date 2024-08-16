@@ -1,0 +1,17 @@
+sources:
+  opencti:
+    kind: dockerimage
+    spec:
+      image: opencti/platform
+      architecture: linux/amd64
+      versionFilter:
+        kind: semver
+conditions: {}
+targets:
+  opencti:
+    name: bump chart appversion
+    kind: yaml
+    spec:
+      file: charts/opencti/Chart.yaml
+      key: $.appVersion
+    sourceid: opencti

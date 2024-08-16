@@ -14,31 +14,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get latest release
-        id: latest_release
-        run: |
-          latest_release=$(curl -s https://api.github.com/repos/opencti-platform/opencti/releases | jq -r '.[0].name' | cut -d' ' -f 2)
-          echo "latest_release=$latest_release" >> $GITHUB_OUTPUT
-
       - name: Get current release
         id: current_release
         run: |
           current_release=$(grep appVersion charts/opencti/Chart.yaml | awk '{ print $2 }')
           echo "current_release=$current_release" >> $GITHUB_OUTPUT
 
+      - name: Install updatecli
+        uses: updatecli/updatecli-action@v2
+
+      - name: Update dependencies
+        run: |
+          updatecli apply --config .github/updatecli/helm-appversion.yaml --commit=false
+
+      - name: Get latest release
+        id: latest_release
+        run: |
+          latest_release=$(grep appVersion charts/opencti/Chart.yaml | awk '{ print $2 }')
+          echo "latest_release=$latest_release" >> $GITHUB_OUTPUT
+
       - name: Check if release changed
         id: check_changes
         run: |
-          if [ -z ${{ steps.latest_release.outputs.latest_release }} ]; then
-            echo "release_changed=false" >> $GITHUB_OUTPUT
-          elif [ ${{ steps.latest_release.outputs.latest_release }} != ${{ steps.current_release.outputs.current_release }} ]; then
+          if [ ${{ steps.latest_release.outputs.latest_release }} != ${{ steps.current_release.outputs.current_release }} ]; then
             echo "release_changed=true" >> $GITHUB_OUTPUT
           fi
-
-      - name: Set new Chat.yaml appVersion
-        if: steps.check_changes.outputs.release_changed == 'true'
-        run: |
-          sed -i "s/appVersion: .*/appVersion: ${{ steps.latest_release.outputs.latest_release }}/g" charts/opencti/Chart.yaml
 
       - name: Update README.md Helm Chart
         if: steps.check_changes.outputs.release_changed == 'true'
