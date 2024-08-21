@@ -9,7 +9,7 @@ maintainers:
 sources:
   - https://github.com/OpenCTI-Platform/opencti
 version: 1.0.0
-appVersion: 6.2.13
+appVersion: 6.2.14
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:
   - opencti
