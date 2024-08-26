@@ -259,6 +259,8 @@ connectors: []
 #   # Plain vars
 #   # foo: bar
 #   # my_env: my_value
+#   # -- Deployment annotations
+#   deploymentAnnotations: {}
 #   # -- Pod annotations
 #   podAnnotations: {}
 #   # -- Secrets from variables
