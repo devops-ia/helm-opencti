@@ -7,6 +7,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $connectorName }}-connector-{{ include "opencti.fullname" $ }}
+  {{- with .deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     opencti.connector: {{ $connectorName }}
     {{- include "opencti.labels" $ | nindent 4 }}
@@ -22,7 +26,7 @@ spec:
     metadata:
       {{- with .podAnnotations }}
       annotations:
-        {{- toYaml $ | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         opencti.connector: {{ $connectorName }}
