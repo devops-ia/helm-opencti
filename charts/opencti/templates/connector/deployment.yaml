@@ -22,7 +22,9 @@ spec:
     metadata:
       {{- with .podAnnotations }}
       annotations:
-        {{- toYaml $ | nindent 8 }}
+        {{- range $key, $value := . }}
+        {{ $key }}: "{{ $value }}"
+        {{- end }}
       {{- end }}
       labels:
         opencti.connector: {{ $connectorName }}
