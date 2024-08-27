@@ -61,7 +61,7 @@ _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command doc
 
 * [Environment configuration](https://docs.opencti.io/latest/deployment/configuration/#platform)
 * [Connectors](https://github.com/OpenCTI-Platform/connectors/tree/master). Review `docker-compose.yaml` with the properly config
-* Check connectors samples on `connector-examples` folder
+* Check connectors samples on [`connector-examples`](./connector-examples) folder
 
 ## Basic installation and examples
 
