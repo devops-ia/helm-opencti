@@ -7,12 +7,18 @@ maintainers:
     email: hello@ialejandro.rocks
     url: https://ialejandro.rocks
 sources:
+  - https://github.com/devops-ia/helm-opencti
   - https://github.com/OpenCTI-Platform/opencti
 version: 1.0.0
 appVersion: 6.2.15
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:
   - opencti
+  - cybersecurity
+  - threat-intelligence
+  - cti
+  - threat
+  - analysis
 dependencies:
   - name: elasticsearch
     version: 21.3.8
