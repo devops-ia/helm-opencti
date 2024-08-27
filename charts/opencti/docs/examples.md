@@ -303,7 +303,7 @@ kind: ServiceAccount
 metadata:
   name: sample-misp-connector-opencti
   labels:
-    opencti.connector: splunk
+    opencti.connector: sample-misp
     ...
 automountServiceAccountToken: true
 --
