@@ -249,6 +249,9 @@ connectors: []
 # - name: connector-name
 #   enabled: true
 #   replicas: 1
+#   # -- Service Account for connector
+#   serviceAccount: {}
+#     create: false
 #   # -- Image registry
 #   image: {}
 #     repository:
