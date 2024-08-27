@@ -49,7 +49,15 @@ spec:
         command:
           - 'sh'
           - '-c'
-          - 'RETRY=0; until [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ]; do nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-server {{ $.Values.service.port }} && break; echo "[$RETRY/{{ $.Values.worker.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-server:{{ $.Values.service.port }} is ready"; sleep {{ $.Values.worker.readyChecker.timeout }}; RETRY=$(($RETRY + 1)); done'
+          - >
+            RETRY=0;
+            until [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ];
+            do
+              nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server {{ $.Values.service.port }} && break;
+              echo "[$RETRY/{{ $.Values.worker.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server:{{ $.Values.service.port }} is ready";
+              sleep {{ $.Values.worker.readyChecker.timeout }};
+              RETRY=$(($RETRY + 1));
+            done
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}-worker

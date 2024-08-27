@@ -49,7 +49,15 @@ spec:
         command:
           - 'sh'
           - '-c'
-          - 'RETRY=0; until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ]; do nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }} {{ $service.port }} && break; echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready"; sleep {{ $.Values.readyChecker.timeout }}; RETRY=$(($RETRY + 1)); done'
+          - |
+            RETRY=0;
+            until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ];
+            do
+              nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }} {{ $service.port }} && break;
+              echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready";
+              sleep {{ $.Values.readyChecker.timeout }};
+              RETRY=$(($RETRY + 1));
+            done
       {{- end }}
       {{- end }}
       containers:
