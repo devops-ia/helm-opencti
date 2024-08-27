@@ -1,6 +1,8 @@
 # Examples
 
-## Global: create secrets
+## Global
+
+### Manage secrets
 
 Use `secrets` to create secrets to reference with `envFromSecrets`. By default the secret is created in the same namespace of the release.
 
@@ -29,7 +31,9 @@ Can reference the secret using `envFromSecrets` in any (is the same `Secret` for
 > [!NOTE]
 > A suggestion to facilitate the management of secrets is to use prefixes. For example, for connector secrets save `CONNECTOR_MISP_MY_SECRET` to reference `MISP` connector.
 
-## Server: health checks
+## Server
+
+### Enable health checks
 
 Enable `testConnection` to check if the service is reachable.
 
@@ -106,7 +110,7 @@ Output:
           - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-redis-master 6379 && break; echo "[$RETRY/30] waiting service opencti-ci-redis-master:6379 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
 ```
 
-## Server: configure OpenID
+### Configure OpenID
 
 ```yaml
 env:
@@ -126,7 +130,9 @@ env:
   PROVIDERS__OPENID__STRATEGY: "OpenIDConnectStrategy"
 ```
 
-## Connector: sample complete
+## Connector
+
+### Sample complete
 
 ```yaml
 connectors:
@@ -136,6 +142,8 @@ connectors:
   replicas: 1
   image:
     repository: opencti/connector-misp
+  serviceAccount:
+    create: true
   env:
     CONNECTOR_CONFIDENCE_LEVEL: "XXXX"
     CONNECTOR_ID: "XXXX"
@@ -168,7 +176,7 @@ connectors:
       memory: 128Mi
 ```
 
-You can config which node to run the connector using nodeSelector and tolerations.
+You can config which node to run the connector using `nodeSelector` and `tolerations`.
 
 ```yaml
 connector:
@@ -198,4 +206,117 @@ Or you can use affinity to run the connector in different node if you increase r
                 values:
                   - sample-misp
           topologyKey: kubernetes.io/hostname
+```
+
+### Configure image
+
+You can configure default `image` to run the connector or use default `image`.
+
+If you don't set `image` block, by default use `opencti/<name-connector>:<Chart.AppVersion>`.
+
+```yaml
+connectors:
+- name: sample-misp
+  enabled: true
+  replicas: 1
+  ...
+```
+
+This config use default image: `opencti/sample-misp:6.2.18`
+
+You can configure `repository` and `tag` to use a custom image.
+
+```yaml
+connectors:
+- name: sample-misp
+  enabled: true
+  replicas: 1
+  image:
+    repository: my-private-repo/connector-misp-sample
+    tag: "6.2.15"
+  ...
+```
+
+Now, this config set an image: `my-private-repo/connector-misp-sample:6.2.15`
+
+### Configure serviceAccount
+
+You can configure default `serviceAccount` to run the connector or use a custom `serviceAccount`. Following code, create a `serviceAccount` named `test` to run the connector.
+
+```yaml
+...
+connectors:
+- name: sample-misp
+  enabled: true
+  replicas: 1
+  serviceAccount:
+    create: true
+    name: test
+    automountServiceAccountToken: true # false by default
+```
+
+Result:
+
+```yaml
+# Source: opencti/templates/connector/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test
+  labels:
+    opencti.connector: sample-misp
+    ...
+automountServiceAccountToken: true
+--
+# Source: opencti/templates/connector/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-misp-connector-opencti
+  ...
+spec:
+  ...
+  template:
+    ...
+    spec:
+      serviceAccountName: test
+```
+
+If you want use default `name` (`<name-connector>-connector-<release-name>`) you can use `create: true` only.
+
+```yaml
+...
+connectors:
+- name: sample-misp
+  enabled: true
+  replicas: 1
+  serviceAccount:
+    create: true
+```
+
+Result:
+
+```yaml
+# Source: opencti/templates/connector/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sample-misp-connector-opencti
+  labels:
+    opencti.connector: splunk
+    ...
+automountServiceAccountToken: true
+--
+# Source: opencti/templates/connector/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-misp-connector-opencti
+  ...
+spec:
+  ...
+  template:
+    ...
+    spec:
+      serviceAccountName: sample-misp-connector-opencti
 ```

@@ -43,20 +43,17 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- end }}
+      {{- if .serviceAccount }}
+      serviceAccountName: {{ if and .serviceAccount (hasKey .serviceAccount "name") }}{{ .serviceAccount.name }}{{ else }}{{ $connectorName }}-connector-{{ include "opencti.fullname" $ }}{{ end }}
+      {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
       containers:
         - name: {{ $connectorName }}-connector
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          {{- if .image.repository }}
-          image: "{{ .image.repository }}:{{ .image.tag | default $.Chart.AppVersion }}"
-          {{- else if $.Values.global.imageRegistry }}
-          image: "{{ printf "%s/opencti/%s" $.Values.global.imageRegistry .name }}:{{ .image.tag | default $.Chart.AppVersion }}"
-          {{- else }}
-          image: "{{ printf "opencti/%s" .name }}:{{ .image.tag | default $.Chart.AppVersion }}"
-          {{- end }}
-          imagePullPolicy: {{ .image.pullPolicy | default "IfNotPresent" }}
+          image: "{{- if and .image (hasKey .image "repository") }}{{ .image.repository }}{{- else if $.Values.global.imageRegistry }}{{ printf "%s/opencti/%s" $.Values.global.imageRegistry .name }}{{- else }}{{ printf "opencti/%s" .name }}{{- end }}:{{ if and .image (hasKey .image "tag") }}{{ .image.tag | default $.Chart.AppVersion }}{{ else }}{{ $.Chart.AppVersion }}{{ end }}"
+          imagePullPolicy: {{ if and .image (hasKey .image "pullPolicy") }}{{ .image.pullPolicy }}{{ else }}IfNotPresent{{ end }}
           env:
           # Variables from secrets have precedence
           {{- $envList := dict -}}
@@ -73,7 +70,7 @@ spec:
           {{- end }}
 
           # Special handling for OPENCTI_URL which is constructed from other values
-          {{- if not (hasKey .env "OPENCTI_URL") }}
+          {{- if not (hasKey $envList "OPENCTI_URL") }}
           {{- if eq $.Values.env.APP__BASE_PATH "/" }}
           - name: OPENCTI_URL
             value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}"
