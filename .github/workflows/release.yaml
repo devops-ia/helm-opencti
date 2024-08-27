@@ -92,7 +92,7 @@ jobs:
             digest=$(awk -F "[, ]+" '/Digest/{print $NF}' < helm-push-output.log)
             cosign sign -y "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}@${digest}"
 
-            oras push "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}:${{ steps.chart_version.outputs.CHART_VERSION }}"
+            oras push "ghcr.io/${GITHUB_REPOSITORY}/${chart_name}:artifacthub.io" "./charts/${chart_name}/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml"
           done
         env:
           COSIGN_EXPERIMENTAL: 1
