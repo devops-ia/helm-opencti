@@ -90,6 +90,17 @@ spec:
           {{- end }}
           {{- end }}
 
+          # Add Variables in plain text from .Values.worker.env if they were not already added from secrets
+          {{- if .Values.worker.env }}
+          {{- range $key, $value := .Values.worker.env }}
+          {{- if not (hasKey $envList $key) }}
+          - name: {{ $key | upper }}
+            value: {{ $value | quote }}
+          {{- $_ := set $envList $key true }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+
           # Special handling for OPENCTI_URL which is constructed from other values
           {{- if not (hasKey $envList "OPENCTI_URL") }}
           {{- if eq .Values.env.APP__BASE_PATH "/" }}
@@ -105,17 +116,6 @@ spec:
           {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (.Values.env.APP__ADMIN__TOKEN) }}
           - name: OPENCTI_TOKEN
             value: "{{ .Values.env.APP__ADMIN__TOKEN }}"
-          {{- end }}
-
-          # Add Variables in plain text from .Values.worker.env if they were not already added from secrets
-          {{- if .Values.worker.env }}
-          {{- range $key, $value := .Values.worker.env }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
           {{- end }}
 
           resources:
