@@ -86,6 +86,16 @@ spec:
           {{- $_ := set $envList $key true }}
           {{- end }}
           {{- end }}
+           # Add variables in plain text if they were not already added from secrets
+          {{- if .env }}
+          {{- range $key, $value := .env }}
+          {{- if not (hasKey $envList $key) }}
+          - name: {{ $key | upper }}
+            value: {{ $value | quote }}
+          {{- $_ := set $envList $key true }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           # Special handling for OPENCTI_URL which is constructed from other values
           {{- if not (hasKey $envList "OPENCTI_URL") }}
           {{- if eq $.Values.env.APP__BASE_PATH "/" }}
@@ -97,19 +107,9 @@ spec:
           {{- end }}
           {{- end }}
           # Special handling for OPENCTI_TOKEN which is constructed from other values
-          {{- if and (not (hasKey .env "OPENCTI_TOKEN")) ($.Values.env.APP__ADMIN__TOKEN) }}
+          {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) ($.Values.env.APP__ADMIN__TOKEN) }}
           - name: OPENCTI_TOKEN
             value: "{{ $.Values.env.APP__ADMIN__TOKEN }}"
-          {{- end }}
-          # Add variables in plain text if they were not already added from secrets
-          {{- if .env }}
-          {{- range $key, $value := .env }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
           {{- end }}
           resources:
             {{- toYaml .resources | nindent 12 }}
