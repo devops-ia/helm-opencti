@@ -187,6 +187,23 @@ readyChecker:
   - name: redis-master
     port: 6379
 
+# -- Defines privilege and access control settings for a Pod.
+# </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Defines privilege and access control settings for a Container.
+# </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
 # -- Ingress configuration to expose app
 ingress:
   enabled: false

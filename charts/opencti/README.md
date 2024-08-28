@@ -121,6 +121,7 @@ helm show values opencti/opencti
 | opensearch.opensearchJavaOpts | string | `"-Xmx512M -Xms512M"` | OpenSearch Java options |
 | opensearch.persistence | object | `{"enabled":false}` | Enable persistence using Persistent Volume Claims </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/ |
 | opensearch.singleNode | bool | `true` | If discovery.type in the opensearch configuration is set to "single-node", this should be set to "true" If "true", replicas will be forced to 1 |
+| podSecurityContext | object | `{}` | Defines privilege and access control settings for a Pod. </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | rabbitmq | object | `{"auth":{"erlangCookie":"ChangeMe","password":"ChangeMe","username":"user"},"clustering":{"enabled":false},"enabled":true,"persistence":{"enabled":false},"replicaCount":1}` | RabbitMQ subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml |
 | rabbitmq.auth | object | `{"erlangCookie":"ChangeMe","password":"ChangeMe","username":"user"}` | RabbitMQ Authentication parameters |
 | rabbitmq.auth.password | string | `"ChangeMe"` | RabbitMQ application password </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables |
@@ -153,6 +154,7 @@ helm show values opencti/opencti
 | replicaCount | int | `1` | Number of replicas |
 | resources | object | `{}` | The resources limits and requested |
 | secrets | object | `{}` | Secrets values to create credentials and reference by envFromSecrets |
+| securityContext | object | `{}` | Defines privilege and access control settings for a Container. </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | service | object | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` | Kubernetes service to expose Pod |
 | service.port | int | `80` | Kubernetes Service port |
 | service.targetPort | int | `4000` | Pod expose port |
