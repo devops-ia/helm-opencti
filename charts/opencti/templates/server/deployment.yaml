@@ -22,17 +22,16 @@ spec:
       labels:
         opencti.component: server
         {{- include "opencti.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if .Values.imagePullSecrets }}
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       {{- else if .Values.global.imagePullSecrets }}
-      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "opencti.serviceAccountName" . }}
       securityContext:
@@ -134,7 +133,6 @@ spec:
             value: --max-old-space-size=8096
           - name: PROVIDERS__LOCAL__STRATEGY
             value: LocalStrategy
-
           # Variables from secrets have precedence
           {{- $envList := dict -}}
           {{- if .Values.envFromSecrets }}
@@ -149,8 +147,7 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
-
-          # Add Variables in plain text if they were not already added from secrets
+          # Add variables in plain text if they were not already added from secrets
           {{- if .Values.env }}
           {{- range $key, $value := .Values.env }}
           {{- if not (hasKey $envList $key) }}
@@ -160,9 +157,16 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
-
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+         {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
