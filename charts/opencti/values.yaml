@@ -1,6 +1,13 @@
 # -- Global configuration
+# The global section contains configuration options that are applied to all services
+# @default - See below
+#
 global:
+  # Specifies the registry to pull images from. Leave empty for the default registry
+  #
   imageRegistry: ""
+  # Specifies the secrets to use for pulling images from private registries
+  # Leave empty if no secrets are required
   # E.g.
   # imagePullSecrets:
   #   - name: myRegistryKeySecretName
@@ -8,25 +15,40 @@ global:
   imagePullSecrets: []
 
 # -- Number of replicas
+# Specifies the number of replicas for the service
+#
 replicaCount: 1
 
 # -- Image registry
+# The image configuration for the base service
+# @default -- See below
+#
 image:
+  # The repository of the image
+  #
   repository: opencti/platform
+  # The pull policy for the image
+  #
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # Overrides the image tag whose default is the chart appVersion
+  #
   tag: ""
 
 # -- String to partially override opencti.fullname template (will maintain the release name)
+#
 nameOverride: ""
 
 # -- String to fully override opencti.fullname template
+#
 fullnameOverride: ""
 
 # -- Global Docker registry secret names as an array
+#
 imagePullSecrets: []
 
 # -- Enable creation of ServiceAccount
+# @default - See below
+#
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -40,10 +62,12 @@ serviceAccount:
   automountServiceAccountToken: false
 
 # -- Enable or disable test connection
+#
 testConnection: false
 
 # -- Environment variables to configure application
-# </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
+# </br> Ref: https://docs.openbas.io/latest/deployment/configuration/#platform
+#
 env:
   # APP OPENCTI
   APP__ADMIN__EMAIL: admin@opencti.io
@@ -52,7 +76,7 @@ env:
   APP__BASE_PATH: "/"
   APP__GRAPHQL__PLAYGROUND__ENABLED: false
   APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: false
-  # MINIO:
+  # MINIO
   MINIO__ENDPOINT: release-name-minio:9000
   # ELASTICSEARCH
   ELASTICSEARCH__URL: http://release-name-elasticsearch:9200
@@ -71,26 +95,34 @@ env:
   APP__HEALTH_ACCESS_KEY: ChangeMe
 
 # -- Secrets from variables
+#
 envFromSecrets: {}
-  # Cipher vars
-  # my_env:
-  #  name: release-name-credentials
+  # MY_VARIABLE:
+  #  name: <release-name>-credentials
   #  key: secret_key
 
 # -- Secrets values to create credentials and reference by envFromSecrets
+# Generate Secret with following name: <release-name>-credentials
+#
 secrets: {}
 
 # -- Kubernetes service to expose Pod
+# </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
+#
 service:
   # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP
+  #
   type: ClusterIP
   # -- Kubernetes Service port
+  #
   port: 80
   # -- NodePort port (only when type is NodePort)
   # nodePort: 32000
   # -- Pod expose port
+  #
   targetPort: 4000
   # -- Pod extra ports
+  #
   # extraPorts:
   # - name: metrics
   #   port: 9080
@@ -98,6 +130,7 @@ service:
 
 # -- Enable ServiceMonitor to get metrics
 # </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
+#
 serviceMonitor:
   # -- Enable or disable
   enabled: false
@@ -108,6 +141,7 @@ serviceMonitor:
 
 # -- Configure liveness checker
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+#
 livenessProbe:
   enabled: true
   failureThreshold: 3
@@ -117,6 +151,7 @@ livenessProbe:
   timeoutSeconds: 5
 
 # -- Custom livenessProbe
+#
 livenessProbeCustom: {}
   # httpGet:
   #   path: /dashboard
@@ -129,6 +164,7 @@ livenessProbeCustom: {}
 
 # -- Configure readinessProbe checker
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+#
 readinessProbe:
   enabled: true
   failureThreshold: 3
@@ -138,6 +174,7 @@ readinessProbe:
   timeoutSeconds: 1
 
 # -- Custom readinessProbe
+#
 readinessProbeCustom: {}
   # httpGet:
   #   path: /dashboard
@@ -150,6 +187,7 @@ readinessProbeCustom: {}
 
 # -- Configure startupProbe checker
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+#
 startupProbe:
   enabled: true
   failureThreshold: 30
@@ -159,6 +197,7 @@ startupProbe:
   timeoutSeconds: 5
 
 # -- Custom startupProbe
+#
 startupProbeCustom: {}
   # httpGet:
   #   path: /dashboard
@@ -170,7 +209,9 @@ startupProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Enable or disable ready-checker
+#
 readyChecker:
+  # -- Enable or disable ready-checker
   enabled: true
   # -- Number of retries before giving up
   retries: 30
@@ -187,7 +228,36 @@ readyChecker:
   - name: redis-master
     port: 6379
 
+# -- Configure annotations on Pods
+#
+podAnnotations: {}
+
+# -- Configure labels on Pods
+#
+podLabels: {}
+
+# -- Defines privilege and access control settings for a Pod
+# </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+#
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# -- Defines privilege and access control settings for a Container
+# </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+#
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
 # -- Ingress configuration to expose app
+# </br> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+#
 ingress:
   enabled: false
   className: ""
@@ -205,6 +275,8 @@ ingress:
   #      - chart-example.local
 
 # -- The resources limits and requested
+# </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+#
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -218,6 +290,8 @@ resources: {}
   #   memory: 256Mi
 
 # -- Autoscaling with CPU or memory utilization percentage
+# </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+#
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -225,22 +299,43 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# -- Additional volumes on the output Deployment definition
+#
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# -- Additional volumeMounts on the output Deployment definition
+#
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
 # -- Node labels for pod assignment
+# </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+#
 nodeSelector: {}
 
 # -- Tolerations for pod assignment
+# </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+#
 tolerations: []
 
 # -- Affinity for pod assignment
+# </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+#
 affinity: {}
 
 # -- Connector Global environment
 connectorsGlobalEnv: {}
-  # foo: bar
-  # my_env: my_value
+  # MY_VARIABLE: my_value
 
 # -- Connectors
 # </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
+#
 connectors: []
 # - name: connector-name
 #   enabled: true
@@ -295,14 +390,22 @@ connectors: []
 #   affinity: {}
 
 # -- OpenCTI worker deployment configuration
+# </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers
+#
 worker:
+  # -- Enable or disable worker
+  #
   enabled: true
 
   # -- Number of replicas
+  # Specifies the number of replicas for the service
+  #
   replicaCount: 1
 
   # -- Enable or disable ready-checker waiting server is ready
+  #
   readyChecker:
+    # -- Enable or disable ready-checker
     enabled: true
     # -- Number of retries before giving up
     retries: 30
@@ -310,27 +413,38 @@ worker:
     timeout: 5
 
   # -- Image registry
+  # The image configuration for the base service
+  # @default -- See below
+  #
   image:
+    # The repository of the image
+    #
     repository: opencti/worker
+    # The pull policy for the image
+    #
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
+    # Overrides the image tag whose default is the chart appVersion
+    #
     tag: ""
 
   # -- Environment variables to configure application
   # </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
+  #
   env:
     WORKER_LOG_LEVEL: info
     # METRICS
     WORKER_TELEMETRY_ENABLED: true
 
   # -- Secrets from variables
+  #
   envFromSecrets: {}
-    # my_env:
-    #  name: release-name-credentials
+    # MY_VARIABLE:
+    #  name: <release-name>-credentials
     #  key: secret_key
 
   # -- Enable ServiceMonitor to get metrics
   # </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
+  #
   serviceMonitor:
     # -- Enable or disable
     enabled: false
@@ -340,6 +454,8 @@ worker:
     relabelings: []
 
   # -- The resources limits and requested
+  # </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  #
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -353,6 +469,8 @@ worker:
     #   memory: 56Mi
 
   # -- Autoscaling with CPU or memory utilization percentage
+  # </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  #
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -360,17 +478,39 @@ worker:
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
+  # -- Additional volumes on the output Deployment definition
+  #
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # -- Additional volumeMounts on the output Deployment definition
+  #
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
   # -- Node labels for pod assignment
+  # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  #
   nodeSelector: {}
 
   # -- Tolerations for pod assignment
+  # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  #
   tolerations: []
 
   # -- Affinity for pod assignment
+  # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+  #
   affinity: {}
 
 # -- OpenSearch subchart deployment
 # </br> Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml
+#
 opensearch:
   # -- Enable or disable OpenSearch subchart
   enabled: false
@@ -390,6 +530,7 @@ opensearch:
 
 # -- ElasticSearch subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/elasticsearch/values.yaml
+#
 elasticsearch:
   # -- Enable or disable ElasticSearch subchart
   enabled: true
@@ -466,6 +607,7 @@ minio:
 
 # -- RabbitMQ subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
+#
 rabbitmq:
     # -- Enable or disable RabbitMQ subchart
   enabled: true
@@ -495,6 +637,7 @@ rabbitmq:
 
 # -- Redis subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+#
 redis:
   # -- Enable or disable Redis subchart
   enabled: true

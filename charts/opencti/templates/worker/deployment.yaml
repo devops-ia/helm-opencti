@@ -23,22 +23,21 @@ spec:
       labels:
         opencti.component: worker
         {{- include "opencti.selectorLabels" . | nindent 8 }}
+        {{- with .Values.worker.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if .Values.worker.imagePullSecrets }}
-      {{- with .Values.worker.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.worker.imagePullSecrets | nindent 8 }}
       {{- else if .Values.global.imagePullSecrets }}
-      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "opencti.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.worker.podSecurityContext | nindent 8 }}
-      {{- if .Values.readyChecker.enabled }}
+      {{- if .Values.worker.readyChecker.enabled }}
       initContainers:
       - name: ready-checker-server
         {{- if $.Values.global.imageRegistry }}
@@ -78,7 +77,6 @@ spec:
           env:
           # Variables from secrets have precedence
           {{- $envList := dict -}}
-
           {{- if .Values.worker.envFromSecrets }}
           {{- range $key, $value := .Values.worker.envFromSecrets }}
           - name: {{ $key | upper }}
@@ -89,8 +87,7 @@ spec:
           {{- $_ := set $envList $key true }}
           {{- end }}
           {{- end }}
-
-          # Add Variables in plain text from .Values.worker.env if they were not already added from secrets
+          # Add variables in plain text from .Values.worker.env if they were not already added from secrets
           {{- if .Values.worker.env }}
           {{- range $key, $value := .Values.worker.env }}
           {{- if not (hasKey $envList $key) }}
@@ -100,7 +97,6 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
-
           # Special handling for OPENCTI_URL which is constructed from other values
           {{- if not (hasKey $envList "OPENCTI_URL") }}
           {{- if eq .Values.env.APP__BASE_PATH "/" }}
@@ -111,15 +107,21 @@ spec:
             value: "http://{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}{{ .Values.env.APP__BASE_PATH }}"
           {{- end }}
           {{- end }}
-
           # Special handling for OPENCTI_TOKEN which is constructed from other values
           {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (.Values.env.APP__ADMIN__TOKEN) }}
           - name: OPENCTI_TOKEN
             value: "{{ .Values.env.APP__ADMIN__TOKEN }}"
           {{- end }}
-
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
+         {{- with .Values.worker.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.worker.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

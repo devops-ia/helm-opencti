@@ -33,15 +33,11 @@ spec:
         {{- include "opencti.selectorLabels" $ | nindent 8 }}
     spec:
       {{- if .imagePullSecrets }}
-      {{- with .imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .imagePullSecrets | nindent 8 }}
       {{- else if $.Values.global.imagePullSecrets }}
-      {{- with $.Values.global.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml $.Values.global.imagePullSecrets | nindent 8 }}
       {{- end }}
       {{- if .serviceAccount }}
       serviceAccountName: {{ if and .serviceAccount (hasKey .serviceAccount "name") }}{{ .serviceAccount.name }}{{ else }}{{ $connectorName }}-connector-{{ include "opencti.fullname" $ }}{{ end }}
@@ -77,11 +73,9 @@ spec:
             {{- toYaml .securityContext | nindent 12 }}
           image: "{{- if and .image (hasKey .image "repository") }}{{ .image.repository }}{{- else if $.Values.global.imageRegistry }}{{ printf "%s/opencti/%s" $.Values.global.imageRegistry .name }}{{- else }}{{ printf "opencti/%s" .name }}{{- end }}:{{ if and .image (hasKey .image "tag") }}{{ .image.tag | default $.Chart.AppVersion }}{{ else }}{{ $.Chart.AppVersion }}{{ end }}"
           imagePullPolicy: {{ if and .image (hasKey .image "pullPolicy") }}{{ .image.pullPolicy }}{{ else }}IfNotPresent{{ end }}
-
           env:
           # Variables from secrets have precedence
           {{- $envList := dict -}}
-
           {{- if .envFromSecrets }}
           {{- range $key, $value := .envFromSecrets }}
           - name: {{ $key | upper }}
@@ -92,8 +86,7 @@ spec:
           {{- $_ := set $envList $key true }}
           {{- end }}
           {{- end }}
-
-           # Add Variables in plain text if they were not already added from secrets
+           # Add variables in plain text if they were not already added from secrets
           {{- if .env }}
           {{- range $key, $value := .env }}
           {{- if not (hasKey $envList $key) }}
@@ -103,7 +96,6 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
-
           # Special handling for OPENCTI_URL which is constructed from other values
           {{- if not (hasKey $envList "OPENCTI_URL") }}
           {{- if eq $.Values.env.APP__BASE_PATH "/" }}
@@ -114,13 +106,11 @@ spec:
             value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}{{ $.Values.env.APP__BASE_PATH }}"
           {{- end }}
           {{- end }}
-
           # Special handling for OPENCTI_TOKEN which is constructed from other values
           {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) ($.Values.env.APP__ADMIN__TOKEN) }}
           - name: OPENCTI_TOKEN
             value: "{{ $.Values.env.APP__ADMIN__TOKEN }}"
           {{- end }}
-
           resources:
             {{- toYaml .resources | nindent 12 }}
       {{- with .nodeSelector }}
