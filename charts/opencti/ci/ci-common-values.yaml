@@ -32,6 +32,10 @@ connectors:
     create: true
     name: ci-sa
     automountServiceAccountToken: true
+  readyChecker:
+    enabled: true
+    retries: 30
+    timeout: 10
   deploymentAnnotations:
     ci: "true"
   podAnnotations:

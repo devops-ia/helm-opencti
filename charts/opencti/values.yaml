@@ -43,11 +43,8 @@ serviceAccount:
 testConnection: false
 
 # -- Environment variables to configure application
-# Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
+# </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
 env:
-  # Plain vars
-  # foo: bar
-  # my_env: my_value
   # APP OPENCTI
   APP__ADMIN__EMAIL: admin@opencti.io
   APP__ADMIN__PASSWORD: ChangeMe
@@ -100,7 +97,7 @@ service:
   #   targetPort: 9080
 
 # -- Enable ServiceMonitor to get metrics
-# Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
+# </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
 serviceMonitor:
   # -- Enable or disable
   enabled: false
@@ -110,7 +107,7 @@ serviceMonitor:
   relabelings: []
 
 # -- Configure liveness checker
-# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 livenessProbe:
   enabled: true
   failureThreshold: 3
@@ -131,7 +128,7 @@ livenessProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Configure readinessProbe checker
-# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 readinessProbe:
   enabled: true
   failureThreshold: 3
@@ -152,7 +149,7 @@ readinessProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Configure startupProbe checker
-# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 startupProbe:
   enabled: true
   failureThreshold: 30
@@ -238,34 +235,39 @@ tolerations: []
 affinity: {}
 
 # -- Connector Global environment
-connectorsGlobalEnv:
-  # Plain vars
+connectorsGlobalEnv: {}
   # foo: bar
   # my_env: my_value
 
 # -- Connectors
-# Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
+# </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
 connectors: []
 # - name: connector-name
 #   enabled: true
 #   replicas: 1
 #   # -- Service Account for connector
 #   serviceAccount: {}
-#     create: false
+#   #  create: false
 #   # -- Image registry
 #   image: {}
-#     repository:
-#     pullPolicy:
-#     tag:
-#   # -- Environment variables to configure application
-#   env: {}
-#   # Plain vars
-#   # foo: bar
-#   # my_env: my_value
+#   #  repository:
+#   #  pullPolicy:
+#   #  tag:
 #   # -- Deployment annotations
 #   deploymentAnnotations: {}
 #   # -- Pod annotations
 #   podAnnotations: {}
+#   # -- Enable or disable ready-checker waiting server is ready
+#   readyChecker:
+#     enabled: true
+#     # -- Number of retries before giving up
+#     retries: 30
+#     # -- Timeout for each check
+#     timeout: 5
+#   # -- Environment variables to configure application
+#   env: {}
+#   # foo: bar
+#   # my_env: my_value
 #   # -- Secrets from variables
 #   envFromSecrets: {}
 #     # Cipher vars
@@ -315,24 +317,20 @@ worker:
     tag: ""
 
   # -- Environment variables to configure application
-  # Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
+  # </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
   env:
-    # Plain vars
-    # foo: bar
-    # my_env: my_value
     WORKER_LOG_LEVEL: info
     # METRICS
     WORKER_TELEMETRY_ENABLED: true
 
   # -- Secrets from variables
   envFromSecrets: {}
-    # Cipher vars
     # my_env:
     #  name: release-name-credentials
     #  key: secret_key
 
   # -- Enable ServiceMonitor to get metrics
-  # Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
+  # </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
   serviceMonitor:
     # -- Enable or disable
     enabled: false
@@ -372,7 +370,7 @@ worker:
   affinity: {}
 
 # -- OpenSearch subchart deployment
-# Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml
+# </br> Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml
 opensearch:
   # -- Enable or disable OpenSearch subchart
   enabled: false
@@ -386,12 +384,12 @@ opensearch:
   singleNode: true
 
   # -- Enable persistence using Persistent Volume Claims
-  # Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   persistence:
     enabled: false
 
 # -- ElasticSearch subchart deployment
-# Ref: https://github.com/bitnami/charts/blob/main/bitnami/elasticsearch/values.yaml
+# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/elasticsearch/values.yaml
 elasticsearch:
   # -- Enable or disable ElasticSearch subchart
   enabled: true
@@ -417,7 +415,7 @@ elasticsearch:
     # -- Number of master-eligible replicas to deploy
     replicaCount: 1
     # -- Enable persistence using Persistent Volume Claims
-    # Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
     persistence:
       # -- Enable persistence using a `PersistentVolumeClaim`
       enabled: false
@@ -428,7 +426,7 @@ elasticsearch:
     replicaCount: 1
 
     # -- Enable persistence using Persistent Volume Claims
-    # Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
     persistence:
       # -- Enable persistence using a `PersistentVolumeClaim`
       enabled: false
@@ -444,14 +442,14 @@ elasticsearch:
     replicaCount: 0
 
 # -- MinIO subchart deployment
-# Ref: https://github.com/bitnami/charts/blob/main/bitnami/minio/values.yaml
+# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/minio/values.yaml
 #
 minio:
   # -- Enable or disable MinIO subchart
   enabled: true
 
   # -- mode Minio server mode (`standalone` or `distributed`)
-  # Ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
+  # </br> Ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
   mode: standalone
   # Minio authentication parameters
   auth:
@@ -461,13 +459,13 @@ minio:
     rootPassword: ChangeMe
 
   # -- Enable persistence using Persistent Volume Claims
-  # Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   persistence:
     # -- Enable MinIO data persistence using PVC. If false, use emptyDir
     enabled: false
 
 # -- RabbitMQ subchart deployment
-# Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
+# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
 rabbitmq:
     # -- Enable or disable RabbitMQ subchart
   enabled: true
@@ -483,10 +481,10 @@ rabbitmq:
   # -- RabbitMQ Authentication parameters
   auth:
     # -- RabbitMQ application username
-    # Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
     username: user
     # -- RabbitMQ application password
-    # Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
     password: ChangeMe
     erlangCookie: ChangeMe
 
@@ -496,7 +494,7 @@ rabbitmq:
     enabled: false
 
 # -- Redis subchart deployment
-# Ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
 redis:
   # -- Enable or disable Redis subchart
   enabled: true
@@ -504,7 +502,7 @@ redis:
   # -- Redis architecture. Allowed values: `standalone` or `replication`
   architecture: standalone
   # -- Redis Authentication parameters
-  # Ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
+  # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
   auth:
     # -- Enable password authentication
     enabled: false
@@ -514,7 +512,7 @@ redis:
     # -- Number of Redis master instances to deploy (experimental, requires additional configuration)
     count: 1
     # -- Persistence parameters
-    # Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
     persistence:
       # -- Enable persistence on Redis master nodes using Persistent Volume Claims
       enabled: false
@@ -524,7 +522,7 @@ redis:
     # -- Number of Redis replicas to deploy
     replicaCount: 1
     # -- Persistence parameters
-    # Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
     persistence:
       # -- Enable persistence on Redis master nodes using Persistent Volume Claims
       enabled: false

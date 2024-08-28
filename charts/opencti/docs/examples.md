@@ -144,6 +144,10 @@ connectors:
     repository: opencti/connector-misp
   serviceAccount:
     create: true
+  readyChecker:
+    enabled: true
+    retries: 30
+    timeout: 10
   env:
     CONNECTOR_CONFIDENCE_LEVEL: "XXXX"
     CONNECTOR_ID: "XXXX"

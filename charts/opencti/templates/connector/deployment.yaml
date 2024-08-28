@@ -48,12 +48,36 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .podSecurityContext | nindent 8 }}
+      {{ if and .readyChecker (hasKey .readyChecker "enabled") }}
+      {{- if .readyChecker.enabled }}
+      initContainers:
+      - name: ready-checker-server
+        {{- if $.Values.global.imageRegistry }}
+        image: "{{ $.Values.global.imageRegistry }}/busybox"
+        {{- else }}
+        image: busybox
+        {{- end }}
+        command:
+          - 'sh'
+          - '-c'
+          - >
+            RETRY=0;
+            until [ $RETRY -eq {{ .readyChecker.retries }} ];
+            do
+              nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server {{ $.Values.service.port }} && break;
+              echo "[$RETRY/{{ .readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
+              sleep {{ .readyChecker.timeout }};
+              RETRY=$(($RETRY + 1));
+            done
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ $connectorName }}-connector
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
           image: "{{- if and .image (hasKey .image "repository") }}{{ .image.repository }}{{- else if $.Values.global.imageRegistry }}{{ printf "%s/opencti/%s" $.Values.global.imageRegistry .name }}{{- else }}{{ printf "opencti/%s" .name }}{{- end }}:{{ if and .image (hasKey .image "tag") }}{{ .image.tag | default $.Chart.AppVersion }}{{ else }}{{ $.Chart.AppVersion }}{{ end }}"
           imagePullPolicy: {{ if and .image (hasKey .image "pullPolicy") }}{{ .image.pullPolicy }}{{ else }}IfNotPresent{{ end }}
+
           env:
           # Variables from secrets have precedence
           {{- $envList := dict -}}
