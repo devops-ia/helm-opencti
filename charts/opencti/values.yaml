@@ -1,12 +1,11 @@
-# -- Global configuration
-# The global section contains configuration options that are applied to all services
+# -- Global section contains configuration options that are applied to all services
 # @default - See below
 #
 global:
-  # Specifies the registry to pull images from. Leave empty for the default registry
+  # -- Specifies the registry to pull images from. Leave empty for the default registry
   #
   imageRegistry: ""
-  # Specifies the secrets to use for pulling images from private registries
+  # -- Specifies the secrets to use for pulling images from private registries
   # Leave empty if no secrets are required
   # E.g.
   # imagePullSecrets:
@@ -14,23 +13,21 @@ global:
   #
   imagePullSecrets: []
 
-# -- Number of replicas
-# Specifies the number of replicas for the service
+# -- Number of replicas for the service
 #
 replicaCount: 1
 
-# -- Image registry
-# The image configuration for the base service
+# -- Image registry configuration for the base service
 # @default -- See below
 #
 image:
-  # The repository of the image
+  # -- Repository of the image
   #
   repository: opencti/platform
-  # The pull policy for the image
+  # -- Pull policy for the image
   #
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion
+  # -- Overrides the image tag whose default is the chart appVersion
   #
   tag: ""
 
@@ -50,14 +47,14 @@ imagePullSecrets: []
 # @default - See below
 #
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
+  # -- Name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-  # Specifies if you don't want the kubelet to automatically mount
+  # -- Specifies if you don't want the kubelet to automatically mount
   # a ServiceAccount's API credentials
   automountServiceAccountToken: false
 
@@ -102,7 +99,7 @@ envFromSecrets: {}
   #  key: secret_key
 
 # -- Secrets values to create credentials and reference by envFromSecrets
-# Generate Secret with following name: <release-name>-credentials
+# Generate Secret with following name: `<release-name>-credentials`
 #
 secrets: {}
 
@@ -209,15 +206,20 @@ startupProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Enable or disable ready-checker
+# @default -- See below
 #
 readyChecker:
   # -- Enable or disable ready-checker
+  #
   enabled: true
   # -- Number of retries before giving up
+  #
   retries: 30
   # -- Timeout for each check
+  #
   timeout: 5
   # -- List services
+  #
   services:
   - name: elasticsearch
     port: 9200
@@ -330,6 +332,7 @@ tolerations: []
 affinity: {}
 
 # -- Connector Global environment
+#
 connectorsGlobalEnv: {}
   # MY_VARIABLE: my_value
 
@@ -397,33 +400,35 @@ worker:
   #
   enabled: true
 
-  # -- Number of replicas
-  # Specifies the number of replicas for the service
+  # -- Number of replicas for the service
   #
   replicaCount: 1
 
   # -- Enable or disable ready-checker waiting server is ready
+  # @default -- See below
   #
   readyChecker:
     # -- Enable or disable ready-checker
+    #
     enabled: true
     # -- Number of retries before giving up
+    #
     retries: 30
     # -- Timeout for each check
+    #
     timeout: 5
 
-  # -- Image registry
-  # The image configuration for the base service
+  # -- Image registry configuration for the base service
   # @default -- See below
   #
   image:
-    # The repository of the image
+    # -- Repository of the image
     #
     repository: opencti/worker
-    # The pull policy for the image
+    # -- Pull policy for the image
     #
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion
+    # -- Overrides the image tag whose default is the chart appVersion
     #
     tag: ""
 
@@ -513,18 +518,22 @@ worker:
 #
 opensearch:
   # -- Enable or disable OpenSearch subchart
+  #
   enabled: false
 
-  # -- OpenSearch Java options
+  # OpenSearch Java options
+  #
   opensearchJavaOpts: "-Xmx512M -Xms512M"
 
-  # -- If discovery.type in the opensearch configuration is set to "single-node",
+  # If discovery.type in the opensearch configuration is set to "single-node",
   # this should be set to "true"
   # If "true", replicas will be forced to 1
+  #
   singleNode: true
 
-  # -- Enable persistence using Persistent Volume Claims
+  # Enable persistence using Persistent Volume Claims
   # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  #
   persistence:
     enabled: false
 
@@ -535,51 +544,65 @@ elasticsearch:
   # -- Enable or disable ElasticSearch subchart
   enabled: true
 
-  ## Kernel settings modifier image
-  ##
+  # Kernel settings modifier image
+  #
   sysctlImage:
-    ## @param sysctlImage.enabled Enable kernel settings modifier image
-    ##
+    # Enable kernel settings modifier image
+    #
     enabled: false
 
-  # -- Elasticsearch cluster name
+  # Elasticsearch cluster name
+  #
   clusterName: elastic
 
+  # Extra variables
+  #
   extraEnvVars:
     - name: ES_JAVA_OPTS
       value: "-Xms512M -Xmx512M"
 
-  ## @section Master-eligible nodes parameters
+  # Master-eligible nodes parameters
+  #
   master:
-    # -- Deploy the Elasticsearch master-eligible nodes as master-only nodes. Recommended for high-demand deployments.
+    # Deploy the Elasticsearch master-eligible nodes as master-only nodes. Recommended for high-demand deployments.
     masterOnly: true
-    # -- Number of master-eligible replicas to deploy
+    # Number of master-eligible replicas to deploy
     replicaCount: 1
-    # -- Enable persistence using Persistent Volume Claims
+    # Enable persistence using Persistent Volume Claims
     # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    #
     persistence:
-      # -- Enable persistence using a `PersistentVolumeClaim`
+      # Enable persistence using a `PersistentVolumeClaim`
+      #
       enabled: false
 
-  # -- Data-only nodes parameters
+  # Data-only nodes parameters
+  #
   data:
-    # -- Number of data-only replicas to deploy
+    # Number of data-only replicas to deploy
+    #
     replicaCount: 1
 
-    # -- Enable persistence using Persistent Volume Claims
+    # Enable persistence using Persistent Volume Claims
     # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    #
     persistence:
-      # -- Enable persistence using a `PersistentVolumeClaim`
+      # Enable persistence using a `PersistentVolumeClaim`
+      #
       enabled: false
 
-  # -- Ingest-only nodes parameters
+  # Ingest-only nodes parameters
+  #
   ingest:
-    # --  Enable ingest nodes
+    # Enable ingest nodes
+    #
     enabled: false
 
-  # -- Coordinating-only nodes parameters
+  # Coordinating-only nodes parameters
+  #
   coordinating:
-    # -- Number of coordinating-only replicas to deploy
+    # Number of coordinating-only replicas to deploy
+    #
     replicaCount: 0
 
 # -- MinIO subchart deployment
@@ -589,50 +612,65 @@ minio:
   # -- Enable or disable MinIO subchart
   enabled: true
 
-  # -- mode Minio server mode (`standalone` or `distributed`)
+  # mode Minio server mode (`standalone` or `distributed`)
   # </br> Ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
+  #
   mode: standalone
   # Minio authentication parameters
+  #
   auth:
-    # -- Minio root username
+    # Minio root username
+    #
     rootUser: ChangeMe
-    # -- Password for Minio root user
+    # Password for Minio root user
+    #
     rootPassword: ChangeMe
 
-  # -- Enable persistence using Persistent Volume Claims
+  # Enable persistence using Persistent Volume Claims
   # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  #
   persistence:
-    # -- Enable MinIO data persistence using PVC. If false, use emptyDir
+    # Enable MinIO data persistence using PVC. If false, use emptyDir
+    #
     enabled: false
 
 # -- RabbitMQ subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
 #
 rabbitmq:
-    # -- Enable or disable RabbitMQ subchart
+  # -- Enable or disable RabbitMQ subchart
+  #
   enabled: true
 
-  # -- Number of RabbitMQ replicas to deploy
+  # Number of RabbitMQ replicas to deploy
+  #
   replicaCount: 1
 
-  # -- Clustering settings
+  # Clustering settings
+  #
   clustering:
-    # -- Enable RabbitMQ clustering
+    # Enable RabbitMQ clustering
+    #
     enabled: false
 
-  # -- RabbitMQ Authentication parameters
+  # RabbitMQ Authentication parameters
+  #
   auth:
-    # -- RabbitMQ application username
+    # RabbitMQ application username
     # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    #
     username: user
-    # -- RabbitMQ application password
+    # RabbitMQ application password
     # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    #
     password: ChangeMe
     erlangCookie: ChangeMe
 
-  # -- Persistence parameters
+  # Persistence parameters
+  #
   persistence:
-    # -- Enable RabbitMQ data persistence using PVC
+    # Enable RabbitMQ data persistence using PVC
+    #
     enabled: false
 
 # -- Redis subchart deployment
@@ -640,32 +678,44 @@ rabbitmq:
 #
 redis:
   # -- Enable or disable Redis subchart
+  #
   enabled: true
 
-  # -- Redis architecture. Allowed values: `standalone` or `replication`
+  # Redis architecture. Allowed values: `standalone` or `replication`
+  #
   architecture: standalone
-  # -- Redis Authentication parameters
+  #  Redis Authentication parameters
   # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
+  #
   auth:
-    # -- Enable password authentication
+    # Enable password authentication
+    #
     enabled: false
 
-  # -- Redis master configuration parameters
+  # Redis master configuration parameters
+  #
   master:
-    # -- Number of Redis master instances to deploy (experimental, requires additional configuration)
+    # Number of Redis master instances to deploy (experimental, requires additional configuration)
+    #
     count: 1
-    # -- Persistence parameters
+    # Persistence parameters
     # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    #
     persistence:
-      # -- Enable persistence on Redis master nodes using Persistent Volume Claims
+      # Enable persistence on Redis master nodes using Persistent Volume Claims
+      #
       enabled: false
 
-  # -- Redis replicas configuration parameters
+  # Redis replicas configuration parameters
+  #
   replica:
-    # -- Number of Redis replicas to deploy
+    # Number of Redis replicas to deploy
+    #
     replicaCount: 1
-    # -- Persistence parameters
+    # Persistence parameters
     # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    #
     persistence:
-      # -- Enable persistence on Redis master nodes using Persistent Volume Claims
+      # Enable persistence on Redis master nodes using Persistent Volume Claims
+      #
       enabled: false
