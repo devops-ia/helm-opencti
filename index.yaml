@@ -3,6 +3,52 @@ entries:
   opencti:
   - apiVersion: v2
     appVersion: 6.2.18
+    created: "2024-09-02T15:28:08.824221349Z"
+    dependencies:
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 21.3.10
+    - condition: minio.enabled
+      name: minio
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 14.7.4
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 2.23.1
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 14.6.9
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 20.0.3
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: b21968d4ff837931b9d3c05bcf241f46c5768eccf85971eb60617348a8f4502d
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v1.4.5/opencti-1.4.5.tgz
+    version: 1.4.5
+  - apiVersion: v2
+    appVersion: 6.2.18
     created: "2024-09-01T07:20:35.147859298Z"
     dependencies:
     - condition: elasticsearch.enabled
@@ -963,4 +1009,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2024-09-01T07:20:35.148011531Z"
+generated: "2024-09-02T15:28:08.824440822Z"
