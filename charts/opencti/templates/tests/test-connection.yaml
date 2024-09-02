@@ -16,6 +16,6 @@ spec:
       image: busybox
       {{- end }}
       command: ['wget']
-      args: ['{{ include "opencti.fullname" . }}:{{ .Values.service.targetPort | default .Values.service.port }}']
+      args: ['{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}']
   restartPolicy: Never
 {{ end }}
