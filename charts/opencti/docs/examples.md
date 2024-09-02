@@ -4,7 +4,7 @@
 
 ### Manage secrets
 
-Use `secrets` to create secrets to reference with `envFromSecrets`. By default the secret is created in the same namespace of the release.
+Use `secrets` to create secrets to reference with `envFromSecrets`. By default the secret is created in the same namespace of the release. This `secrets` have preference over `env`.
 
 > [!IMPORTANT]
 > Secrets are encoded with base64.
@@ -30,6 +30,66 @@ Can reference the secret using `envFromSecrets` in any (is the same `Secret` for
 
 > [!NOTE]
 > A suggestion to facilitate the management of secrets is to use prefixes. For example, for connector secrets save `CONNECTOR_MISP_MY_SECRET` to reference `MISP` connector.
+
+#### Sample
+
+> [!NOTE]
+> Follow [`ci-common-values.yaml`](../ci/ci-common-values.yaml) to see the complete example.
+
+Following `secrets` should be cipher with external tool such as [SOPS](https://github.com/getsops/sops):
+
+```yaml
+secrets:
+  APP__ADMIN__TOKEN: "b1976749-8a53-4f49-bf04-cafa2a3458c1"
+  RABBITMQ__PASSWORD: ChangeMe
+```
+
+Reference with `envFromSecrets`:
+
+```yaml
+envFromSecrets:
+  APP__ADMIN__TOKEN:
+    name: opencti-ci-credentials
+    key: APP__ADMIN__TOKEN
+  OPENCTI_TOKEN:
+    name: opencti-ci-credentials
+    key: APP__ADMIN__TOKEN
+  RABBITMQ__PASSWORD:
+    name: opencti-ci-credentials
+    key: RABBITMQ__PASSWORD
+```
+
+So, the `Secret` should be:
+
+```yaml
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: opencti-ci-credentials
+  ...
+data:
+  APP__ADMIN__TOKEN: YjE5NzY3NDktOGE1My00ZjQ5LWJmMDQtY2FmYTJhMzQ1OGMx
+  RABBITMQ__PASSWORD: Q2hhbmdlTWU=
+```
+
+And you can reference the secret in any component, for example `RabbitMQ`:
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: opencti-ci-rabbitmq
+  namespace: "default"
+  ...
+    env:
+    ...
+      - name: RABBITMQ_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: opencti-ci-credentials
+            key: RABBITMQ__PASSWORD
+```
 
 ## Server
 

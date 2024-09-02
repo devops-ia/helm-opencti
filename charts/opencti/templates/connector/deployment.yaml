@@ -107,9 +107,14 @@ spec:
           {{- end }}
           {{- end }}
           # Special handling for OPENCTI_TOKEN which is constructed from other values
-          {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) ($.Values.env.APP__ADMIN__TOKEN) }}
+          {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (or ($.Values.secrets.APP__ADMIN__TOKEN) ($.Values.env.APP__ADMIN__TOKEN)) }}
+          {{- if $.Values.secrets.APP__ADMIN__TOKEN }}
           - name: OPENCTI_TOKEN
-            value: "{{ $.Values.env.APP__ADMIN__TOKEN }}"
+            value: {{ $.Values.secrets.APP__ADMIN__TOKEN }}
+          {{- else if $.Values.env.APP__ADMIN__TOKEN }}
+          - name: OPENCTI_TOKEN
+            value: {{ $.Values.env.APP__ADMIN__TOKEN }}
+          {{- end }}
           {{- end }}
           resources:
             {{- toYaml .resources | nindent 12 }}
