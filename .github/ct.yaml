@@ -1,7 +1,7 @@
 # See https://github.com/helm/chart-testing#configuration
 chart-dirs: charts
 check-version-increment: false
-debug: true
+debug: false
 remote: origin
 target-branch: main
 upgrade: true
