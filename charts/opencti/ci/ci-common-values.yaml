@@ -49,7 +49,7 @@ connectors:
     automountServiceAccountToken: true
   readyChecker:
     enabled: true
-    retries: 30
+    retries: 40
     timeout: 10
   deploymentAnnotations:
     ci: "true"
@@ -65,14 +65,22 @@ connectors:
       name: opencti-ci-credentials
       key: APP__ADMIN__TOKEN
 
-serviceMonitor:
-  enabled: false
+networkPolicy:
+  enabled: true
 
 autoscaling:
   enabled: true
 
 worker:
   enabled: true
+
+  readyChecker:
+    enabled: true
+    retries: 40
+    timeout: 10
+
+  networkPolicy:
+    enabled: false
 
   autoscaling:
     enabled: true

@@ -4,10 +4,12 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "opencti.fullname" . }}-server
   labels:
+    opencti.component: server
     {{- include "opencti.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
+      opencti.component: server
       {{- include "opencti.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: metrics
