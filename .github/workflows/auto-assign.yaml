@@ -17,4 +17,3 @@ jobs:
         with:
           repo-token: ${{ secrets.PAT_GITHUB }}
           teams: devops-ia
-          removePreviousAssignees: true
