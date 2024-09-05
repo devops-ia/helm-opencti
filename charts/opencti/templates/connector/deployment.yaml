@@ -73,6 +73,10 @@ spec:
             {{- toYaml .securityContext | nindent 12 }}
           image: "{{- if and .image (hasKey .image "repository") }}{{ .image.repository }}{{- else if $.Values.global.imageRegistry }}{{ printf "%s/opencti/%s" $.Values.global.imageRegistry .name }}{{- else }}{{ printf "opencti/%s" .name }}{{- end }}:{{ if and .image (hasKey .image "tag") }}{{ .image.tag | default $.Chart.AppVersion }}{{ else }}{{ $.Chart.AppVersion }}{{ end }}"
           imagePullPolicy: {{ if and .image (hasKey .image "pullPolicy") }}{{ .image.pullPolicy }}{{ else }}IfNotPresent{{ end }}
+          lifecycle:
+            {{- with .lifecycle }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
           # Variables from secrets have precedence
           {{- $envList := dict -}}
@@ -118,6 +122,7 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .resources | nindent 12 }}
+      terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds | default 30 }}
       {{- with .nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
