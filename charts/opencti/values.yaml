@@ -143,6 +143,18 @@ serviceMonitor:
   metricRelabelings: []
   relabelings: []
 
+# -- Configure lifecycle hooks
+# </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+# </br> Ref: https://learnk8s.io/graceful-shutdown
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command: ["sh", "-c", "sleep 10"]
+
+# -- Configure Pod termination grace period
+# </br> Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
+terminationGracePeriodSeconds: 30
+
 # -- Configure liveness checker
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 livenessProbe:
@@ -352,6 +364,13 @@ connectors: []
 #     retries: 30
 #     # -- Timeout for each check
 #     timeout: 5
+#   # -- Lifecycle configuration
+#   lifecycle: {}
+#     # preStop:
+#     #   exec:
+#     #     command: ["sh", "-c", "sleep 10"]
+#   # -- Configure Pod termination grace period
+#   terminationGracePeriodSeconds: 30
 #   # -- Environment variables to configure application
 #   env: {}
 #   # foo: bar
@@ -399,6 +418,18 @@ worker:
     retries: 30
     # -- Timeout for each check
     timeout: 5
+
+  # -- Configure lifecycle hooks
+  # </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  # </br> Ref: https://learnk8s.io/graceful-shutdown
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["sh", "-c", "sleep 10"]
+
+  # -- Configure Pod termination grace period
+  # </br> Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
+  terminationGracePeriodSeconds: 30
 
   # -- Image registry configuration for the base service
   image:

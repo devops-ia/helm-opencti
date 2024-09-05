@@ -74,6 +74,10 @@ spec:
               containerPort: {{ .Values.worker.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
               protocol: TCP
             {{- end }}
+          lifecycle:
+            {{- with .Values.worker.lifecycle }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
           # Variables from secrets have precedence
           {{- $envList := dict -}}
@@ -123,6 +127,7 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.worker.terminationGracePeriodSeconds }}
       {{- with .Values.worker.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

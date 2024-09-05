@@ -83,6 +83,10 @@ spec:
               containerPort: {{ .Values.env.APP__TELEMETRY__METRICS__EXPORTER_PROMETHEUS | default 14269 }}
               protocol: TCP
             {{- end }}
+          lifecycle:
+            {{- with .Values.lifecycle }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             {{- if .Values.livenessProbeCustom }}
@@ -163,6 +167,7 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
