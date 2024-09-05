@@ -35,7 +35,7 @@ jobs:
 
       - name: Run ct lint
         if: steps.list-changed.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
-        run: ct lint --config .github/ct.yaml --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --config .github/ct.yaml
 
       - name: Create kind cluster
         if: steps.list-changed.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
@@ -43,8 +43,8 @@ jobs:
 
       - name: Run ct install
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --config .github/ct.yaml --helm-extra-args '--timeout 900s --debug' --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --config .github/ct.yaml --helm-extra-args '--timeout 900s --debug'
 
       - name: (workflow_dispatch) Run ct install
         if: github.event_name == 'workflow_dispatch'
-        run: ct install --config .github/ct.yaml --helm-extra-args '--timeout 900s --debug' --all --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --config .github/ct.yaml --helm-extra-args '--timeout 900s --debug' --all
