@@ -53,6 +53,14 @@ envFromSecrets:
     name: opencti-ci-credentials
     key: RABBITMQ__PASSWORD
 
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+  - maxSkew: 1
+    topologyKey: test-ci
+    whenUnsatisfiable: DoNotSchedule
+
 worker:
   enabled: true
 
@@ -76,6 +84,14 @@ worker:
 
   autoscaling:
     enabled: true
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: zone
+      whenUnsatisfiable: DoNotSchedule
+    - maxSkew: 1
+      topologyKey: test-ci
+      whenUnsatisfiable: DoNotSchedule
 
 connectors:
 - name: opencti
@@ -109,6 +125,10 @@ connectors:
     OPENCTI_TOKEN:
       name: opencti-ci-credentials
       key: APP__ADMIN__TOKEN
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: zone
+      whenUnsatisfiable: DoNotSchedule
 
 elasticsearch:
   fullnameOverride: opencti-ci-elasticsearch

@@ -17,8 +17,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    opencti.component: server
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.serverLabels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

@@ -4,13 +4,11 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ include "opencti.fullname" . }}-server
   labels:
-    opencti.component: server
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.serverLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      opencti.component: server
-      {{- include "opencti.selectorLabels" . | nindent 6 }}
+      {{- include "opencti.selectorServerLabels" . | nindent 6 }}
   {{- if .Values.podDisruptionBudget.minAvailable }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   {{- end }}

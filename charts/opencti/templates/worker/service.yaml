@@ -4,8 +4,7 @@ kind: Service
 metadata:
   name: {{ include "opencti.fullname" . }}-worker
   labels:
-    opencti.component: worker
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.workerLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -14,6 +13,5 @@ spec:
       targetPort: {{ .Values.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
       protocol: TCP
   selector:
-    opencti.component: worker
-    {{- include "opencti.selectorLabels" . | nindent 4 }}
+    {{- include "opencti.selectorWorkerLabels" . | nindent 4 }}
 {{- end }}

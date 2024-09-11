@@ -4,13 +4,11 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "opencti.fullname" . }}-worker
   labels:
-    opencti.component: worker
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.workerLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      opencti.component: worker
-      {{- include "opencti.selectorLabels" . | nindent 8 }}
+      {{- include "opencti.selectorWorkerLabels" . | nindent 8 }}
   endpoints:
   - port: metrics
     interval: {{ .Values.worker.serviceMonitor.interval | quote }}
