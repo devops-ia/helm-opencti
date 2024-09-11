@@ -335,6 +335,13 @@ tolerations: []
 # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 
+# -- Control how Pods are spread across your cluster
+# </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#example-multiple-topologyspreadconstraints
+topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: zone
+  #   whenUnsatisfiable: DoNotSchedule
+
 # -- Connector Global environment
 connectorsGlobalEnv: {}
   # MY_VARIABLE: my_value
@@ -347,23 +354,21 @@ connectors: []
 #   replicas: 1
 #   # -- Service Account for connector
 #   serviceAccount: {}
-#   #  create: false
+#     # create: false
 #   # -- Image registry
 #   image: {}
-#   #  repository:
-#   #  pullPolicy:
-#   #  tag:
+#     # repository:
+#     # pullPolicy:
+#     # tag: ""
 #   # -- Deployment annotations
 #   deploymentAnnotations: {}
 #   # -- Pod annotations
 #   podAnnotations: {}
 #   # -- Enable or disable ready-checker waiting server is ready
 #   readyChecker:
-#     enabled: true
-#     # -- Number of retries before giving up
-#     retries: 30
-#     # -- Timeout for each check
-#     timeout: 5
+#     # enabled: true
+#     # retries: 30
+#     # timeout: 5
 #   # -- Lifecycle configuration
 #   lifecycle: {}
 #     # preStop:
@@ -373,33 +378,36 @@ connectors: []
 #   terminationGracePeriodSeconds: 30
 #   # -- Environment variables to configure application
 #   env: {}
-#   # foo: bar
-#   # my_env: my_value
-#   # -- Secrets from variables
+#     # my_env: my_value
+#     # -- Secrets from variables
 #   envFromSecrets: {}
-#     # Cipher vars
 #     # my_env:
 #     #  name: release-name-credentials
 #     #  key: secret_key
 #   # -- The resources limits and requested
 #   resources: {}
-#     limits:
-#       memory: 256Mi
-#       cpu: "250m"
-#     requests:
-#       memory: 56Mi
-#       cpu: "50m"
+#     # limits:
+#     #   memory: 256Mi
+#     #   cpu: "250m"
+#     # requests:
+#     #   memory: 56Mi
+#     #   cpu: "50m"
 #   # -- Node labels for pod assignment
 #   nodeSelector: {}
-#     project: "opencti"
+#     # project: "opencti"
 #   # -- Tolerations for pod assignment
 #   tolerations: []
-#     - key: "project"
-#       operator: "Equal"
-#       value: "opencti"
-#       effect: "NoSchedule"
+#     # - key: "project"
+#     #   operator: "Equal"
+#     #   value: "opencti"
+#     #   effect: "NoSchedule"
 #   # -- Affinity for pod assignment
 #   affinity: {}
+#   # -- Control how Pods are spread across your cluster
+#   topologySpreadConstraints: []
+#     # - maxSkew: 1
+#     #   topologyKey: zone
+#     #   whenUnsatisfiable: DoNotSchedule
 
 # -- OpenCTI worker deployment configuration
 # </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers
@@ -549,6 +557,13 @@ worker:
   # -- Affinity for pod assignment
   # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+  # -- Control how Pods are spread across your cluster
+  # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#example-multiple-topologyspreadconstraints
+  topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: zone
+    #   whenUnsatisfiable: DoNotSchedule
 
 # -- OpenSearch subchart deployment
 # </br> Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml

@@ -4,8 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "opencti.fullname" . }}-server
   labels:
-    opencti.component: server
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.serverLabels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

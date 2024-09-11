@@ -4,16 +4,14 @@ kind: NetworkPolicy
 metadata:
   name: {{ include "opencti.fullname" . }}-server
   labels:
-    opencti.component: server
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.serverLabels" . | nindent 4 }}
 spec:
   {{- if and (not .Values.networkPolicy.policyTypes) (not .Values.networkPolicy.ingress) (not .Values.networkPolicy.egress) }}
   podSelector: {}
   {{- else }}
   podSelector:
     matchLabels:
-      opencti.component: server
-      {{- include "opencti.selectorLabels" . | nindent 6 }}
+      {{- include "opencti.selectorServerLabels" . | nindent 6 }}
   {{- end }}
 
   {{- if .Values.networkPolicy.policyTypes }}

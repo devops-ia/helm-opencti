@@ -3,16 +3,14 @@ kind: Deployment
 metadata:
   name: {{ include "opencti.fullname" . }}-server
   labels:
-    opencti.component: server
-    {{- include "opencti.labels" . | nindent 4 }}
+    {{- include "opencti.serverLabels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      opencti.component: server
-      {{- include "opencti.selectorLabels" . | nindent 6 }}
+      {{- include "opencti.selectorServerLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -20,8 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        opencti.component: server
-        {{- include "opencti.selectorLabels" . | nindent 8 }}
+        {{- include "opencti.selectorServerLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -182,5 +179,10 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      {{- $_ := include "opencti.patchTopologySpreadConstraintsServer" $ }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
