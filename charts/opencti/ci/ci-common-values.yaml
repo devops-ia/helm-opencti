@@ -55,10 +55,7 @@ envFromSecrets:
 
 topologySpreadConstraints:
   - maxSkew: 1
-    topologyKey: zone
-    whenUnsatisfiable: DoNotSchedule
-  - maxSkew: 1
-    topologyKey: test-ci
+    topologyKey: kubernetes.io/os
     whenUnsatisfiable: DoNotSchedule
 
 worker:
@@ -87,10 +84,7 @@ worker:
 
   topologySpreadConstraints:
     - maxSkew: 1
-      topologyKey: zone
-      whenUnsatisfiable: DoNotSchedule
-    - maxSkew: 1
-      topologyKey: test-ci
+      topologyKey: kubernetes.io/os
       whenUnsatisfiable: DoNotSchedule
 
 connectors:
@@ -127,7 +121,7 @@ connectors:
       key: APP__ADMIN__TOKEN
   topologySpreadConstraints:
     - maxSkew: 1
-      topologyKey: zone
+      topologyKey: kubernetes.io/os
       whenUnsatisfiable: DoNotSchedule
 
 elasticsearch:
