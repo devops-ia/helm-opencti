@@ -223,6 +223,12 @@ startupProbeCustom: {}
 readyChecker:
   # -- Enable or disable ready-checker
   enabled: true
+  # -- Repository of the image
+  repository: busybox
+  # -- Pull policy for the image
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag
+  tag: latest
   # -- Number of retries before giving up
   retries: 30
   # -- Timeout for each check
@@ -365,8 +371,11 @@ connectors: []
 #   # -- Pod annotations
 #   podAnnotations: {}
 #   # -- Enable or disable ready-checker waiting server is ready
-#   readyChecker:
+#   readyChecker: {}
 #     # enabled: true
+#     # repository: busybox
+#     # pullPolicy: IfNotPresent
+#     # tag: latest
 #     # retries: 30
 #     # timeout: 5
 #   # -- Lifecycle configuration
@@ -422,6 +431,12 @@ worker:
   readyChecker:
     # -- Enable or disable ready-checker
     enabled: true
+    # -- Repository of the image
+    repository: busybox
+    # -- Pull policy for the image
+    pullPolicy: IfNotPresent
+    # -- Overrides the image tag
+    tag: latest
     # -- Number of retries before giving up
     retries: 30
     # -- Timeout for each check

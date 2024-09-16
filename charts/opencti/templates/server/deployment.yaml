@@ -38,10 +38,11 @@ spec:
       {{- range $service := .Values.readyChecker.services }}
       - name: ready-checker-{{ $service.name }}
         {{- if $.Values.global.imageRegistry }}
-        image: "{{ $.Values.global.imageRegistry }}/busybox"
+        image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
         {{- else }}
-        image: busybox
+        image: {{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}
         {{- end }}
+        imagePullPolicy: {{ $.Values.readyChecker.pullPolicy }}
         command:
           - 'sh'
           - '-c'
