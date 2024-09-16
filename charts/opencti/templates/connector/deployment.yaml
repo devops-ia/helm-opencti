@@ -49,9 +49,10 @@ spec:
       initContainers:
       - name: ready-checker-server
         {{- if $.Values.global.imageRegistry }}
-        image: "{{ $.Values.global.imageRegistry }}/busybox"
+        image: "{{ $.Values.global.imageRegistry }}/{{ .readyChecker.image | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}"
         {{- else }}
-        image: busybox
+        image: {{ .readyChecker.repository | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}
+        imagePullPolicy: {{ .readyChecker.pullPolicy | default "IfNotPresent" }}
         {{- end }}
         command:
           - 'sh'
