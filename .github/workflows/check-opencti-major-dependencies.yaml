@@ -52,7 +52,7 @@ jobs:
           echo "date=$(date -I)" >> $GITHUB_OUTPUT
 
       - name: Create PR with changes (dry-run)
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         if: github.event_name == 'workflow_dispatch'
         with:
           add-paths: charts/opencti
@@ -68,7 +68,7 @@ jobs:
             auto-pr-bump-version
 
       - name: Create PR with changes
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         if: github.event_name == 'schedule'
         with:
           add-paths: charts/opencti
