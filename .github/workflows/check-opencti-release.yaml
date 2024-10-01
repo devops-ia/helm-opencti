@@ -48,7 +48,7 @@ jobs:
 
       - name: Create PR with changes
         if: steps.check_changes.outputs.release_changed == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: update OpenCTI version to ${{ steps.latest_release.outputs.latest_release }}"
