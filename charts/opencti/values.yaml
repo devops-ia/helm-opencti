@@ -348,9 +348,30 @@ topologySpreadConstraints: []
   #   topologyKey: zone
   #   whenUnsatisfiable: DoNotSchedule
 
-# -- Connector Global environment
-connectorsGlobalEnv: {}
+# -- Connectors Globals
+connectorsGlobal:
+  # -- Secrets from variables
+  envFromSecrets: {}
+  # MY_VARIABLE:
+  #  name: <release-name>-credentials
+  #  key: secret_key
+
+  # -- Additional environment variables on the output connector definition
+  env: {}
   # MY_VARIABLE: my_value
+
+  # -- Additional volumes on the output connector Deployment definition
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # -- Additional volumeMounts on the output connector Deployment definition
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
 
 # -- Connectors
 # </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
