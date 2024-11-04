@@ -2,8 +2,8 @@ name: Auto-assign Issue
 on:
   issues:
     types: [opened]
-  pull_request:
-    types: [opened, edited, synchronize, reopened]
+  pull_request_target:
+    types: [opened, ready_for_review]
 jobs:
   run:
     runs-on: ubuntu-latest
