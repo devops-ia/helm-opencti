@@ -384,3 +384,23 @@ spec:
     spec:
       serviceAccountName: sample-misp-connector-opencti
 ```
+
+### Configure metrics
+
+You can enable Prometheus metric scraping with a serviceMonitor object
+```yaml
+connectors:
+- name: sample-misp
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+  env:
+    ...
+    CONNECTOR_EXPOSE_METRICS: true
+    ...
+```
+
+The `interval` and `scrapeTimeout` are optional and can be omitted in order to use the defaults. Make sure to set the enviroment variable `CONNECTOR_EXPOSE_METRICS` to `true`. 
+

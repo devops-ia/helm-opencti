@@ -91,6 +91,10 @@ connectors:
 - name: opencti
   enabled: true
   replicas: 1
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
   image:
     repository: opencti/connector-opencti
   serviceAccount:
