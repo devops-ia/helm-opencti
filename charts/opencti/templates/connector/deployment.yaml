@@ -75,6 +75,12 @@ spec:
             {{- toYaml .securityContext | nindent 12 }}
           image: "{{- if and .image (hasKey .image "repository") }}{{ .image.repository }}{{- else if $.Values.global.imageRegistry }}{{ printf "%s/opencti/%s" $.Values.global.imageRegistry .name }}{{- else }}{{ printf "opencti/%s" .name }}{{- end }}:{{ if and .image (hasKey .image "tag") }}{{ .image.tag | default $.Chart.AppVersion }}{{ else }}{{ $.Chart.AppVersion }}{{ end }}"
           imagePullPolicy: {{ if and .image (hasKey .image "pullPolicy") }}{{ .image.pullPolicy }}{{ else }}IfNotPresent{{ end }}
+          ports:
+            {{- if ((.serviceMonitor).enabled) }}
+            - name: metrics
+              containerPort: {{ .env.CONNECTOR_METRICS_PORT | default 9095 }}
+              protocol: TCP
+            {{- end }}
           lifecycle:
             {{- with .lifecycle }}
             {{- toYaml . | nindent 12 }}
