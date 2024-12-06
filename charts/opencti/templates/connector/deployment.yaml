@@ -48,26 +48,33 @@ spec:
       {{ if and .readyChecker (hasKey .readyChecker "enabled") }}
       {{- if .readyChecker.enabled }}
       initContainers:
-      - name: ready-checker-server
-        {{- if $.Values.global.imageRegistry }}
-        image: "{{ $.Values.global.imageRegistry }}/{{ .readyChecker.image | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}"
-        {{- else }}
-        image: {{ .readyChecker.repository | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}
-        imagePullPolicy: {{ .readyChecker.pullPolicy | default "IfNotPresent" }}
+        - name: ready-checker-server
+          {{- if $.Values.global.imageRegistry }}
+          image: "{{ $.Values.global.imageRegistry }}/{{ .readyChecker.image | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}"
+          {{- else }}
+          image: {{ .readyChecker.repository | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}
+          imagePullPolicy: {{ .readyChecker.pullPolicy | default "IfNotPresent" }}
+          {{- end }}
+          command:
+            - 'sh'
+            - '-c'
+            - >
+              RETRY=0;
+              until [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ];
+              do
+                if nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server {{ $.Values.service.port }}; then
+                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/{{ $.Values.worker.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
+                sleep {{ $.Values.worker.readyChecker.timeout }};
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ]; then
+                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} did not become ready after {{ $.Values.worker.readyChecker.retries }} retries";
+                  exit 1;
+                fi;
+              done
         {{- end }}
-        command:
-          - 'sh'
-          - '-c'
-          - >
-            RETRY=0;
-            until [ $RETRY -eq {{ .readyChecker.retries }} ];
-            do
-              nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server {{ $.Values.service.port }} && break;
-              echo "[$RETRY/{{ .readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
-              sleep {{ .readyChecker.timeout }};
-              RETRY=$(($RETRY + 1));
-            done
-      {{- end }}
       {{- end }}
       containers:
         - name: {{ $connectorName }}-connector
@@ -85,98 +92,135 @@ spec:
             {{- with .lifecycle }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          envFrom:
+            {{- if .envFromFiles }}
+            {{- tpl (toYaml .envFromFiles) . | nindent 12 }}
+            {{- end }}
+            {{- if $connectorsGlobal.envFromFiles }}
+            {{- tpl (toYaml $connectorsGlobal.envFromFiles) . | nindent 12 }}
+            {{- end }}
           env:
-          # Variables from secrets have precedence
-          {{- $envList := dict -}}
-          # Connector specific env from secrets
-          {{- if .envFromSecrets }}
-          {{- range $key, $value := .envFromSecrets }}
-          - name: {{ $key | upper }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $value.name }}
-                key: {{ $value.key | default $key }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          # Connectors global env from secrets
-          {{- if $connectorsGlobal.envFromSecret }}
-          {{- range $key, $value := $connectorsGlobal.envFromSecret }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $value.name }}
-                key: {{ $value.key | default $key }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
-           # Add variables in plain text if they were not already added from secrets
-          {{- if .env }}
-          {{- range $key, $value := .env }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
-          # Connectors global env from secrets
-          {{- if $connectorsGlobal.env }}
-          {{- range $key, $value := $connectorsGlobal.env }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
-          # Special handling for OPENCTI_URL which is constructed from other values
-          {{- if not (hasKey $envList "OPENCTI_URL") }}
-          {{- if eq $.Values.env.APP__BASE_PATH "/" }}
-          - name: OPENCTI_URL
-            value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}"
-          {{- else }}
-          - name: OPENCTI_URL
-            value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}{{ $.Values.env.APP__BASE_PATH }}"
-          {{- end }}
-          {{- end }}
-          # Special handling for OPENCTI_TOKEN which is constructed from other values
-          {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (or ($.Values.secrets.APP__ADMIN__TOKEN) ($.Values.env.APP__ADMIN__TOKEN)) }}
-          {{- if $.Values.secrets.APP__ADMIN__TOKEN }}
-          - name: OPENCTI_TOKEN
-            value: {{ $.Values.secrets.APP__ADMIN__TOKEN }}
-          {{- else if $.Values.env.APP__ADMIN__TOKEN }}
-          - name: OPENCTI_TOKEN
-            value: {{ $.Values.env.APP__ADMIN__TOKEN }}
-          {{- end }}
-          {{- end }}
+            # Variables from secrets have precedence
+            # Connector specific env from secrets
+            {{- $envList := dict -}}
+            {{- if .envFromSecrets }}
+            {{- range $key, $value := .envFromSecrets }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            # Variables from configmap have precedence
+            {{- if .envFromConfigMap }}
+            {{- range $key, $value := .envFromConfigMap }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Add variables in plain text if they were not already added from secrets
+            {{- if .env }}
+            {{- range $key, $value := .env }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Special handling for OPENCTI_URL which is constructed from other values
+            {{- if not (hasKey $envList "OPENCTI_URL") }}
+            {{- if eq $.Values.env.APP__BASE_PATH "/" }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}"
+            {{- else }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}{{ $.Values.env.APP__BASE_PATH }}"
+            {{- end }}
+            {{- end }}
+            # Special handling for OPENCTI_TOKEN which is constructed from other values
+            {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (or ($.Values.secrets.APP__ADMIN__TOKEN) ($.Values.env.APP__ADMIN__TOKEN)) }}
+            {{- if $.Values.secrets.APP__ADMIN__TOKEN }}
+            - name: OPENCTI_TOKEN
+              value: {{ $.Values.secrets.APP__ADMIN__TOKEN }}
+            {{- else if $.Values.env.APP__ADMIN__TOKEN }}
+            - name: OPENCTI_TOKEN
+              value: {{ $.Values.env.APP__ADMIN__TOKEN }}
+            {{- end }}
+            {{- end }}
+            # Connectors global env from secrets
+            {{- if $connectorsGlobal.envFromSecrets }}
+            {{- range $key, $value := $connectorsGlobal.envFromSecrets }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Connectors global env from configmap
+            {{- if $connectorsGlobal.envFromConfigMap }}
+            {{- range $key, $value := $connectorsGlobal.envFromConfigMap }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Connectors global env
+            {{- if $connectorsGlobal.env }}
+            {{- range $key, $value := $connectorsGlobal.env }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          volumeMounts:
+            {{- with .volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with $connectorsGlobal.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml .resources | nindent 12 }}
-          # Connectors global volumeMounts if defined
-          {{- with $connectorsGlobal.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
       terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds | default 30 }}
-      {{- with $connectorsGlobal.volumes }}
-      # Connectors global volumes if defined
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .nodeSelector }}
+        {{- with .volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $connectorsGlobal.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .tolerations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .affinity }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- range $constraint := . }}

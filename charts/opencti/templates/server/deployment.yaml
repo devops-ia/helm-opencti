@@ -33,30 +33,40 @@ spec:
       serviceAccountName: {{ include "opencti.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.readyChecker.enabled }}
       initContainers:
-      {{- range $service := .Values.readyChecker.services }}
-      - name: ready-checker-{{ $service.name }}
-        {{- if $.Values.global.imageRegistry }}
-        image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
-        {{- else }}
-        image: {{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}
+      {{- if .Values.readyChecker.enabled }}
+        {{- range $service := .Values.readyChecker.services }}
+        - name: ready-checker-{{ $service.name }}
+          {{- if $.Values.global.imageRegistry }}
+          image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
+          {{- else }}
+          image: {{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}
+          {{- end }}
+          imagePullPolicy: {{ $.Values.readyChecker.pullPolicy }}
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ];
+              do
+                if nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }} {{ $service.port }}; then
+                  echo "Service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready";
+                sleep {{ $.Values.readyChecker.timeout }};
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq {{ $.Values.readyChecker.retries }} ]; then
+                  echo "Service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is not ready";
+                  exit 1;
+                fi;
+              done
+          {{- end }}
         {{- end }}
-        imagePullPolicy: {{ $.Values.readyChecker.pullPolicy }}
-        command:
-          - 'sh'
-          - '-c'
-          - |
-            RETRY=0;
-            until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ];
-            do
-              nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }} {{ $service.port }} && break;
-              echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready";
-              sleep {{ $.Values.readyChecker.timeout }};
-              RETRY=$(($RETRY + 1));
-            done
-      {{- end }}
-      {{- end }}
+        {{- with .Values.initContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}-server
           securityContext:
@@ -67,6 +77,12 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.args }}
+          args: {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.targetPort | default .Values.service.port }}
@@ -130,38 +146,55 @@ spec:
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
             {{- end }}
           {{- end }}
+          envFrom:
+            {{- if .Values.envFromFiles }}
+            {{- tpl (toYaml .Values.envFromFiles) . | nindent 12 }}
+            {{- end }}
           env:
-          - name: NODE_OPTIONS
-            value: --max-old-space-size=8096
-          - name: PROVIDERS__LOCAL__STRATEGY
-            value: LocalStrategy
-          # Variables from secrets have precedence
-          {{- $envList := dict -}}
-          {{- if .Values.envFromSecrets }}
-          {{- range $key, $value := .Values.envFromSecrets }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $value.name }}
-                key: {{ $value.key | default $key }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
-          # Add variables in plain text if they were not already added from secrets
-          {{- if .Values.env }}
-          {{- range $key, $value := .Values.env }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
+            - name: NODE_OPTIONS
+              value: --max-old-space-size=8096
+            - name: PROVIDERS__LOCAL__STRATEGY
+              value: LocalStrategy
+            # Variables from secrets have precedence
+            {{- $envList := dict -}}
+            {{- if .Values.envFromSecrets }}
+            {{- range $key, $value := .Values.envFromSecrets }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Variables from configmap have precedence
+            {{- if .Values.envFromConfigMap }}
+            {{- range $key, $value := .Values.envFromConfigMap }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Add variables in plain text if they were not already added from secrets
+            {{- if .Values.env }}
+            {{- range $key, $value := .Values.env }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-         {{- with .Values.volumeMounts }}
+          {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
