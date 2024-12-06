@@ -36,26 +36,36 @@ spec:
         {{- toYaml .Values.worker.podSecurityContext | nindent 8 }}
       {{- if .Values.worker.readyChecker.enabled }}
       initContainers:
-      - name: ready-checker-server
-        {{- if $.Values.global.imageRegistry }}
-        image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.worker.readyChecker.repository }}:{{ $.Values.worker.readyChecker.tag }}"
-        {{- else }}
-        image: {{ $.Values.worker.readyChecker.repository }}:{{ $.Values.worker.readyChecker.tag }}
+        - name: ready-checker-server
+          {{- if $.Values.global.imageRegistry }}
+          image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.worker.readyChecker.repository }}:{{ $.Values.worker.readyChecker.tag }}"
+          {{- else }}
+          image: {{ $.Values.worker.readyChecker.repository }}:{{ $.Values.worker.readyChecker.tag }}
+          {{- end }}
+          imagePullPolicy: {{ $.Values.worker.readyChecker.pullPolicy }}
+          command:
+            - 'sh'
+            - '-c'
+            - >
+              RETRY=0;
+              until [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ];
+              do
+                if nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server {{ $.Values.service.port }}; then
+                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server:{{ $.Values.service.port }} is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/{{ $.Values.worker.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server:{{ $.Values.service.port }} is ready";
+                sleep {{ $.Values.worker.readyChecker.timeout }};
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ]; then
+                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server:{{ $.Values.service.port }} is not ready";
+                  exit 1;
+                fi;
+              done
         {{- end }}
-        imagePullPolicy: {{ $.Values.worker.readyChecker.pullPolicy }}
-        command:
-          - 'sh'
-          - '-c'
-          - >
-            RETRY=0;
-            until [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ];
-            do
-              nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server {{ $.Values.service.port }} && break;
-              echo "[$RETRY/{{ $.Values.worker.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" .) }}-server:{{ $.Values.service.port }} is ready";
-              sleep {{ $.Values.worker.readyChecker.timeout }};
-              RETRY=$(($RETRY + 1));
-            done
-      {{- end }}
+        {{- with .Values.worker.initContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}-worker
           securityContext:
@@ -66,6 +76,12 @@ spec:
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag | default .Chart.AppVersion }}"
           {{- end }}
           imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          {{- with .Values.worker.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.args }}
+          args: {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             {{- if .Values.worker.env.WORKER_TELEMETRY_ENABLED }}
             - name: metrics
@@ -76,52 +92,69 @@ spec:
             {{- with .Values.worker.lifecycle }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          envFrom:
+            {{- if .Values.worker.envFromFiles }}
+            {{- tpl (toYaml .Values.worker.envFromFiles) . | nindent 12 }}
+            {{- end }}
           env:
-          # Variables from secrets have precedence
-          {{- $envList := dict -}}
-          {{- if .Values.worker.envFromSecrets }}
-          {{- range $key, $value := .Values.worker.envFromSecrets }}
-          - name: {{ $key | upper }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $value.name }}
-                key: {{ $value.key | default $key }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          # Add variables in plain text from .Values.worker.env if they were not already added from secrets
-          {{- if .Values.worker.env }}
-          {{- range $key, $value := .Values.worker.env }}
-          {{- if not (hasKey $envList $key) }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- $_ := set $envList $key true }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
-          # Special handling for OPENCTI_URL which is constructed from other values
-          {{- if not (hasKey $envList "OPENCTI_URL") }}
-          {{- if eq .Values.env.APP__BASE_PATH "/" }}
-          - name: OPENCTI_URL
-            value: "http://{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}"
-          {{- else }}
-          - name: OPENCTI_URL
-            value: "http://{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}{{ .Values.env.APP__BASE_PATH }}"
-          {{- end }}
-          {{- end }}
-          # Special handling for OPENCTI_TOKEN which is constructed from other values
-          {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (or (.Values.secrets.APP__ADMIN__TOKEN) (.Values.env.APP__ADMIN__TOKEN)) }}
-          {{- if .Values.secrets.APP__ADMIN__TOKEN }}
-          - name: OPENCTI_TOKEN
-            value: {{ .Values.secrets.APP__ADMIN__TOKEN }}
-          {{- else if .Values.env.APP__ADMIN__TOKEN }}
-          - name: OPENCTI_TOKEN
-            value: {{ .Values.env.APP__ADMIN__TOKEN }}
-          {{- end }}
-          {{- end }}
+            # Variables from secrets have precedence
+            {{- $envList := dict -}}
+            {{- if .Values.worker.envFromSecrets }}
+            {{- range $key, $value := .Values.worker.envFromSecrets }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            # Variables from configmap have precedence
+            {{- if .Values.worker.envFromConfigMap }}
+            {{- range $key, $value := .Values.worker.envFromConfigMap }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Add variables in plain text from .Values.worker.env if they were not already added from secrets
+            {{- if .Values.worker.env }}
+            {{- range $key, $value := .Values.worker.env }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Special handling for OPENCTI_URL which is constructed from other values
+            {{- if not (hasKey $envList "OPENCTI_URL") }}
+            {{- if eq .Values.env.APP__BASE_PATH "/" }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}"
+            {{- else }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}{{ .Values.env.APP__BASE_PATH }}"
+            {{- end }}
+            {{- end }}
+            # Special handling for OPENCTI_TOKEN which is constructed from other values
+            {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (or (.Values.secrets.APP__ADMIN__TOKEN) (.Values.env.APP__ADMIN__TOKEN)) }}
+            {{- if .Values.secrets.APP__ADMIN__TOKEN }}
+            - name: OPENCTI_TOKEN
+              value: {{ .Values.secrets.APP__ADMIN__TOKEN }}
+            {{- else if .Values.env.APP__ADMIN__TOKEN }}
+            - name: OPENCTI_TOKEN
+              value: {{ .Values.env.APP__ADMIN__TOKEN }}
+            {{- end }}
+            {{- end }}
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
-         {{- with .Values.worker.volumeMounts }}
+          {{- with .Values.worker.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}

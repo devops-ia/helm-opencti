@@ -39,8 +39,7 @@ serviceAccount:
   # -- Name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-  # -- Specifies if you don't want the kubelet to automatically mount
-  # a ServiceAccount's API credentials
+  # -- Specifies if you don't want the kubelet to automatically mount a ServiceAccount API credentials
   automountServiceAccountToken: false
 
 # -- Enable or disable test connection
@@ -74,15 +73,59 @@ env:
   APP__TELEMETRY__METRICS__ENABLED: true
   APP__HEALTH_ACCESS_KEY: ChangeMe
 
-# -- Secrets from variables
+# -- Variables from configMap
+envFromConfigMap: {}
+  # MY_VARIABLE:
+  #  name: <name-configmap>
+  #  key: key
+
+# -- Variables from secrets
 envFromSecrets: {}
   # MY_VARIABLE:
-  #  name: <release-name>-credentials
+  #  name: <name-secret>
   #  key: secret_key
+
+# -- Load all variables from files
+# </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
+envFromFiles: []
+  # - secretRef:
+  #     name: <name-secret>
+  # - configMapRef:
+  #     name: <name-configmap>
 
 # -- Secrets values to create credentials and reference by envFromSecrets
 # Generate Secret with following name: `<release-name>-credentials`
+# </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/
 secrets: {}
+
+# -- ConfigMap values to create configuration files
+# Generate ConfigMap with following name: <release-name>-<name>
+# </br> Ref: https://kubernetes.io/docs/concepts/configuration/configmap/
+configMaps: []
+  # - name: configmap-name
+  #   data:
+  #     my.key: |-
+  #       my-content
+  #     my_var: my-value
+
+# -- Configure additional containers
+# </br> Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+initContainers: []
+  # - name: my-container
+  #   image: busybox
+  #   command: ['sh', '-c', 'echo "Hello, World!"']
+
+# -- Configure args
+# </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+args: []
+  # - -c
+  # - echo "Hello, World!"
+
+# -- Configure command
+# </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+command: []
+  # - echo
+  # - "Hello, World!"
 
 # -- Kubernetes service to expose Pod
 # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
@@ -314,16 +357,16 @@ autoscaling:
 
 # -- Additional volumes on the output Deployment definition
 volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
 
 # -- Additional volumeMounts on the output Deployment definition
 volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
 
 # -- Node labels for pod assignment
 # </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
@@ -344,30 +387,44 @@ topologySpreadConstraints: []
   #   topologyKey: zone
   #   whenUnsatisfiable: DoNotSchedule
 
-# -- Connectors Globals
+# -- Connectors global configuration
 connectorsGlobal:
-  # -- Secrets from variables
-  envFromSecrets: {}
-  # MY_VARIABLE:
-  #  name: <release-name>-credentials
-  #  key: secret_key
 
   # -- Additional environment variables on the output connector definition
   env: {}
-  # MY_VARIABLE: my_value
+    # MY_VARIABLE: my_value
+
+  # -- Variables from secrets
+  envFromSecrets: {}
+    # MY_VARIABLE:
+    #   name: <name-secret>
+    #   key: secret_key
+
+  # -- Variables from configMap
+  envFromConfigMap: {}
+    # MY_VARIABLE:
+    #   name: <name-configmap>
+    #   key: key
+
+  # -- Load all variables from files
+  envFromFiles: []
+    # - secretRef:
+    #     name: <name-secret>
+    # - configMapRef:
+    #     name: <name-configmap>
 
   # -- Additional volumes on the output connector Deployment definition
   volumes: []
-  # - name: foo
-  #   secret:
-  #     secretName: mysecret
-  #     optional: false
+    # - name: foo
+    #   secret:
+    #     secretName: mysecret
+    #     optional: false
 
   # -- Additional volumeMounts on the output connector Deployment definition
   volumeMounts: []
-  # - name: foo
-  #   mountPath: "/etc/foo"
-  #   readOnly: true
+    # - name: foo
+    #   mountPath: "/etc/foo"
+    #   readOnly: true
 
 # -- Connectors
 # </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
@@ -405,11 +462,33 @@ connectors: []
 #   # -- Environment variables to configure application
 #   env: {}
 #     # my_env: my_value
-#     # -- Secrets from variables
+#   # -- Variables from secrets
 #   envFromSecrets: {}
-#     # my_env:
-#     #  name: release-name-credentials
+#     # MY_VARIABLE:
+#     #  name: <name-secret>
 #     #  key: secret_key
+#   # -- Variables from configMap
+#   envFromConfigMap: {}
+#     # MY_VARIABLE:
+#     #  name: <name-configmap>
+#     #  key: key
+#   # -- Load all variables from files
+#   envFromFiles: []
+#     # - secretRef:
+#     #     name: <name-secret>
+#     # - configMapRef:
+#     #     name: <name-configmap>
+#   # -- Additional volumes on the output connector Deployment definition
+#   volumes: []
+#     # - name: foo
+#     #   secret:
+#     #     secretName: mysecret
+#     #     optional: false
+#   # -- Additional volumeMounts on the output connector Deployment definition
+#   volumeMounts: []
+#     # - name: foo
+#     #   mountPath: "/etc/foo"
+#     #   readOnly: true
 #   # -- The resources limits and requested
 #   resources: {}
 #     # limits:
@@ -487,11 +566,54 @@ worker:
     # METRICS
     WORKER_TELEMETRY_ENABLED: true
 
-  # -- Secrets from variables
+  # -- Variables from configMap
+  envFromConfigMap: {}
+    # MY_VARIABLE:
+    #  name: <name-configmap>
+    #  key: key
+
+  # -- Variables from secrets
   envFromSecrets: {}
     # MY_VARIABLE:
-    #  name: <release-name>-credentials
+    #  name: <name-secret>
     #  key: secret_key
+
+  # -- Load all variables from files
+  # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
+  envFromFiles: []
+    # - secretRef:
+    #     name: <name-secret>
+    # - configMapRef:
+    #     name: <name-configmap>
+
+  # -- ConfigMap values to create configuration files
+  # Generate ConfigMap with following name: <release-name>-<name>
+  # </br> Ref: https://kubernetes.io/docs/concepts/configuration/configmap/
+  configMaps: []
+    # - name: configmap-name
+    #   data:
+    #     my.key: |-
+    #       my-content
+    #     my_var: my-value
+
+  # -- Configure additional containers
+  # </br> Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+    # - name: my-container
+    #   image: busybox
+    #   command: ['sh', '-c', 'echo "Hello, World!"']
+
+  # -- Configure args
+  # </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+  args: []
+    # - -c
+    # - echo "Hello, World!"
+
+  # -- Configure command
+  # </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+  command: []
+    # - echo
+    # - "Hello, World!"
 
   # -- NetworkPolicy configuration
   # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
@@ -538,10 +660,6 @@ worker:
   # -- The resources limits and requested
   # </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
     # limits:
     #   cpu: "250m"
     #   memory: 256Mi
@@ -648,7 +766,6 @@ elasticsearch:
       enabled: false
 
   # Data-only nodes parameters
-
   data:
     # Number of data-only replicas to deploy
     replicaCount: 1
@@ -723,7 +840,6 @@ rabbitmq:
 
 # -- Redis subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
-
 redis:
   # -- Enable or disable Redis subchart
   enabled: true

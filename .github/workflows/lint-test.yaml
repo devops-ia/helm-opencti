@@ -13,6 +13,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure sysctl
+        run: |
+          sudo sysctl -w vm.max_map_count=262144
+
       # default install latest (stable)
       - name: Set up Helm
         uses: azure/setup-helm@v4
