@@ -60,17 +60,17 @@ spec:
             - '-c'
             - >
               RETRY=0;
-              until [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ];
+              until [ $RETRY -eq {{ .readyChecker.retries }} ];
               do
                 if nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server {{ $.Values.service.port }}; then
                   echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
                   exit 0;
                 fi;
-                echo "[$RETRY/{{ $.Values.worker.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
-                sleep {{ $.Values.worker.readyChecker.timeout }};
+                echo "[$RETRY/{{ .readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
+                sleep {{ .readyChecker.timeout }};
                 RETRY=$(($RETRY + 1));
-                if [ $RETRY -eq {{ $.Values.worker.readyChecker.retries }} ]; then
-                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} did not become ready after {{ $.Values.worker.readyChecker.retries }} retries";
+                if [ $RETRY -eq {{ .readyChecker.retries }} ]; then
+                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} did not become ready after {{ .readyChecker.retries }} retries";
                   exit 1;
                 fi;
               done
@@ -203,24 +203,24 @@ spec:
             {{- toYaml .resources | nindent 12 }}
       terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds | default 30 }}
       volumes:
-        {{- with .volumes }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with $connectorsGlobal.volumes }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .nodeSelector }}
+      {{- with .volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $connectorsGlobal.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .nodeSelector }}
       nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .tolerations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .tolerations }}
       tolerations:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .affinity }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .affinity }}
       affinity:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- range $constraint := . }}
