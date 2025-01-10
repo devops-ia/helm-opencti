@@ -50,15 +50,16 @@ spec:
               RETRY=0;
               until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ];
               do
-                if nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }} {{ $service.port }}; then
-                  echo "Service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready";
+                ADDRESS="{{ if $service.address }}{{ $service.address }}{{ else }}{{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}{{ end }}";
+                if nc -zv $ADDRESS {{ $service.port }}; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is ready";
                   exit 0;
                 fi;
-                echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready";
+                echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting for service {{ $service.name }} with address $ADDRESS:{{ $service.port }} to become ready";
                 sleep {{ $.Values.readyChecker.timeout }};
                 RETRY=$(($RETRY + 1));
                 if [ $RETRY -eq {{ $.Values.readyChecker.retries }} ]; then
-                  echo "Service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is not ready";
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is not ready";
                   exit 1;
                 fi;
               done

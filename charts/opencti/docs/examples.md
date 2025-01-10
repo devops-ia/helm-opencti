@@ -103,20 +103,33 @@ testConnection: true
 
 Or check each service using `readyChecker` to check if the services which depends to run OpenCTI are ready.
 
-> [!IMPORTANT]
-> Only works with servies which are deployed like deps in this chart.
-
 ```yaml
 readyChecker:
+  # -- Enable or disable ready-checker
   enabled: true
+  # -- Repository of the image
+  repository: busybox
+  # -- Pull policy for the image
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag
+  tag: latest
   # -- Number of retries before giving up
   retries: 30
   # -- Timeout for each check
   timeout: 5
   # -- List services
   services:
+  # - name: service_name
+  #   port: service_port
+  #   address: service_address  # (Optional) This parameter is optional. If
+  #   not specified, the address for the check will be automatically
+  #   determined assuming the service was installed using a subchart. It is
+  #   useful to specify it when the service is provisioned differently (e.g.,
+  #   an S3 bucket created in the Cloud or an Elasticsearch instance outside
+  #   the Kubernetes cluster). The address can be an IP address or a DNS name.
   - name: elasticsearch
     port: 9200
+    address: 172.0.0.1
   - name: minio
     port: 9000
   - name: rabbitmq
@@ -129,14 +142,40 @@ In deep this config are deployed as a initial container which check the services
 
 ```yaml
       initContainers:
-      {{- range $service := .Values.readyChecker.services }}
-      - name: ready-checker-{{ $service.name }}
-        image: busybox
-        command:
-          - 'sh'
-          - '-c'
-          - 'RETRY=0; until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ]; do nc -zv {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }} {{ $service.port }} && break; echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}:{{ $service.port }} is ready"; sleep {{ $.Values.readyChecker.timeout }}; RETRY=$(($RETRY + 1)); done'
-      {{- end }}
+      {{- if .Values.readyChecker.enabled }}
+        {{- range $service := .Values.readyChecker.services }}
+        - name: ready-checker-{{ $service.name }}
+          {{- if $.Values.global.imageRegistry }}
+          image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
+          {{- else }}
+          image: {{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}
+          {{- end }}
+          imagePullPolicy: {{ $.Values.readyChecker.pullPolicy }}
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq {{ $.Values.readyChecker.retries }} ];
+              do
+                ADDRESS="{{ if $service.address }}{{ $service.address }}{{ else }}{{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}{{ end }}";
+                if nc -zv $ADDRESS {{ $service.port }}; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/{{ $.Values.readyChecker.retries }}] waiting for service {{ $service.name }} with address $ADDRESS:{{ $service.port }} to become ready";
+                sleep {{ $.Values.readyChecker.timeout }};
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq {{ $.Values.readyChecker.retries }} ]; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is not ready";
+                  exit 1;
+                fi;
+              done
+          {{- end }}
+        {{- end }}
+        {{- with .Values.initContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
 ```
 
 Output:
@@ -144,30 +183,99 @@ Output:
 ```yaml
 ...
       initContainers:
-      - name: ready-checker-elasticsearch
-        image: busybox
-        command:
-          - 'sh'
-          - '-c'
-          - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-elasticsearch 9200 && break; echo "[$RETRY/30] waiting service opencti-ci-elasticsearch:9200 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
-      - name: ready-checker-minio
-        image: busybox
-        command:
-          - 'sh'
-          - '-c'
-          - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-minio 9000 && break; echo "[$RETRY/30] waiting service opencti-ci-minio:9000 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
-      - name: ready-checker-rabbitmq
-        image: busybox
-        command:
-          - 'sh'
-          - '-c'
-          - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-rabbitmq 5672 && break; echo "[$RETRY/30] waiting service opencti-ci-rabbitmq:5672 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
-      - name: ready-checker-redis-master
-        image: busybox
-        command:
-          - 'sh'
-          - '-c'
-          - 'RETRY=0; until [ $RETRY -eq 30 ]; do nc -zv opencti-ci-redis-master 6379 && break; echo "[$RETRY/30] waiting service opencti-ci-redis-master:6379 is ready"; sleep 5; RETRY=$(($RETRY + 1)); done'
+        - name: ready-checker-elasticsearch
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq 30 ];
+              do
+                ADDRESS="172.0.0.1";
+                if nc -zv $ADDRESS 9200; then
+                  echo "Service elasticsearch with address $ADDRESS:9200 is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/30] waiting for service elasticsearch with address $ADDRESS:9200 to become ready";
+                sleep 5;
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq 30 ]; then
+                  echo "Service elasticsearch with address $ADDRESS:9200 is not ready";
+                  exit 1;
+                fi;
+              done
+        - name: ready-checker-minio
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq 30 ];
+              do
+                ADDRESS="opencti-ci-minio";
+                if nc -zv $ADDRESS 9000; then
+                  echo "Service minio with address $ADDRESS:9000 is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/30] waiting for service minio with address $ADDRESS:9000 to become ready";
+                sleep 5;
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq 30 ]; then
+                  echo "Service minio with address $ADDRESS:9000 is not ready";
+                  exit 1;
+                fi;
+              done
+        - name: ready-checker-rabbitmq
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq 30 ];
+              do
+                ADDRESS="opencti-ci-rabbitmq";
+                if nc -zv $ADDRESS 5672; then
+                  echo "Service rabbitmq with address $ADDRESS:5672 is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/30] waiting for service rabbitmq with address $ADDRESS:5672 to become ready";
+                sleep 5;
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq 30 ]; then
+                  echo "Service rabbitmq with address $ADDRESS:5672 is not ready";
+                  exit 1;
+                fi;
+              done
+        - name: ready-checker-redis-master
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq 30 ];
+              do
+                ADDRESS="opencti-ci-redis-master";
+                if nc -zv $ADDRESS 6379; then
+                  echo "Service redis-master with address $ADDRESS:6379 is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/30] waiting for service redis-master with address $ADDRESS:6379 to become ready";
+                sleep 5;
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq 30 ]; then
+                  echo "Service redis-master with address $ADDRESS:6379 is not ready";
+                  exit 1;
+                fi;
+              done
+...
 ```
 
 ### Configure OpenID
@@ -402,5 +510,4 @@ connectors:
     ...
 ```
 
-The `interval` and `scrapeTimeout` are optional and can be omitted in order to use the defaults. Make sure to set the enviroment variable `CONNECTOR_EXPOSE_METRICS` to `true`. 
-
+The `interval` and `scrapeTimeout` are optional and can be omitted in order to use the defaults. Make sure to set the enviroment variable `CONNECTOR_EXPOSE_METRICS` to `true`.
