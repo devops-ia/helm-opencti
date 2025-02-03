@@ -278,6 +278,14 @@ readyChecker:
   timeout: 5
   # -- List services
   services:
+  # - name: service_name
+  #   port: service_port
+  #   address: service_address  # (Optional) This parameter is optional. If
+  #   not specified, the address for the check will be automatically
+  #   determined assuming the service was installed using a subchart. It is
+  #   useful to specify it when the service is provisioned differently (e.g.,
+  #   an S3 bucket created in the Cloud or an Elasticsearch instance outside
+  #   the Kubernetes cluster). The address can be an IP address or a DNS name.
   - name: elasticsearch
     port: 9200
   - name: minio
