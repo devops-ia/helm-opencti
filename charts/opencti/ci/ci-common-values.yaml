@@ -229,5 +229,7 @@ redis:
   auth:
     enabled: false
     sentinel: false
+    usePasswordFiles: false
+    usePasswordFileFromSecret: false
   networkPolicy:
     enabled: false

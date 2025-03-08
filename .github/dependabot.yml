@@ -8,3 +8,7 @@ updates:
   labels:
   - enhancement
   - dependency-management
+  groups:
+    github-actions:
+      patterns:
+        - "*"
