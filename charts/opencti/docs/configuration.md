@@ -179,7 +179,7 @@ Server block to configure MinIO:
 ```yaml
 env:
 ...
-  MINIO__ENDPOINT: <release-name>-minio:9000
+  MINIO__ENDPOINT: <release-name>-minio
 ```
 
 Basic config:
