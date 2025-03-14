@@ -1,0 +1,74 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-case-conflict
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-nodejs
+    rev: v1.1.2
+    hooks:
+      - id: markdown-toc
+        args: [--maxdepth=3]
+        files: ^(README\.md|CONTRIBUTING\.md|TESTING\.md)$
+
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.26
+    hooks:
+      - id: helmlint
+        args:
+          - charts/opencti
+      - id: shellcheck
+
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: v1.14.2
+    hooks:
+      - id: helm-docs
+        args:
+          - --chart-search-root=charts
+          - --template-files=README.md.gotmpl
+          - --document-dependency-values
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.31.3
+    hooks:
+      - id: check-jsonschema
+        name: "Check values.schema.json"
+        files: values\.schema\.json$
+        args: ["--schemafile", "https://json-schema.org/draft-07/schema"]
+
+  - repo: local
+    hooks:
+      - id: helm-check-version
+        name: Check Helm Chart Version
+        entry: bash -c 'if ! grep -q "version:" charts/opencti/Chart.yaml; then echo "Version field missing in Chart.yaml"; exit 1; fi'
+        language: system
+        files: ^charts/opencti/Chart\.yaml$
+        pass_filenames: false
+
+      - id: helm-check-values
+        name: Check values.yaml against schema
+        entry: bash -c 'if [ -f values.schema.json ]; then if ! helm template charts/opencti --validate --values charts/opencti/values.yaml > /dev/null; then exit 1; fi; fi'
+        language: system
+        files: ^charts/opencti/values\.yaml$
+        pass_filenames: false
+
+      - id: check-chart-version-bump
+        name: Check Chart Version Bump
+        entry: |
+          #!/bin/sh
+          if git diff --cached --name-only | grep -q "^charts/opencti/Chart.yaml$"; then
+            if ! git diff --cached charts/opencti/Chart.yaml | grep -q "^+version:"; then
+              echo "Please bump the chart version in Chart.yaml"
+              exit 1
+            fi
+          fi
+        language: system
+        files: ^charts/opencti/Chart\.yaml$
+        pass_filenames: false

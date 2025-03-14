@@ -46,7 +46,7 @@ serviceAccount:
 testConnection: false
 
 # -- Environment variables to configure application
-# </br> Ref: https://docs.openbas.io/latest/deployment/configuration/#platform
+# </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
 env:
   # APP OPENCTI
   APP__ADMIN__EMAIL: admin@opencti.io

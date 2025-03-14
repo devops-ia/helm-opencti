@@ -1,0 +1,506 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "imageRegistry": {
+          "type": "string"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "default": "opencti/platform"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "default": "IfNotPresent"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": ["repository"]
+    },
+    "nameOverride": {
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "type": "string"
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": true
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "automountServiceAccountToken": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "testConnection": {
+      "type": "boolean",
+      "default": false
+    },
+    "env": {
+      "type": "object",
+      "properties": {
+        "APP__ADMIN__EMAIL": {
+          "type": "string",
+          "format": "email",
+          "default": "admin@opencti.io"
+        },
+        "APP__ADMIN__PASSWORD": {
+          "type": "string"
+        },
+        "APP__ADMIN__TOKEN": {
+          "type": "string"
+        },
+        "APP__BASE_PATH": {
+          "type": "string",
+          "default": "/"
+        },
+        "APP__GRAPHQL__PLAYGROUND__ENABLED": {
+          "type": "boolean",
+          "default": false
+        },
+        "APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION": {
+          "type": "boolean",
+          "default": false
+        },
+        "MINIO__ENDPOINT": {
+          "type": "string"
+        },
+        "ELASTICSEARCH__URL": {
+          "type": "string"
+        },
+        "RABBITMQ__HOSTNAME": {
+          "type": "string"
+        },
+        "RABBITMQ__PORT_MANAGEMENT": {
+          "type": "integer",
+          "default": 15672
+        },
+        "RABBITMQ__PORT": {
+          "type": "integer",
+          "default": 5672
+        },
+        "RABBITMQ__USERNAME": {
+          "type": "string"
+        },
+        "RABBITMQ__PASSWORD": {
+          "type": "string"
+        },
+        "REDIS__HOSTNAME": {
+          "type": "string"
+        },
+        "REDIS__PORT": {
+          "type": "integer",
+          "default": 6379
+        },
+        "REDIS__MODE": {
+          "type": "string",
+          "enum": ["single", "cluster"],
+          "default": "single"
+        },
+        "APP__TELEMETRY__METRICS__ENABLED": {
+          "type": "boolean",
+          "default": true
+        },
+        "APP__HEALTH_ACCESS_KEY": {
+          "type": "string"
+        }
+      }
+    },
+    "envFromConfigMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "key"]
+      }
+    },
+    "envFromSecrets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "key"]
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "default": "ClusterIP"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 80
+        },
+        "targetPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 4000
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "className": {
+          "type": "string"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "enum": ["Exact", "Prefix", "ImplementationSpecific"]
+                    }
+                  },
+                  "required": ["path", "pathType"]
+                }
+              }
+            },
+            "required": ["host", "paths"]
+          }
+        },
+        "tls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "secretName": {
+                "type": "string"
+              },
+              "hosts": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": ["hosts"]
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[0-9]+m?$|^[0-9]+\\.[0-9]*$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+(Ki|Mi|Gi|Ti|Pi|Ei|[kMGTPE]i?)?$"
+            }
+          }
+        },
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[0-9]+m?$|^[0-9]+\\.[0-9]*$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+(Ki|Mi|Gi|Ti|Pi|Ei|[kMGTPE]i?)?$"
+            }
+          }
+        }
+      }
+    },
+    "worker": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "replicaCount": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "default": "opencti/worker"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": ["Always", "IfNotPresent", "Never"],
+              "default": "IfNotPresent"
+            },
+            "tag": {
+              "type": "string"
+            }
+          }
+        },
+        "env": {
+          "type": "object",
+          "properties": {
+            "WORKER_LOG_LEVEL": {
+              "type": "string",
+              "enum": ["error", "warn", "info", "debug", "trace"],
+              "default": "info"
+            },
+            "WORKER_TELEMETRY_ENABLED": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      }
+    },
+    "elasticsearch": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "clusterName": {
+          "type": "string",
+          "default": "elastic"
+        },
+        "master": {
+          "type": "object",
+          "properties": {
+            "masterOnly": {
+              "type": "boolean",
+              "default": true
+            },
+            "replicaCount": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "persistence": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "minio": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["standalone", "distributed"],
+          "default": "standalone"
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "rootUser": {
+              "type": "string"
+            },
+            "rootPassword": {
+              "type": "string"
+            }
+          },
+          "required": ["rootUser", "rootPassword"]
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    },
+    "rabbitmq": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "replicaCount": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "clustering": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "default": "user"
+            },
+            "password": {
+              "type": "string"
+            },
+            "erlangCookie": {
+              "type": "string"
+            }
+          },
+          "required": ["username", "password", "erlangCookie"]
+        }
+      }
+    },
+    "redis": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "architecture": {
+          "type": "string",
+          "enum": ["standalone", "replication"],
+          "default": "standalone"
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "master": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "persistence": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
