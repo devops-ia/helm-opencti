@@ -1,0 +1,20 @@
+{{- if eq .Values.deploymentType "clustering" }}
+{{- if .Values.clustering.ingestion.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "opencti.fullname" . }}-server
+  labels:
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "opencti.selectorIngestionLabels" . | nindent 6 }}
+  {{- if .Values.clustering.ingestion.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.clustering.ingestion.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if .Values.clustering.ingestion.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.clustering.ingestion.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}

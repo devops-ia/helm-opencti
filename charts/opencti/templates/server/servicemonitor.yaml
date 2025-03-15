@@ -1,3 +1,4 @@
+{{- if eq .Values.deploymentType "standalone" }}
 {{- if and .Values.serviceMonitor.enabled .Values.env.APP__TELEMETRY__METRICS__ENABLED }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -22,3 +23,4 @@ spec:
     {{- toYaml .Values.serviceMonitor.relabelings | nindent 4 }}
     {{- end }}
 {{- end -}}
+{{- end }}

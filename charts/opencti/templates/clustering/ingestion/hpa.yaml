@@ -1,0 +1,34 @@
+{{- if eq .Values.deploymentType "clustering" }}
+{{- if .Values.clustering.ingestion.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "opencti.fullname" . }}-server
+  labels:
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "opencti.fullname" . }}-server
+  minReplicas: {{ .Values.clustering.ingestion.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.clustering.ingestion.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.clustering.ingestion.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.clustering.ingestion.worker.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.clustering.ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.clustering.ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
+{{- end }}

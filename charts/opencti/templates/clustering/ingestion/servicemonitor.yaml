@@ -1,0 +1,26 @@
+{{- if eq .Values.deploymentType "clustering" }}
+{{- if and .Values.clustering.ingestion.serviceMonitor.enabled .Values.clustering.ingestion.env.APP__TELEMETRY__METRICS__ENABLED }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "opencti.fullname" . }}-server
+  labels:
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "opencti.selectorIngestionLabels" . | nindent 8 }}
+  endpoints:
+  - port: metrics
+    interval: {{ .Values.clustering.ingestion.serviceMonitor.interval | quote }}
+    scrapeTimeout: {{ .Values.clustering.ingestion.serviceMonitor.scrapeTimeout | quote }}
+    {{- if .Values.clustering.ingestion.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{- toYaml .Values.clustering.ingestion.serviceMonitor.metricRelabelings | nindent 4 }}
+    {{- end }}
+    {{- if .Values.clustering.ingestion.serviceMonitor.relabelings }}
+    relabelings:
+    {{- toYaml .Values.clustering.ingestion.serviceMonitor.relabelings | nindent 4 }}
+    {{- end }}
+{{- end -}}
+{{- end }}

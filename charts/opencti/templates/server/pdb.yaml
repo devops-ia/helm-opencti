@@ -1,3 +1,4 @@
+{{- if eq .Values.deploymentType "standalone" }}
 {{- if .Values.podDisruptionBudget.enabled }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -15,4 +16,5 @@ spec:
   {{- if .Values.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
   {{- end }}
+{{- end }}
 {{- end }}

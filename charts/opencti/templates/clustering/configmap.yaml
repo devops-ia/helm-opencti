@@ -1,4 +1,3 @@
-{{- if eq .Values.deploymentType "clustering" }}
 {{- range .Values.configMaps }}
 ---
 apiVersion: v1
@@ -19,5 +18,4 @@ data:
   {{ $key }}: {{ $value }}
   {{- end }}
   {{- end }}
-{{- end }}
 {{- end }}

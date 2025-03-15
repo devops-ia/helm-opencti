@@ -1,3 +1,4 @@
+{{- if eq .Values.deploymentType "standalone" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -152,10 +153,6 @@ spec:
             {{- tpl (toYaml .Values.envFromFiles) . | nindent 12 }}
             {{- end }}
           env:
-            - name: NODE_OPTIONS
-              value: --max-old-space-size=8096
-            - name: PROVIDERS__LOCAL__STRATEGY
-              value: LocalStrategy
             # Variables from secrets have precedence
             {{- $envList := dict -}}
             {{- if .Values.envFromSecrets }}
@@ -221,3 +218,4 @@ spec:
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}

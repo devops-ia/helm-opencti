@@ -1,0 +1,32 @@
+{{- if eq .Values.deploymentType "clustering" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opencti.fullname" . }}-frontend
+  labels:
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.clustering.frontend.service.type }}
+  ports:
+    - port: {{ .Values.clustering.frontend.service.port }}
+      targetPort: {{ .Values.clustering.frontend.service.targetPort | default .Values.clustering.frontend.service.port }}
+      protocol: TCP
+      name: http
+      {{- if and (eq "NodePort" .Values.clustering.frontend.service.type) .Values.clustering.frontend.service.nodePort }}
+      nodePort: {{ .Values.clustering.frontend.service.nodePort }}
+      {{- end }}
+    {{- range $port := .Values.clustering.frontend.service.extraPorts }}
+    - name: {{ $port.name }}
+      port: {{ $port.port }}
+      targetPort: {{ $port.targetPort }}
+      protocol: TCP
+    {{- end }}
+    {{- if .Values.clustering.frontend.env.APP__TELEMETRY__METRICS__ENABLED }}
+    - name: metrics
+      port: {{ .Values.clustering.frontend.env.APP__TELEMETRY__METRICS__EXPORTER_PROMETHEUS | default 14269 }}
+      targetPort: {{ .Values.clustering.frontend.env.APP__TELEMETRY__METRICS__EXPORTER_PROMETHEUS | default 14269 }}
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "opencti.selectorFrontendLabels" . | nindent 4 }}
+{{- end }}

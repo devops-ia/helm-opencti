@@ -1,10 +1,10 @@
-{{- if eq .Values.deploymentType "standalone" }}
-{{- if .Values.ingress.enabled -}}
+{{- if eq .Values.deploymentType "clustering" }}
+{{- if .Values.clustering.frontend.ingress.enabled -}}
 {{- $fullName := include "opencti.fullname" . -}}
-{{- $svcPort := .Values.service.port -}}
-{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
+{{- $svcPort := .Values.clustering.frontend.service.port -}}
+{{- if and .Values.clustering.frontend.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.clustering.frontend.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.clustering.frontend.ingress.annotations "kubernetes.io/ingress.class" .Values.clustering.frontend.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -18,18 +18,18 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    {{- include "opencti.serverLabels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+  {{- with .Values.clustering.frontend.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.ingress.className }}
+  {{- if and .Values.clustering.frontend.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.clustering.frontend.ingress.className }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- if .Values.clustering.frontend.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range .Values.clustering.frontend.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -38,7 +38,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
+    {{- range .Values.clustering.frontend.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

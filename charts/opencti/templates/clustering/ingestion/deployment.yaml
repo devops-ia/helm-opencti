@@ -1,0 +1,221 @@
+{{- if eq .Values.deploymentType "clustering" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "opencti.fullname" . }}-server
+  labels:
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+spec:
+  {{- if not .Values.clustering.ingestion.autoscaling.enabled }}
+  replicas: {{ .Values.clustering.ingestion.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "opencti.selectorIngestionLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.clustering.ingestion.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "opencti.selectorIngestionLabels" . | nindent 8 }}
+        {{- with .Values.clustering.ingestion.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.clustering.ingestion.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.clustering.ingestion.imagePullSecrets | nindent 8 }}
+      {{- else if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "opencti.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.clustering.ingestion.podSecurityContext | nindent 8 }}
+      initContainers:
+      {{- if .Values.clustering.ingestion.readyChecker.enabled }}
+        {{- range $service := .Values.clustering.ingestion.readyChecker.services }}
+        - name: ready-checker-{{ $service.name }}
+          {{- if $.Values.global.imageRegistry }}
+          image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.clustering.ingestion.readyChecker.repository }}:{{ $.Values.clustering.ingestion.readyChecker.tag }}"
+          {{- else }}
+          image: {{ $.Values.clustering.ingestion.readyChecker.repository }}:{{ $.Values.clustering.ingestion.readyChecker.tag }}
+          {{- end }}
+          imagePullPolicy: {{ $.Values.clustering.ingestion.readyChecker.pullPolicy }}
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq {{ $.Values.clustering.ingestion.readyChecker.retries }} ];
+              do
+                ADDRESS="{{ if $service.address }}{{ $service.address }}{{ else }}{{ $.Values.clustering.ingestion.fullnameOverride | default $.Release.Name }}-{{ $service.name }}{{ end }}";
+                if nc -zv $ADDRESS {{ $service.port }}; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/{{ $.Values.clustering.ingestion.readyChecker.retries }}] waiting for service {{ $service.name }} with address $ADDRESS:{{ $service.port }} to become ready";
+                sleep {{ $.Values.clustering.ingestion.readyChecker.timeout }};
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq {{ $.Values.clustering.ingestion.readyChecker.retries }} ]; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is not ready";
+                  exit 1;
+                fi;
+              done
+          {{- end }}
+        {{- end }}
+        {{- with .Values.clustering.ingestion.initContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-server
+          securityContext:
+            {{- toYaml .Values.clustering.ingestion.securityContext | nindent 12 }}
+          {{- if .Values.global.imageRegistry }}
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.clustering.ingestion.image.repository }}:{{ .Values.clustering.ingestion.image.tag | default .Chart.AppVersion }}"
+          {{- else }}
+          image: "{{ .Values.clustering.ingestion.image.repository }}:{{ .Values.clustering.ingestion.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.clustering.ingestion.image.pullPolicy }}
+          {{- with .Values.clustering.ingestion.command }}
+          command: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.clustering.ingestion.args }}
+          args: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.clustering.ingestion.service.targetPort | default .Values.clustering.ingestion.service.port }}
+              protocol: TCP
+            {{- range $port := .Values.clustering.ingestion.service.extraPorts }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.targetPort }}
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.clustering.ingestion.serviceMonitor.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.clustering.ingestion.env.APP__TELEMETRY__METRICS__EXPORTER_PROMETHEUS | default 14269 }}
+              protocol: TCP
+            {{- end }}
+          lifecycle:
+            {{- with .Values.clustering.ingestion.lifecycle }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.clustering.ingestion.livenessProbe.enabled }}
+          livenessProbe:
+            {{- if .Values.clustering.ingestion.livenessProbeCustom }}
+            {{- toYaml .Values.clustering.ingestion.livenessProbeCustom | nindent 12 }}
+            {{- else }}
+            httpGet:
+              path: {{ .Values.clustering.ingestion.service.healthPath | default (printf "/health?health_access_key=%s" .Values.clustering.ingestion.env.APP__HEALTH_ACCESS_KEY) | quote }}
+              port: {{ .Values.clustering.ingestion.service.targetPort | default .Values.clustering.ingestion.service.port }}
+            failureThreshold: {{ .Values.clustering.ingestion.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.clustering.ingestion.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.clustering.ingestion.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.clustering.ingestion.livenessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.clustering.ingestion.livenessProbe.timeoutSeconds }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.clustering.ingestion.readinessProbe.enabled }}
+          readinessProbe:
+            {{- if .Values.clustering.ingestion.readinessProbeCustom }}
+            {{- toYaml .Values.clustering.ingestion.readinessProbeCustom | nindent 12 }}
+            {{- else }}
+            httpGet:
+              path: {{ .Values.clustering.ingestion.service.healthPath | default (printf "/health?health_access_key=%s" .Values.clustering.ingestion.env.APP__HEALTH_ACCESS_KEY) | quote }}
+              port: {{ .Values.clustering.ingestion.service.targetPort | default .Values.clustering.ingestion.service.port }}
+            failureThreshold: {{ .Values.clustering.ingestion.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.clustering.ingestion.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.clustering.ingestion.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.clustering.ingestion.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.clustering.ingestion.readinessProbe.timeoutSeconds }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.clustering.ingestion.startupProbe.enabled }}
+          startupProbe:
+            {{- if .Values.clustering.ingestion.startupProbeCustom }}
+            {{- toYaml .Values.clustering.ingestion.startupProbeCustom | nindent 12 }}
+            {{- else }}
+            httpGet:
+              path: {{ .Values.clustering.ingestion.service.healthPath | default (printf "/health?health_access_key=%s" .Values.clustering.ingestion.env.APP__HEALTH_ACCESS_KEY) | quote }}
+              port: {{ .Values.clustering.ingestion.service.targetPort | default .Values.clustering.ingestion.service.port }}
+            failureThreshold: {{ .Values.clustering.ingestion.startupProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.clustering.ingestion.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.clustering.ingestion.startupProbe.periodSeconds }}
+            successThreshold: {{ .Values.clustering.ingestion.startupProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.clustering.ingestion.startupProbe.timeoutSeconds }}
+            {{- end }}
+          {{- end }}
+          envFrom:
+            {{- if .Values.clustering.ingestion.envFromFiles }}
+            {{- tpl (toYaml .Values.clustering.ingestion.envFromFiles) . | nindent 12 }}
+            {{- end }}
+          env:
+            # Variables from secrets have precedence
+            {{- $envList := dict -}}
+            {{- if .Values.clustering.ingestion.envFromSecrets }}
+            {{- range $key, $value := .Values.clustering.ingestion.envFromSecrets }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Variables from configmap have precedence
+            {{- if .Values.clustering.ingestion.envFromConfigMap }}
+            {{- range $key, $value := .Values.clustering.ingestion.envFromConfigMap }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $value.name }}
+                  key: {{ $value.key | default $key }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            # Add variables in plain text if they were not already added from secrets
+            {{- if .Values.clustering.ingestion.env }}
+            {{- range $key, $value := .Values.clustering.ingestion.env }}
+            {{- if not (hasKey $envList $key) }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+            {{- $_ := set $envList $key true }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.clustering.ingestion.resources | nindent 12 }}
+          {{- with .Values.clustering.ingestion.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.clustering.ingestion.terminationGracePeriodSeconds }}
+      {{- with .Values.clustering.ingestion.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clustering.ingestion.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clustering.ingestion.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clustering.ingestion.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.clustering.ingestion.topologySpreadConstraints }}
+      {{- $_ := include "opencti.patchTopologySpreadConstraintsIngestion" $ }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

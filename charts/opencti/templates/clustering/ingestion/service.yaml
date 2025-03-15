@@ -1,0 +1,32 @@
+{{- if eq .Values.deploymentType "clustering" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opencti.fullname" . }}-server
+  labels:
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.clustering.ingestion.service.type }}
+  ports:
+    - port: {{ .Values.clustering.ingestion.service.port }}
+      targetPort: {{ .Values.clustering.ingestion.service.targetPort | default .Values.clustering.ingestion.service.port }}
+      protocol: TCP
+      name: http
+      {{- if and (eq "NodePort" .Values.clustering.ingestion.service.type) .Values.clustering.ingestion.service.nodePort }}
+      nodePort: {{ .Values.clustering.ingestion.service.nodePort }}
+      {{- end }}
+    {{- range $port := .Values.clustering.ingestion.service.extraPorts }}
+    - name: {{ $port.name }}
+      port: {{ $port.port }}
+      targetPort: {{ $port.targetPort }}
+      protocol: TCP
+    {{- end }}
+    {{- if .Values.clustering.ingestion.env.APP__TELEMETRY__METRICS__ENABLED }}
+    - name: metrics
+      port: {{ .Values.clustering.ingestion.env.APP__TELEMETRY__METRICS__EXPORTER_PROMETHEUS | default 14269 }}
+      targetPort: {{ .Values.clustering.ingestion.env.APP__TELEMETRY__METRICS__EXPORTER_PROMETHEUS | default 14269 }}
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "opencti.selectorIngestionLabels" . | nindent 4 }}
+{{- end }}
