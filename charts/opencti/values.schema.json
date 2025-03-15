@@ -97,12 +97,10 @@
           "default": "admin@opencti.io"
         },
         "APP__ADMIN__PASSWORD": {
-          "type": "string",
-          "minLength": 8
+          "type": "string"
         },
         "APP__ADMIN__TOKEN": {
-          "type": "string",
-          "minLength": 8
+          "type": "string"
         },
         "APP__BASE_PATH": {
           "type": "string",

@@ -85,20 +85,6 @@ helm uninstall opencti-test --namespace opencti-test
 kubectl delete namespace opencti-test
 ```
 
-## Common Issues and Troubleshooting
-
-1. **Resource Constraints**
-   - Ensure cluster has sufficient resources
-   - Check pod resource requests and limits
-
-2. **Storage Issues**
-   - Verify PVC creation
-   - Check storage class availability
-
-3. **Network Issues**
-   - Validate service connectivity
-   - Check ingress configuration if used
-
 ## Automated testing
 
 For CI/CD pipelines, you can use the following tools:
