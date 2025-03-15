@@ -152,10 +152,6 @@ spec:
             {{- tpl (toYaml .Values.envFromFiles) . | nindent 12 }}
             {{- end }}
           env:
-            - name: NODE_OPTIONS
-              value: --max-old-space-size=8096
-            - name: PROVIDERS__LOCAL__STRATEGY
-              value: LocalStrategy
             # Variables from secrets have precedence
             {{- $envList := dict -}}
             {{- if .Values.envFromSecrets }}

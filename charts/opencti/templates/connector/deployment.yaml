@@ -1,3 +1,13 @@
+{{- $appAdminToken := "" -}}
+{{- range .Values.secrets -}}
+  {{- if and (hasKey .data "APP__ADMIN__TOKEN") (not $appAdminToken) -}}
+    {{- $appAdminToken = index .data "APP__ADMIN__TOKEN" -}}
+  {{- end -}}
+{{- end -}}
+{{- if and (hasKey .Values.env "APP__ADMIN__TOKEN") (not $appAdminToken) -}}
+  {{- $appAdminToken = .Values.env.APP__ADMIN__TOKEN -}}
+{{- end -}}
+
 {{- $connectorsGlobal := .Values.connectorsGlobal }}
 {{- range .Values.connectors }}
 {{- $connectorName := .name }}
@@ -147,14 +157,9 @@ spec:
             {{- end }}
             {{- end }}
             # Special handling for OPENCTI_TOKEN which is constructed from other values
-            {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) (or ($.Values.secrets.APP__ADMIN__TOKEN) ($.Values.env.APP__ADMIN__TOKEN)) }}
-            {{- if $.Values.secrets.APP__ADMIN__TOKEN }}
+            {{- if and (not (hasKey $envList "OPENCTI_TOKEN")) $appAdminToken }}
             - name: OPENCTI_TOKEN
-              value: {{ $.Values.secrets.APP__ADMIN__TOKEN }}
-            {{- else if $.Values.env.APP__ADMIN__TOKEN }}
-            - name: OPENCTI_TOKEN
-              value: {{ $.Values.env.APP__ADMIN__TOKEN }}
-            {{- end }}
+              value: {{ $appAdminToken }}
             {{- end }}
             # Connectors global env from secrets
             {{- if $connectorsGlobal.envFromSecrets }}

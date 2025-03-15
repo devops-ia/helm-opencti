@@ -55,6 +55,8 @@ env:
   APP__BASE_PATH: "/"
   APP__GRAPHQL__PLAYGROUND__ENABLED: false
   APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: false
+  NODE_OPTIONS: "--max-old-space-size=8096"
+  PROVIDERS__LOCAL__STRATEGY: LocalStrategy
   # MINIO
   MINIO__ENDPOINT: release-name-minio:9000
   # ELASTICSEARCH
@@ -94,9 +96,14 @@ envFromFiles: []
   #     name: <name-configmap>
 
 # -- Secrets values to create credentials and reference by envFromSecrets
-# Generate Secret with following name: `<release-name>-credentials`
+# Generate Secret with following name: <release-name>-<name>
 # </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/
-secrets: {}
+secrets: []
+  # - name: secret-name
+  #   data:
+  #     my.key: |-
+  #       my-content
+  #     my_var: my-value
 
 # -- ConfigMap values to create configuration files
 # Generate ConfigMap with following name: <release-name>-<name>
@@ -593,6 +600,16 @@ worker:
     #     name: <name-secret>
     # - configMapRef:
     #     name: <name-configmap>
+
+  # -- Secrets values to create credentials and reference by envFromSecrets
+  # Generate Secret with following name: <release-name>-<name>
+  # </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/
+  secrets: []
+    # - name: secret-name
+    #   data:
+    #     my.key: |-
+    #       my-content
+    #     my_var: my-value
 
   # -- ConfigMap values to create configuration files
   # Generate ConfigMap with following name: <release-name>-<name>

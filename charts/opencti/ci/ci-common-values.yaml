@@ -47,8 +47,13 @@ autoscaling:
   enabled: true
 
 secrets:
-  APP__ADMIN__TOKEN: "b1976749-8a53-4f49-bf04-cafa2a3458c1"
-  RABBITMQ__PASSWORD: ChangeMe
+  - name: credentials
+    data:
+      APP__ADMIN__TOKEN: "b1976749-8a53-4f49-bf04-cafa2a3458c1"
+      RABBITMQ__PASSWORD: ChangeMe
+      OTHER_SECRET: |-
+        multiple
+        lines
 
 configMaps:
   - name: configmap-name-ci
@@ -59,9 +64,6 @@ configMaps:
 
 envFromSecrets:
   APP__ADMIN__TOKEN:
-    name: opencti-ci-credentials
-    key: APP__ADMIN__TOKEN
-  OPENCTI_TOKEN:
     name: opencti-ci-credentials
     key: APP__ADMIN__TOKEN
   RABBITMQ__PASSWORD:

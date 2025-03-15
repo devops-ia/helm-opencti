@@ -137,19 +137,20 @@ Move `opensearch.securityConfig.config.data.internal_users.yml` to `secrets` blo
 
 ```yaml
 secrets:
-  ELASTICSEARCH__USERNAME: admin
-  ELASTICSEARCH__PASSWORD: admin
-  - name: internal_users.yml
-    value: |-
-      _meta:
-        type: "internalusers"
-        config_version: 2
-      admin:
-        hash: "$2a$12$VcCDgh2NDk07JGN0rjGbM.Ad41qVR/YFJcgHp0UGns5JDymv..TOG"
-        reserved: true
-        backend_roles:
-        - "admin"
-        description: "Demo admin user"
+  - name: credentials
+    data:
+      ELASTICSEARCH__USERNAME: admin
+      ELASTICSEARCH__PASSWORD: admin
+      internal_users.yml: |-
+        _meta:
+          type: "internalusers"
+          config_version: 2
+        admin:
+          hash: "$2a$12$VcCDgh2NDk07JGN0rjGbM.Ad41qVR/YFJcgHp0UGns5JDymv..TOG"
+          reserved: true
+          backend_roles:
+          - "admin"
+          description: "Demo admin user"
 ```
 
 Configure `envFromSecrets` for server block:
@@ -200,8 +201,10 @@ Move `minio.auth.rootUser` and `minio.auth.rootPassword` to `secrets` block for 
 
 ```yaml
 secrets:
-  root-user: MySecretPassword
-  root-password: MySecretErlangCookie
+  - name: credentials
+    data:
+      root-user: MySecretPassword
+      root-password: MySecretErlangCookie
 ```
 
 Configure `envFromSecrets` for server block:
@@ -260,8 +263,10 @@ Move `rabbitmq.auth.password` and `rabbitmq.auth.erlangCookie` to `secrets` bloc
 
 ```yaml
 secrets:
-  rabbitmq-password: MySecretPassword
-  rabbitmq-erlang-cookie: MySecretErlangCookie
+  - name: credentials
+    data:
+      rabbitmq-password: MySecretPassword
+      rabbitmq-erlang-cookie: MySecretErlangCookie
 ```
 
 Configure `envFromSecrets` for server block:
