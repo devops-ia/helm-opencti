@@ -25,7 +25,7 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: elasticsearch.enabled
   - name: minio
-    version: 15.0.6
+    version: 15.0.7
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: minio.enabled
   - name: opensearch
@@ -37,6 +37,6 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: rabbitmq.enabled
   - name: redis
-    version: 20.11.2
+    version: 20.11.3
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: redis.enabled
