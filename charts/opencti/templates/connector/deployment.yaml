@@ -42,6 +42,9 @@ spec:
       labels:
         opencti.connector: {{ $connectorName }}
         {{- include "opencti.selectorLabels" $ | nindent 8 }}
+        {{- with .podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if .imagePullSecrets }}
       imagePullSecrets:
@@ -236,6 +239,12 @@ spec:
           {{- toYaml $constraint | nindent 10 }}
         {{- end }}
       {{- end }}
-
+      {{- with .dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
 {{- end }}
 {{- end }}
