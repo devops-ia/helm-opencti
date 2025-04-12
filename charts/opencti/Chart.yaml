@@ -1,6 +1,7 @@
 apiVersion: v2
 name: opencti
 description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
 type: application
 maintainers:
   - name: ialejandro
