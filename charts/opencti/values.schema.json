@@ -6,10 +6,12 @@
       "type": "object",
       "properties": {
         "imageRegistry": {
-          "type": "string"
+          "type": "string",
+          "description": "Specifies the registry to pull images from"
         },
         "imagePullSecrets": {
           "type": "array",
+          "description": "Specifies the secrets to use for pulling images from private registries",
           "items": {
             "type": "object",
             "properties": {
@@ -25,34 +27,41 @@
     "replicaCount": {
       "type": "integer",
       "minimum": 1,
-      "default": 1
+      "default": 1,
+      "description": "Number of replicas for the service"
     },
     "image": {
       "type": "object",
       "properties": {
         "repository": {
           "type": "string",
-          "default": "opencti/platform"
+          "default": "opencti/platform",
+          "description": "Repository of the image"
         },
         "pullPolicy": {
           "type": "string",
           "enum": ["Always", "IfNotPresent", "Never"],
-          "default": "IfNotPresent"
+          "default": "IfNotPresent",
+          "description": "Pull policy for the image"
         },
         "tag": {
-          "type": "string"
+          "type": "string",
+          "description": "Overrides the image tag whose default is the chart appVersion"
         }
       },
       "required": ["repository"]
     },
     "nameOverride": {
-      "type": "string"
+      "type": "string",
+      "description": "String to partially override opencti.fullname template"
     },
     "fullnameOverride": {
-      "type": "string"
+      "type": "string",
+      "description": "String to fully override opencti.fullname template"
     },
     "imagePullSecrets": {
       "type": "array",
+      "description": "Global Docker registry secret names as an array",
       "items": {
         "type": "object",
         "properties": {
@@ -64,110 +73,148 @@
     },
     "serviceAccount": {
       "type": "object",
+      "description": "Service account configuration",
       "properties": {
         "create": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "description": "Specifies whether a service account should be created"
         },
         "annotations": {
           "type": "object",
+          "description": "Annotations to add to the service account",
           "additionalProperties": {
             "type": "string"
           }
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Name of the service account to use"
         },
         "automountServiceAccountToken": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "description": "Specifies if you don't want the kubelet to automatically mount a ServiceAccount API credentials"
         }
       }
     },
     "testConnection": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "Enable or disable test connection"
     },
     "env": {
       "type": "object",
+      "description": "Environment variables to configure application",
       "properties": {
         "APP__ADMIN__EMAIL": {
           "type": "string",
           "format": "email",
-          "default": "admin@opencti.io"
+          "default": "admin@opencti.io",
+          "description": "Admin email address"
         },
         "APP__ADMIN__PASSWORD": {
-          "type": "string"
+          "type": "string",
+          "description": "Admin password"
         },
         "APP__ADMIN__TOKEN": {
-          "type": "string"
+          "type": "string",
+          "description": "Admin token"
         },
         "APP__BASE_PATH": {
           "type": "string",
-          "default": "/"
+          "default": "/",
+          "description": "Base path for the application"
         },
         "APP__GRAPHQL__PLAYGROUND__ENABLED": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "description": "Enable GraphQL playground"
         },
         "APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "description": "Force disable introspection in GraphQL playground"
+        },
+        "NODE_OPTIONS": {
+          "type": "string",
+          "default": "--max-old-space-size=8096",
+          "description": "Node.js options"
+        },
+        "PROVIDERS__LOCAL__STRATEGY": {
+          "type": "string",
+          "default": "LocalStrategy",
+          "description": "Authentication strategy"
         },
         "MINIO__ENDPOINT": {
-          "type": "string"
+          "type": "string",
+          "description": "MinIO endpoint"
         },
         "ELASTICSEARCH__URL": {
-          "type": "string"
+          "type": "string",
+          "description": "Elasticsearch URL"
         },
         "RABBITMQ__HOSTNAME": {
-          "type": "string"
+          "type": "string",
+          "description": "RabbitMQ hostname"
         },
         "RABBITMQ__PORT_MANAGEMENT": {
           "type": "integer",
-          "default": 15672
+          "default": 15672,
+          "description": "RabbitMQ management port"
         },
         "RABBITMQ__PORT": {
           "type": "integer",
-          "default": 5672
+          "default": 5672,
+          "description": "RabbitMQ port"
         },
         "RABBITMQ__USERNAME": {
-          "type": "string"
+          "type": "string",
+          "description": "RabbitMQ username"
         },
         "RABBITMQ__PASSWORD": {
-          "type": "string"
+          "type": "string",
+          "description": "RabbitMQ password"
         },
         "REDIS__HOSTNAME": {
-          "type": "string"
+          "type": "string",
+          "description": "Redis hostname"
         },
         "REDIS__PORT": {
           "type": "integer",
-          "default": 6379
+          "default": 6379,
+          "description": "Redis port"
         },
         "REDIS__MODE": {
           "type": "string",
           "enum": ["single", "cluster"],
-          "default": "single"
+          "default": "single",
+          "description": "Redis mode"
         },
         "APP__TELEMETRY__METRICS__ENABLED": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "description": "Enable telemetry metrics"
         },
         "APP__HEALTH_ACCESS_KEY": {
-          "type": "string"
+          "type": "string",
+          "description": "Health check access key"
         }
       }
     },
     "envFromConfigMap": {
       "type": "object",
+      "description": "Variables from configMap",
       "additionalProperties": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "ConfigMap name"
           },
           "key": {
-            "type": "string"
+            "type": "string",
+            "description": "ConfigMap key"
           }
         },
         "required": ["name", "key"]
@@ -175,64 +222,203 @@
     },
     "envFromSecrets": {
       "type": "object",
+      "description": "Variables from secrets",
       "additionalProperties": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Secret name"
           },
           "key": {
-            "type": "string"
+            "type": "string",
+            "description": "Secret key"
           }
         },
         "required": ["name", "key"]
       }
     },
+    "envFromFiles": {
+      "type": "array",
+      "description": "Load all variables from files",
+      "items": {
+        "type": "object",
+        "properties": {
+          "secretRef": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Secret name"
+              }
+            }
+          },
+          "configMapRef": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "ConfigMap name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "secrets": {
+      "type": "array",
+      "description": "Secrets values to create credentials and reference by envFromSecrets",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Secret name"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "configMaps": {
+      "type": "array",
+      "description": "ConfigMap values to create configuration files",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "ConfigMap name"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "initContainers": {
+      "type": "array",
+      "description": "Configure additional containers",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Container name"
+          },
+          "image": {
+            "type": "string",
+            "description": "Container image"
+          },
+          "command": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "args": {
+      "type": "array",
+      "description": "Configure args",
+      "items": {
+        "type": "string"
+      }
+    },
+    "command": {
+      "type": "array",
+      "description": "Configure command",
+      "items": {
+        "type": "string"
+      }
+    },
     "service": {
       "type": "object",
+      "description": "Kubernetes service to expose Pod",
       "properties": {
         "type": {
           "type": "string",
           "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
-          "default": "ClusterIP"
+          "default": "ClusterIP",
+          "description": "Kubernetes Service type"
         },
         "port": {
           "type": "integer",
           "minimum": 1,
           "maximum": 65535,
-          "default": 80
+          "default": 80,
+          "description": "Kubernetes Service port"
+        },
+        "nodePort": {
+          "type": "integer",
+          "minimum": 30000,
+          "maximum": 32767,
+          "description": "NodePort port (only when type is NodePort)"
         },
         "targetPort": {
           "type": "integer",
           "minimum": 1,
           "maximum": 65535,
-          "default": 4000
+          "default": 4000,
+          "description": "Pod expose port"
+        },
+        "extraPorts": {
+          "type": "array",
+          "description": "Pod extra ports",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "port": {
+                "type": "integer"
+              },
+              "targetPort": {
+                "type": "integer"
+              }
+            }
+          }
         }
       }
     },
     "ingress": {
       "type": "object",
+      "description": "Ingress configuration to expose app",
       "properties": {
         "enabled": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "description": "Enable or disable ingress"
         },
         "className": {
-          "type": "string"
+          "type": "string",
+          "description": "Ingress class name"
         },
         "annotations": {
           "type": "object",
+          "description": "Ingress annotations",
           "additionalProperties": {
             "type": "string"
           }
         },
         "hosts": {
           "type": "array",
+          "description": "Ingress hosts configuration",
           "items": {
             "type": "object",
             "properties": {
               "host": {
-                "type": "string"
+                "type": "string",
+                "description": "Hostname"
               },
               "paths": {
                 "type": "array",
@@ -240,11 +426,13 @@
                   "type": "object",
                   "properties": {
                     "path": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Path"
                     },
                     "pathType": {
                       "type": "string",
-                      "enum": ["Exact", "Prefix", "ImplementationSpecific"]
+                      "enum": ["Exact", "Prefix", "ImplementationSpecific"],
+                      "description": "Path type"
                     }
                   },
                   "required": ["path", "pathType"]
@@ -256,11 +444,13 @@
         },
         "tls": {
           "type": "array",
+          "description": "TLS configuration",
           "items": {
             "type": "object",
             "properties": {
               "secretName": {
-                "type": "string"
+                "type": "string",
+                "description": "TLS secret name"
               },
               "hosts": {
                 "type": "array",
@@ -276,17 +466,20 @@
     },
     "resources": {
       "type": "object",
+      "description": "The resources limits and requested",
       "properties": {
         "limits": {
           "type": "object",
           "properties": {
             "cpu": {
               "type": "string",
-              "pattern": "^[0-9]+m?$|^[0-9]+\\.[0-9]*$"
+              "pattern": "^[0-9]+m?$|^[0-9]+\\.[0-9]*$",
+              "description": "CPU limit"
             },
             "memory": {
               "type": "string",
-              "pattern": "^[0-9]+(Ki|Mi|Gi|Ti|Pi|Ei|[kMGTPE]i?)?$"
+              "pattern": "^[0-9]+(Ki|Mi|Gi|Ti|Pi|Ei|[kMGTPE]i?)?$",
+              "description": "Memory limit"
             }
           }
         },
@@ -295,13 +488,70 @@
           "properties": {
             "cpu": {
               "type": "string",
-              "pattern": "^[0-9]+m?$|^[0-9]+\\.[0-9]*$"
+              "pattern": "^[0-9]+m?$|^[0-9]+\\.[0-9]*$",
+              "description": "CPU request"
             },
             "memory": {
               "type": "string",
-              "pattern": "^[0-9]+(Ki|Mi|Gi|Ti|Pi|Ei|[kMGTPE]i?)?$"
+              "pattern": "^[0-9]+(Ki|Mi|Gi|Ti|Pi|Ei|[kMGTPE]i?)?$",
+              "description": "Memory request"
             }
           }
+        }
+      }
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "description": "Pod Disruption Budget",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable PDB"
+        },
+        "maxUnavailable": {
+          "type": ["integer", "string"],
+          "description": "Maximum number/percentage of unavailable pods"
+        },
+        "minAvailable": {
+          "type": ["integer", "string"],
+          "description": "Minimum number/percentage of available pods"
+        }
+      }
+    },
+    "autoscaling": {
+      "type": "object",
+      "description": "Autoscaling with CPU or memory utilization percentage",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable autoscaling"
+        },
+        "minReplicas": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Minimum number of replicas"
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100,
+          "description": "Maximum number of replicas"
+        },
+        "targetCPUUtilizationPercentage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 80,
+          "description": "Target CPU utilization percentage"
+        },
+        "targetMemoryUtilizationPercentage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Target memory utilization percentage"
         }
       }
     },
@@ -495,6 +745,950 @@
                 "enabled": {
                   "type": "boolean",
                   "default": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "networkPolicy": {
+      "type": "object",
+      "description": "NetworkPolicy configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable NetworkPolicy"
+        },
+        "policyTypes": {
+          "type": "array",
+          "description": "Policy types",
+          "items": {
+            "type": "string",
+            "enum": ["Ingress", "Egress"]
+          }
+        },
+        "ingress": {
+          "type": "array",
+          "description": "Ingress rules",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ipBlock": {
+                      "type": "object",
+                      "properties": {
+                        "cidr": {
+                          "type": "string"
+                        },
+                        "except": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "namespaceSelector": {
+                      "type": "object",
+                      "properties": {
+                        "matchLabels": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "podSelector": {
+                      "type": "object",
+                      "properties": {
+                        "matchLabels": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ports": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": {
+                      "type": "string",
+                      "enum": ["TCP", "UDP"]
+                    },
+                    "port": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "egress": {
+          "type": "array",
+          "description": "Egress rules",
+          "items": {
+            "type": "object",
+            "properties": {
+              "to": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ipBlock": {
+                      "type": "object",
+                      "properties": {
+                        "cidr": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ports": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": {
+                      "type": "string",
+                      "enum": ["TCP", "UDP"]
+                    },
+                    "port": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "serviceMonitor": {
+      "type": "object",
+      "description": "Enable ServiceMonitor to get metrics",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable"
+        },
+        "interval": {
+          "type": "string",
+          "default": "30s",
+          "description": "Scrape interval"
+        },
+        "scrapeTimeout": {
+          "type": "string",
+          "default": "10s",
+          "description": "Scrape timeout"
+        },
+        "metricRelabelings": {
+          "type": "array",
+          "description": "Metric relabeling configurations",
+          "items": {
+            "type": "object"
+          }
+        },
+        "relabelings": {
+          "type": "array",
+          "description": "Relabeling configurations",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "description": "Configure lifecycle hooks",
+      "properties": {
+        "preStop": {
+          "type": "object",
+          "properties": {
+            "exec": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "terminationGracePeriodSeconds": {
+      "type": "integer",
+      "default": 30,
+      "description": "Configure Pod termination grace period"
+    },
+    "livenessProbe": {
+      "type": "object",
+      "description": "Configure liveness checker",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable liveness probe"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "default": 3,
+          "description": "Failure threshold"
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "default": 180,
+          "description": "Initial delay seconds"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "default": 10,
+          "description": "Period seconds"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "default": 1,
+          "description": "Success threshold"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 5,
+          "description": "Timeout seconds"
+        }
+      }
+    },
+    "livenessProbeCustom": {
+      "type": "object",
+      "description": "Custom livenessProbe configuration",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "port": {
+              "type": "integer"
+            }
+          }
+        },
+        "failureThreshold": {
+          "type": "integer"
+        },
+        "initialDelaySeconds": {
+          "type": "integer"
+        },
+        "periodSeconds": {
+          "type": "integer"
+        },
+        "successThreshold": {
+          "type": "integer"
+        },
+        "timeoutSeconds": {
+          "type": "integer"
+        }
+      }
+    },
+    "readinessProbe": {
+      "type": "object",
+      "description": "Configure readinessProbe checker",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable readiness probe"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "default": 3,
+          "description": "Failure threshold"
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "default": 10,
+          "description": "Initial delay seconds"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "default": 10,
+          "description": "Period seconds"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "default": 1,
+          "description": "Success threshold"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 1,
+          "description": "Timeout seconds"
+        }
+      }
+    },
+    "readinessProbeCustom": {
+      "type": "object",
+      "description": "Custom readinessProbe configuration",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "port": {
+              "type": "integer"
+            }
+          }
+        },
+        "failureThreshold": {
+          "type": "integer"
+        },
+        "initialDelaySeconds": {
+          "type": "integer"
+        },
+        "periodSeconds": {
+          "type": "integer"
+        },
+        "successThreshold": {
+          "type": "integer"
+        },
+        "timeoutSeconds": {
+          "type": "integer"
+        }
+      }
+    },
+    "startupProbe": {
+      "type": "object",
+      "description": "Configure startupProbe checker",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable startup probe"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "default": 30,
+          "description": "Failure threshold"
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "default": 180,
+          "description": "Initial delay seconds"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "default": 10,
+          "description": "Period seconds"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "default": 1,
+          "description": "Success threshold"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 5,
+          "description": "Timeout seconds"
+        }
+      }
+    },
+    "startupProbeCustom": {
+      "type": "object",
+      "description": "Custom startupProbe configuration",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "port": {
+              "type": "integer"
+            }
+          }
+        },
+        "failureThreshold": {
+          "type": "integer"
+        },
+        "initialDelaySeconds": {
+          "type": "integer"
+        },
+        "periodSeconds": {
+          "type": "integer"
+        },
+        "successThreshold": {
+          "type": "integer"
+        },
+        "timeoutSeconds": {
+          "type": "integer"
+        }
+      }
+    },
+    "readyChecker": {
+      "type": "object",
+      "description": "Enable or disable ready-checker",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable ready-checker"
+        },
+        "repository": {
+          "type": "string",
+          "default": "busybox",
+          "description": "Repository of the image"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "default": "IfNotPresent",
+          "description": "Pull policy for the image"
+        },
+        "tag": {
+          "type": "string",
+          "default": "latest",
+          "description": "Overrides the image tag"
+        },
+        "retries": {
+          "type": "integer",
+          "default": 30,
+          "description": "Number of retries before giving up"
+        },
+        "timeout": {
+          "type": "integer",
+          "default": 5,
+          "description": "Timeout for each check"
+        },
+        "services": {
+          "type": "array",
+          "description": "List services",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Service name"
+              },
+              "port": {
+                "type": "integer",
+                "description": "Service port"
+              },
+              "address": {
+                "type": "string",
+                "description": "Service address (optional)"
+              }
+            },
+            "required": ["name", "port"]
+          }
+        }
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "description": "Configure annotations on Pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podLabels": {
+      "type": "object",
+      "description": "Configure labels on Pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Defines privilege and access control settings for a Pod",
+      "properties": {
+        "fsGroup": {
+          "type": "integer",
+          "description": "A special supplemental group that applies to all containers in a pod"
+        }
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Defines privilege and access control settings for a Container",
+      "properties": {
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "drop": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "description": "Whether this container has a read-only root filesystem"
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Indicates that the container must run as a non-root user"
+        },
+        "runAsUser": {
+          "type": "integer",
+          "description": "The UID to run the entrypoint of the container process"
+        }
+      }
+    },
+    "volumes": {
+      "type": "array",
+      "description": "Additional volumes on the output Deployment definition",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Volume name"
+          },
+          "secret": {
+            "type": "object",
+            "properties": {
+              "secretName": {
+                "type": "string",
+                "description": "Secret name"
+              },
+              "optional": {
+                "type": "boolean",
+                "description": "Whether the Secret must be defined"
+              }
+            }
+          }
+        }
+      }
+    },
+    "volumeMounts": {
+      "type": "array",
+      "description": "Additional volumeMounts on the output Deployment definition",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Volume name"
+          },
+          "mountPath": {
+            "type": "string",
+            "description": "Path where the volume should be mounted"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "Whether the volume should be mounted read-only"
+          }
+        }
+      }
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node labels for pod assignment",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Tolerations for pod assignment",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": ["Equal", "Exists"]
+          },
+          "value": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string",
+            "enum": ["NoSchedule", "PreferNoSchedule", "NoExecute"]
+          }
+        }
+      }
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Affinity for pod assignment"
+    },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "description": "Control how Pods are spread across your cluster",
+      "items": {
+        "type": "object",
+        "properties": {
+          "maxSkew": {
+            "type": "integer",
+            "description": "Maximum difference between the number of matching pods"
+          },
+          "topologyKey": {
+            "type": "string",
+            "description": "The key of node labels"
+          },
+          "whenUnsatisfiable": {
+            "type": "string",
+            "enum": ["DoNotSchedule", "ScheduleAnyway"],
+            "description": "How to deal with a Pod if it doesn't satisfy the spread constraint"
+          }
+        }
+      }
+    },
+    "dnsConfig": {
+      "type": "object",
+      "description": "Configure DNS",
+      "properties": {
+        "nameservers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "searches": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "dnsPolicy": {
+      "type": "string",
+      "enum": ["ClusterFirst", "Default", "ClusterFirstWithHostNet", "None"],
+      "default": "ClusterFirst",
+      "description": "Configure DNS policy"
+    },
+    "opensearch": {
+      "type": "object",
+      "description": "OpenSearch subchart deployment",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable OpenSearch subchart"
+        },
+        "opensearchJavaOpts": {
+          "type": "string",
+          "default": "-Xmx512M -Xms512M",
+          "description": "OpenSearch Java options"
+        },
+        "singleNode": {
+          "type": "boolean",
+          "default": true,
+          "description": "If discovery.type is set to single-node"
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable persistence using Persistent Volume Claims"
+            }
+          }
+        }
+      }
+    },
+    "elasticsearch": {
+      "type": "object",
+      "description": "ElasticSearch subchart deployment",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable ElasticSearch subchart"
+        },
+        "sysctlImage": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable kernel settings modifier image"
+            }
+          }
+        },
+        "clusterName": {
+          "type": "string",
+          "default": "elastic",
+          "description": "Elasticsearch cluster name"
+        },
+        "extraEnvVars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "master": {
+          "type": "object",
+          "properties": {
+            "masterOnly": {
+              "type": "boolean",
+              "default": true,
+              "description": "Deploy master-eligible nodes as master-only nodes"
+            },
+            "replicaCount": {
+              "type": "integer",
+              "default": 1,
+              "description": "Number of master-eligible replicas"
+            },
+            "persistence": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Enable persistence using PVC"
+                }
+              }
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer",
+              "default": 1,
+              "description": "Number of data-only replicas"
+            },
+            "persistence": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Enable persistence using PVC"
+                }
+              }
+            }
+          }
+        },
+        "ingest": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable ingest nodes"
+            }
+          }
+        },
+        "coordinating": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer",
+              "default": 0,
+              "description": "Number of coordinating-only replicas"
+            }
+          }
+        }
+      }
+    },
+    "minio": {
+      "type": "object",
+      "description": "MinIO subchart deployment",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable MinIO subchart"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["standalone", "distributed"],
+          "default": "standalone",
+          "description": "MinIO server mode"
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "rootUser": {
+              "type": "string",
+              "description": "MinIO root username"
+            },
+            "rootPassword": {
+              "type": "string",
+              "description": "Password for MinIO root user"
+            }
+          }
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable MinIO data persistence using PVC"
+            }
+          }
+        }
+      }
+    },
+    "rabbitmq": {
+      "type": "object",
+      "description": "RabbitMQ subchart deployment",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable RabbitMQ subchart"
+        },
+        "replicaCount": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of RabbitMQ replicas"
+        },
+        "clustering": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable RabbitMQ clustering"
+            }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "default": "user",
+              "description": "RabbitMQ application username"
+            },
+            "password": {
+              "type": "string",
+              "description": "RabbitMQ application password"
+            },
+            "erlangCookie": {
+              "type": "string",
+              "description": "Erlang cookie for RabbitMQ clustering"
+            }
+          }
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable RabbitMQ data persistence using PVC"
+            }
+          }
+        }
+      }
+    },
+    "redis": {
+      "type": "object",
+      "description": "Redis subchart deployment",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable Redis subchart"
+        },
+        "architecture": {
+          "type": "string",
+          "enum": ["standalone", "replication"],
+          "default": "standalone",
+          "description": "Redis architecture"
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable password authentication"
+            }
+          }
+        },
+        "master": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "Number of Redis master instances"
+            },
+            "persistence": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Enable persistence on Redis master nodes using PVC"
+                }
+              }
+            }
+          }
+        },
+        "replica": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer",
+              "default": 1,
+              "description": "Number of Redis replicas"
+            },
+            "persistence": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Enable persistence on Redis replica nodes using PVC"
                 }
               }
             }

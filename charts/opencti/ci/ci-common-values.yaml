@@ -80,6 +80,13 @@ topologySpreadConstraints:
     topologyKey: kubernetes.io/os
     whenUnsatisfiable: DoNotSchedule
 
+dnsConfig:
+  nameservers:
+    - 1.1.1.1
+  searches: []
+
+dnsPolicy: ClusterFirst
+
 worker:
   enabled: true
 
@@ -129,6 +136,13 @@ worker:
       topologyKey: kubernetes.io/os
       whenUnsatisfiable: DoNotSchedule
 
+  dnsConfig:
+    nameservers:
+      - 1.1.1.1
+    searches: []
+
+  dnsPolicy: ClusterFirst
+
 connectorsGlobal:
   env:
     MY_VARIABLE_ENV: my_value
@@ -164,6 +178,8 @@ connectors:
     ci: "true"
   podAnnotations:
     ci: "true"
+  podLabels:
+    ci: "true"
   env:
     CONNECTOR_ID: 399e6354-cc2c-4fe1-bb85-145a5bb043a9
     CONNECTOR_NAME: "OpenCTI"
@@ -180,6 +196,11 @@ connectors:
     - maxSkew: 1
       topologyKey: kubernetes.io/os
       whenUnsatisfiable: DoNotSchedule
+  dnsConfig:
+    nameservers:
+      - 1.1.1.1
+    searches: []
+  dnsPolicy: ClusterFirst
 
 elasticsearch:
   fullnameOverride: opencti-ci-elasticsearch

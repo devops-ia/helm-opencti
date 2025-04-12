@@ -359,7 +359,7 @@ resources: {}
 podDisruptionBudget:
   enabled: false
   maxUnavailable: 1
-  minAvailable:
+  # minAvailable:
 
 # -- Autoscaling with CPU or memory utilization percentage
 # </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -401,6 +401,27 @@ topologySpreadConstraints: []
   # - maxSkew: 1
   #   topologyKey: zone
   #   whenUnsatisfiable: DoNotSchedule
+
+# -- Configure DNS
+# </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+dnsConfig: {}
+  # nameservers:
+  #   - 1.2.3.4
+  #   - 5.6.7.8
+  # searches:
+  #   - ns1.svc.cluster.local
+  #   - my.dns.search.suffix
+  # option:
+  #   - name: ndots
+  #     value: "2"
+  #   - name: edns0
+  #   - name: timeout
+  #     value: "3"
+
+# -- Configure DNS policy
+# Options: ClusterFirst, Default, ClusterFirstWithHostNet, None
+# </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+dnsPolicy: ClusterFirst
 
 # -- Connectors global configuration
 connectorsGlobal:
@@ -459,6 +480,8 @@ connectors: []
 #   deploymentAnnotations: {}
 #   # -- Pod annotations
 #   podAnnotations: {}
+#   # -- Configure labels on Pods
+#   podLabels: {}
 #   # -- Enable or disable ready-checker waiting server is ready
 #   readyChecker: {}
 #     # enabled: true
@@ -528,6 +551,23 @@ connectors: []
 #     # - maxSkew: 1
 #     #   topologyKey: zone
 #     #   whenUnsatisfiable: DoNotSchedule
+#   # -- Configure DNS
+#   dnsConfig: {}
+#     # nameservers:
+#     #   - 1.2.3.4
+#     #   - 5.6.7.8
+#     # searches:
+#     #   - ns1.svc.cluster.local
+#     #   - my.dns.search.suffix
+#     # option:
+#     #   - name: ndots
+#     #     value: "2"
+#     #   - name: edns0
+#     #   - name: timeout
+#     #     value: "3"
+#   # -- Configure DNS policy
+#   # Options: ClusterFirst, Default, ClusterFirstWithHostNet, None
+#   dnsPolicy: ClusterFirst
 
 # -- OpenCTI worker deployment configuration
 # </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers
@@ -552,6 +592,12 @@ worker:
     retries: 30
     # -- Timeout for each check
     timeout: 5
+
+  # -- Configure annotations on Pods
+  podAnnotations: {}
+
+  # -- Configure labels on Pods
+  podLabels: {}
 
   # -- Configure lifecycle hooks
   # </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
@@ -697,7 +743,7 @@ worker:
   podDisruptionBudget:
     enabled: false
     maxUnavailable: 1
-    minAvailable:
+    # minAvailable:
 
   # -- Autoscaling with CPU or memory utilization percentage
   # </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -739,6 +785,27 @@ worker:
     # - maxSkew: 1
     #   topologyKey: zone
     #   whenUnsatisfiable: DoNotSchedule
+
+  # -- Configure DNS
+  # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  dnsConfig: {}
+    # nameservers:
+    #   - 1.2.3.4
+    #   - 5.6.7.8
+    # searches:
+    #   - ns1.svc.cluster.local
+    #   - my.dns.search.suffix
+    # option:
+    #   - name: ndots
+    #     value: "2"
+    #   - name: edns0
+    #   - name: timeout
+    #     value: "3"
+
+  # -- Configure DNS policy
+  # Options: ClusterFirst, Default, ClusterFirstWithHostNet, None
+  # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  dnsPolicy: ClusterFirst
 
 # -- OpenSearch subchart deployment
 # </br> Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml
