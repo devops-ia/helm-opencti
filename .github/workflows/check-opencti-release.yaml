@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '0 0 * * *' # every day
 
+permissions:
+  contents: write
+
 jobs:
   check-and-update-opencti:
     runs-on: ubuntu-latest
