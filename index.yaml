@@ -3,6 +3,53 @@ entries:
   opencti:
   - apiVersion: v2
     appVersion: 6.6.13
+    created: "2025-05-26T16:55:14.716208481Z"
+    dependencies:
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 22.0.4
+    - condition: minio.enabled
+      name: minio
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.10
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 2.34.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.3
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 20.13.4
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 9b87b176ea23b0851aedc4ab72a006d46807bfcfb896978d5a66e5bc945643ea
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v1.10.15/opencti-1.10.15.tgz
+    version: 1.10.15
+  - apiVersion: v2
+    appVersion: 6.6.13
     created: "2025-05-24T10:45:05.28781218Z"
     dependencies:
     - condition: elasticsearch.enabled
@@ -5301,4 +5348,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-05-24T10:45:05.288180416Z"
+generated: "2025-05-26T16:55:14.716672031Z"
