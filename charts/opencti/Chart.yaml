@@ -30,14 +30,14 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: minio.enabled
   - name: opensearch
-    version: 2.34.0
+    version: 3.0.0
     repository: https://opensearch-project.github.io/helm-charts/
     condition: opensearch.enabled
   - name: rabbitmq
-    version: 16.0.3
+    version: 16.0.4
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: rabbitmq.enabled
   - name: redis
-    version: 20.13.4
+    version: 21.1.11
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: redis.enabled
