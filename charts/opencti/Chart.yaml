@@ -1,6 +1,6 @@
 apiVersion: v2
 name: opencti
-description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+description: A Helm chart to deploy Open Cyber Threat Intelligence platform (Fixed worker service configuration)
 icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
 type: application
 maintainers:
@@ -10,7 +10,7 @@ maintainers:
 sources:
   - https://github.com/devops-ia/helm-opencti
   - https://github.com/OpenCTI-Platform/opencti
-version: 1.0.0
+version: 1.0.1
 appVersion: 6.6.15
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:
