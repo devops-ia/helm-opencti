@@ -580,12 +580,7 @@ worker:
 
   # -- Worker service configuration
   # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
-  service:
-    # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP
-    # type: ClusterIP  # Commented out to allow fallback to global service.type
-    # -- Kubernetes Service port
-    port: 14269
-
+  service: {}
   # -- Enable or disable ready-checker waiting server is ready
   readyChecker:
     # -- Enable or disable ready-checker
