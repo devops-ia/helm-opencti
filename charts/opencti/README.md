@@ -205,8 +205,8 @@ helm show values opencti/opencti
 | worker.secrets | list | `[]` | Secrets values to create credentials and reference by envFromSecrets Generate Secret with following name: <release-name>-<name> </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/ |
 | worker.securityContext | object | `{}` | Defines privilege and access control settings for a Container </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | worker.service | object | `{"clusterIP":"None","type":"ClusterIP"}` | Kubernetes service to expose Pod </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/ |
-| worker.service.clusterIP | string | `"None"` | Kubernetes Service port (only when type is ClusterIP) |
-| worker.service.type | string | `"ClusterIP"` | Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP |
+| worker.service.clusterIP | string | `"None"` | Kubernetes Service clusterIP |
+| worker.service.type | string | `"ClusterIP"` | Kubernetes Service type. Allowed values: ClusterIP |
 | worker.serviceMonitor | object | `{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"}` | Enable ServiceMonitor to get metrics </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor |
 | worker.serviceMonitor.enabled | bool | `false` | Enable or disable |
 | worker.strategy | object | `{}` | Configure strategy for the deployment |

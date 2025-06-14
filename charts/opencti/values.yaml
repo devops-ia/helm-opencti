@@ -733,9 +733,9 @@ worker:
   # -- Kubernetes service to expose Pod
   # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
   service:
-    # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP
+    # -- Kubernetes Service type. Allowed values: ClusterIP
     type: ClusterIP
-    # -- Kubernetes Service port (only when type is ClusterIP)
+    # -- Kubernetes Service clusterIP
     clusterIP: None
 
   # -- NetworkPolicy configuration
