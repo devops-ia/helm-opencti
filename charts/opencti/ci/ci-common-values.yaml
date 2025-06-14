@@ -1,6 +1,9 @@
 replicaCount: 1
 fullnameOverride: opencti-ci
 
+strategy:
+  type: Recreate
+
 env:
   APP__ADMIN__EMAIL: admin@opencti.io
   APP__ADMIN__PASSWORD: test
@@ -105,6 +108,9 @@ worker:
       image: busybox
       command: ['sh', '-c', 'echo "Hello, World!"']
 
+  strategy:
+    type: Recreate
+
   env:
     MY_VARIABLE_WORKER_ENV: my_value
 
@@ -201,6 +207,8 @@ connectors:
       - 1.1.1.1
     searches: []
   dnsPolicy: ClusterFirst
+  strategy:
+    type: Recreate
 
 elasticsearch:
   fullnameOverride: opencti-ci-elasticsearch
