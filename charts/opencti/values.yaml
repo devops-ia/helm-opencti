@@ -9,6 +9,12 @@ global:
   #   - name: myRegistryKeySecretName
   imagePullSecrets: []
 
+# -- String to fully override opencti.fullname template
+fullnameOverride: ""
+
+# -- String to partially override opencti.fullname template (will maintain the release name)
+nameOverride: ""
+
 # -- Number of replicas for the service
 replicaCount: 1
 
@@ -21,14 +27,18 @@ image:
   # -- Overrides the image tag whose default is the chart appVersion
   tag: ""
 
-# -- String to partially override opencti.fullname template (will maintain the release name)
-nameOverride: ""
-
-# -- String to fully override opencti.fullname template
-fullnameOverride: ""
-
-# -- Global Docker registry secret names as an array
+# -- Specifies the secrets to use for pulling images from private registries
+# Leave empty if no secrets are required
+# E.g.
+# imagePullSecrets:
+#   - name: myRegistryKeySecretName
 imagePullSecrets: []
+
+# -- Configure strategy for the deployment
+strategy: {}
+  # type: RollingUpdate
+  # rollingUpdate:
+  #   maxUnavailable: 1
 
 # -- Enable creation of ServiceAccount
 serviceAccount:
@@ -311,7 +321,6 @@ podLabels: {}
 # -- Defines privilege and access control settings for a Pod
 # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-
 podSecurityContext: {}
   # fsGroup: 2000
 
@@ -568,6 +577,11 @@ connectors: []
 #   # -- Configure DNS policy
 #   # Options: ClusterFirst, Default, ClusterFirstWithHostNet, None
 #   dnsPolicy: ClusterFirst
+#   # -- Configure strategy for the deployment
+#   strategy: {}
+#     # type: RollingUpdate
+#     # rollingUpdate:
+#     #   maxUnavailable: 1
 
 # -- OpenCTI worker deployment configuration
 # </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers
@@ -577,6 +591,28 @@ worker:
 
   # -- Number of replicas for the service
   replicaCount: 1
+
+  # -- Image registry configuration for the base service
+  image:
+    # -- Repository of the image
+    repository: opencti/worker
+    # -- Pull policy for the image
+    pullPolicy: IfNotPresent
+    # -- Overrides the image tag whose default is the chart appVersion
+    tag: ""
+
+  # -- Specifies the secrets to use for pulling images from private registries
+  # Leave empty if no secrets are required
+  # E.g.
+  # imagePullSecrets:
+  #   - name: myRegistryKeySecretName
+  imagePullSecrets: []
+
+  # -- Configure strategy for the deployment
+  strategy: {}
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxUnavailable: 1
 
   # -- Enable or disable ready-checker waiting server is ready
   readyChecker:
@@ -599,6 +635,23 @@ worker:
   # -- Configure labels on Pods
   podLabels: {}
 
+  # -- Defines privilege and access control settings for a Pod
+  # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+  # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  # -- Defines privilege and access control settings for a Container
+  # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+  # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
   # -- Configure lifecycle hooks
   # </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
   # </br> Ref: https://learnk8s.io/graceful-shutdown
@@ -610,15 +663,6 @@ worker:
   # -- Configure Pod termination grace period
   # </br> Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
   terminationGracePeriodSeconds: 30
-
-  # -- Image registry configuration for the base service
-  image:
-    # -- Repository of the image
-    repository: opencti/worker
-    # -- Pull policy for the image
-    pullPolicy: IfNotPresent
-    # -- Overrides the image tag whose default is the chart appVersion
-    tag: ""
 
   # -- Environment variables to configure application
   # </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
@@ -685,6 +729,14 @@ worker:
   command: []
     # - echo
     # - "Hello, World!"
+
+  # -- Kubernetes service to expose Pod
+  # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
+  service:
+    # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP
+    type: ClusterIP
+    # -- Kubernetes Service port (only when type is ClusterIP)
+    clusterIP: None
 
   # -- NetworkPolicy configuration
   # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
