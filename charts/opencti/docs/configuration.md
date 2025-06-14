@@ -71,6 +71,11 @@ elasticsearch:
   master:
     masterOnly: true
     replicaCount: 1
+    resources:
+      limits:
+        memory: "2Gi"
+      requests:
+        memory: "1Gi"
     persistence:
       enabled: false
 
