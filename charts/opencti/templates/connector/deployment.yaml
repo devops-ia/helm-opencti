@@ -29,6 +29,10 @@ spec:
   {{- if not .autoscaling }}
   replicas: {{ .replicas }}
   {{- end }}
+  {{- with .strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       opencti.connector: {{ $connectorName }}
