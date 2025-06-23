@@ -38,6 +38,6 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: rabbitmq.enabled
   - name: redis
-    version: 21.2.3
+    version: 21.2.5
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: redis.enabled
