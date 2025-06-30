@@ -22,7 +22,7 @@ keywords:
   - analysis
 dependencies:
   - name: elasticsearch
-    version: 22.0.8
+    version: 22.0.9
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: elasticsearch.enabled
   - name: minio
@@ -30,14 +30,14 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: minio.enabled
   - name: opensearch
-    version: 3.0.0
+    version: 3.1.0
     repository: https://opensearch-project.github.io/helm-charts/
     condition: opensearch.enabled
   - name: rabbitmq
-    version: 16.0.8
+    version: 16.0.9
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: rabbitmq.enabled
   - name: redis
-    version: 21.2.5
+    version: 21.2.6
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: redis.enabled
