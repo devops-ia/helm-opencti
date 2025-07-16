@@ -1,13 +1,13 @@
 {{- $connectorsGlobal := .Values.connectorsGlobal }}
 {{- range .Values.connectors }}
 {{- $connectorName := .name }}
-
-{{- if and ((.serviceMonitor).enabled) .env.CONNECTOR_EXPOSE_METRICS }}
+{{- $exposeMetrics := (hasKey .env "CONNECTOR_EXPOSE_METRICS") | ternary .env.CONNECTOR_EXPOSE_METRICS $connectorsGlobal.env.CONNECTOR_EXPOSE_METRICS }}
+{{- if and $exposeMetrics (lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "servicemonitors.monitoring.coreos.com") }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ $connectorName }}
+  name: {{ include "opencti.fullname" $ }}-{{ $connectorName }}-connector
   labels:
     opencti.connector: {{ $connectorName }}
     {{- include "opencti.labels" $ | nindent 4 }}
@@ -28,5 +28,5 @@ spec:
     relabelings:
     {{- toYaml .serviceMonitor.relabelings | nindent 4 }}
     {{- end }}
-{{- end -}}
+{{- end }}
 {{- end }}
