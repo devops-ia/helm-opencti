@@ -25,6 +25,12 @@ env:
 
 testConnection: true
 
+livenessProbe:
+  enabled: false
+
+readinessProbe:
+  enabled: false
+
 startupProbe:
   enabled: false
 
@@ -40,8 +46,36 @@ initContainers:
 
 terminationGracePeriodSeconds: 40
 
-networkPolicy:
-  enabled: true
+# -- Kubernetes service to expose Pod
+# </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4000
+  protocol: TCP
+  portName: http
+  appProtocol: HTTP
+  externalTrafficPolicy: Local
+  internalTrafficPolicy: Local
+  publishNotReadyAddresses: true
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  trafficDistribution: PreferClose
+  labels:
+    environment: ci
+  annotations:
+    foo: bar
+  extraPorts:
+    - name: grpc
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+      appProtocol: GRPC
 
 podDisruptionBudget:
   enabled: true
@@ -152,6 +186,7 @@ worker:
 connectorsGlobal:
   env:
     MY_VARIABLE_ENV: my_value
+    CONNECTOR_EXPOSE_METRICS: true
 
 connectors:
 - name: opencti

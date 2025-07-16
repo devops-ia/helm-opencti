@@ -147,19 +147,87 @@ command: []
 # -- Kubernetes service to expose Pod
 # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
-  # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer or ClusterIP
+  # -- Kubernetes Service type. Allowed values: NodePort, LoadBalancer, ClusterIP, ExternalName
   type: ClusterIP
   # -- Kubernetes Service port
   port: 80
-  # -- NodePort port (only when type is NodePort)
-  # nodePort: 32000
   # -- Pod expose port
   targetPort: 4000
+  # -- Protocol for the service port
+  protocol: TCP
+  # -- Name for the service port
+  portName: http
+  # -- Application protocol (HTTP, HTTPS, etc.)
+  appProtocol: HTTP
+  # -- NodePort port (only when type is NodePort or LoadBalancer)
+  # nodePort: 32000
+  # -- Specific cluster IP (use "None" for headless service)
+  # clusterIP: "10.96.0.1"
+  # -- List of cluster IPs for dual-stack
+  # clusterIPs:
+  #   - "10.96.0.1"
+  #   - "fd00::1"
+  # -- External IPs for the service
+  # externalIPs:
+  #   - "192.168.1.100"
+  # -- LoadBalancer specific configuration
+  loadBalancer: {}
+    # -- LoadBalancer IP (only for LoadBalancer type)
+    # ip: "192.168.1.100"
+    # -- LoadBalancer source ranges (CIDR blocks)
+    # sourceRanges:
+    #   - "10.0.0.0/8"
+    #   - "172.16.0.0/12"
+    # -- LoadBalancer class
+    # class: "nginx"
+    # -- Allocate NodePorts for LoadBalancer service
+    # allocateNodePorts: true
+  # -- External name for ExternalName type service
+  # externalName: "example.com"
+  # -- External traffic policy (Local or Cluster)
+  # externalTrafficPolicy: Local
+  # -- Internal traffic policy (Local or Cluster)
+  # internalTrafficPolicy: Local
+  # -- Health check node port (for LoadBalancer with externalTrafficPolicy: Local)
+  # healthCheckNodePort: 30000
+  # -- Publish not ready addresses
+  # publishNotReadyAddresses: false
+  # -- Session affinity (None or ClientIP)
+  # sessionAffinity: ClientIP
+  # -- Session affinity configuration
+  # sessionAffinityConfig:
+  #   clientIP:
+  #     timeoutSeconds: 10800
+  # -- IP families (IPv4, IPv6)
+  # ipFamilies:
+  #   - IPv4
+  #   - IPv6
+  # -- IP family policy (SingleStack, PreferDualStack, RequireDualStack)
+  # ipFamilyPolicy: SingleStack
+  # -- Traffic distribution (PreferClose)
+  # trafficDistribution: PreferClose
+  # -- Additional labels for the service
+  labels: {}
+  #  environment: production
+  #  team: platform
+  # -- Annotations for the service
+  annotations: {}
+  #   service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  #   service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+  #   nginx.ingress.kubernetes.io/service-upstream: "true"
   # -- Pod extra ports
-  # extraPorts:
-  # - name: metrics
-  #   port: 9080
-  #   targetPort: 9080
+  extraPorts: []
+  #  - name: admin
+  #    port: 9090
+  #    targetPort: 9090
+  #    protocol: TCP
+  #    appProtocol: HTTP
+  #    nodePort: 32001  # Only for NodePort/LoadBalancer
+  #  - name: grpc
+  #    port: 9000
+  #    targetPort: 9000
+  #    protocol: TCP
+  #    appProtocol: GRPC
 
 # -- NetworkPolicy configuration
 # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
@@ -729,14 +797,6 @@ worker:
   command: []
     # - echo
     # - "Hello, World!"
-
-  # -- Kubernetes service to expose Pod
-  # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
-  service:
-    # -- Kubernetes Service type. Allowed values: ClusterIP
-    type: ClusterIP
-    # -- Kubernetes Service clusterIP
-    clusterIP: None
 
   # -- NetworkPolicy configuration
   # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
