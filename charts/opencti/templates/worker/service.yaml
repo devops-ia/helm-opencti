@@ -6,10 +6,8 @@ metadata:
   labels:
     {{- include "opencti.workerLabels" . | nindent 4 }}
 spec:
-  type: {{ .Values.worker.service.type }}
-  {{- if eq .Values.worker.service.type "ClusterIP" }}
-  clusterIP: {{ .Values.worker.service.clusterIP }}
-  {{- end }}
+  type: ClusterIP
+  clusterIP: None
   ports:
     - name: metrics
       port: {{ .Values.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
