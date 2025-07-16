@@ -1,21 +1,21 @@
 {{- $connectorsGlobal := .Values.connectorsGlobal }}
-{{- $serviceType := .Values.service.type }}
-
 {{- range .Values.connectors }}
 {{- $connectorName := .name }}
-{{- if and .enabled .env.CONNECTOR_EXPOSE_METRICS }}
+{{- $exposeMetrics := (hasKey .env "CONNECTOR_EXPOSE_METRICS") | ternary .env.CONNECTOR_EXPOSE_METRICS $connectorsGlobal.env.CONNECTOR_EXPOSE_METRICS }}
+{{- if and .enabled $exposeMetrics }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $connectorName }}-service-{{ include "opencti.fullname" $ }}
+  name: {{ include "opencti.fullname" $ }}-{{ $connectorName }}-connector
   labels:
     opencti.connector: {{ $connectorName }}
     {{- include "opencti.labels" $ | nindent 4 }}
 spec:
-  type: {{ $serviceType }}
+  type: ClusterIP
+  clusterIP: None
   ports:
-    {{- if .env.CONNECTOR_EXPOSE_METRICS }}
+    {{- if $exposeMetrics }}
     - name: metrics
       port: {{ .env.CONNECTOR_METRICS_PORT | default 9095 }}
       targetPort: {{ .env.CONNECTOR_METRICS_PORT | default 9095 }}
