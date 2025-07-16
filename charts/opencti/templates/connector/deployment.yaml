@@ -17,7 +17,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $connectorName }}-connector-{{ include "opencti.fullname" $ }}
+  name: {{ include "opencti.fullname" $ }}-{{ $connectorName }}-connector
   {{- with .deploymentAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
