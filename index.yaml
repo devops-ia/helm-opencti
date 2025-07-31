@@ -2,6 +2,53 @@ apiVersion: v1
 entries:
   opencti:
   - apiVersion: v2
+    appVersion: 6.7.8
+    created: "2025-07-31T08:26:40.370046466Z"
+    dependencies:
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 22.0.14
+    - condition: minio.enabled
+      name: minio
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 17.0.16
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.1.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.11
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 21.2.13
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 0afdce170730fdf5fc8f34945b9b3fd97c856a50956b43b4d2ecde0acafc112a
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v1.12.6/opencti-1.12.6.tgz
+    version: 1.12.6
+  - apiVersion: v2
     appVersion: 6.7.7
     created: "2025-07-28T05:50:11.672278096Z"
     dependencies:
@@ -6523,4 +6570,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-07-28T05:50:11.672733674Z"
+generated: "2025-07-31T08:26:40.370350406Z"
