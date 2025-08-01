@@ -22,7 +22,7 @@ keywords:
   - analysis
 dependencies:
   - name: elasticsearch
-    version: 22.0.14
+    version: 22.0.15
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: elasticsearch.enabled
   - name: minio
