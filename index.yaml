@@ -2,6 +2,53 @@ apiVersion: v1
 entries:
   opencti:
   - apiVersion: v2
+    appVersion: 6.7.10
+    created: "2025-08-12T11:11:26.452037658Z"
+    dependencies:
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 22.1.4
+    - condition: minio.enabled
+      name: minio
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 17.0.19
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.1.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - condition: redis.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 21.2.14
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 7abfe702a15134c906d55d776a61496a176ee031cc7dada0aaeb6a81b954a3bf
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v1.12.11/opencti-1.12.11.tgz
+    version: 1.12.11
+  - apiVersion: v2
     appVersion: 6.7.9
     created: "2025-08-11T09:13:24.677802701Z"
     dependencies:
@@ -6758,4 +6805,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-08-11T09:13:24.678153298Z"
+generated: "2025-08-12T11:11:26.452473135Z"
