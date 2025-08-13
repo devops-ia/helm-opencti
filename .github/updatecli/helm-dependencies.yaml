@@ -1,17 +1,17 @@
 sources:
-  elasticsearch:
+  eck-stack:
     kind: helmchart
     spec:
-      url: https://charts.bitnami.com/bitnami
-      name: elasticsearch
+      url: https://helm.elastic.co
+      name: eck-stack
       versionFilter:
         kind: semver
         pattern: '*' # replace with CI/CD updatecli
-    sourceid: elasticsearch
+    sourceid: eck-stack
   minio:
     kind: helmchart
     spec:
-      url: https://charts.bitnami.com/bitnami
+      url: https://charts.min.io/
       name: minio
       versionFilter:
         kind: semver
@@ -26,33 +26,24 @@ sources:
         kind: semver
         pattern: '*' # replace with CI/CD updatecli
     sourceid: opensearch
-  rabbitmq:
-    kind: helmchart
+  dragonfly:
+    kind: dockerimage
     spec:
-      url: https://charts.bitnami.com/bitnami
-      name: rabbitmq
+      image: ghcr.io/dragonflydb/dragonfly/helm/dragonfly
+      name: dragonfly
       versionFilter:
         kind: semver
         pattern: '*' # replace with CI/CD updatecli
-    sourceid: rabbitmq
-  redis:
-    kind: helmchart
-    spec:
-      url: https://charts.bitnami.com/bitnami
-      name: redis
-      versionFilter:
-        kind: semver
-        pattern: '*' # replace with CI/CD updatecli
-    sourceid: redis
+    sourceid: dragonfly
 conditions: {}
 targets:
-  elasticsearch:
+  eck-stack:
     name: bump chart dependencies
     kind: yaml
     spec:
       file: charts/opencti/Chart.yaml
       key: $.dependencies[0].version
-    sourceid: elasticsearch
+    sourceid: eck-stack
   minio:
     name: bump chart dependencies
     kind: yaml
@@ -67,17 +58,10 @@ targets:
       file: charts/opencti/Chart.yaml
       key: $.dependencies[2].version
     sourceid: opensearch
-  rabbitmq:
-    name: bump chart dependencies
-    kind: yaml
-    spec:
-      file: charts/opencti/Chart.yaml
-      key: $.dependencies[3].version
-    sourceid: rabbitmq
-  redis:
+  dragonfly:
     name: bump chart dependencies
     kind: yaml
     spec:
       file: charts/opencti/Chart.yaml
       key: $.dependencies[4].version
-    sourceid: redis
+    sourceid: dragonfly

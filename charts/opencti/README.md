@@ -2,6 +2,11 @@
 
 A Helm chart to deploy Open Cyber Threat Intelligence platform
 
+> [!NOTE]
+> The default `values.yaml` provided with this chart will **not work out-of-the-box**.
+> Please refer to the [`ci/ci-common-values.yaml`](./ci/ci-common-values.yaml) example for a working configuration suitable for CI/CD installations.
+> Additionally, make sure to read the [`docs/configuration.md`](./docs/configuration.md) guide for detailed configuration instructions and best practices.
+
 ## Maintainers
 
 | Name | Email | Url |
@@ -16,11 +21,11 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 
 | Repository | Name | Version |
 |------------|------|---------|
+| https://charts.min.io/ | minio | 5.4.0 |
+| https://helm.elastic.co | eck-stack | 0.16.0 |
 | https://opensearch-project.github.io/helm-charts/ | opensearch | 3.1.0 |
-| oci://registry-1.docker.io/bitnamicharts | elasticsearch | 22.1.4 |
-| oci://registry-1.docker.io/bitnamicharts | minio | 17.0.19 |
+| oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v1.32.0 |
 | oci://registry-1.docker.io/bitnamicharts | rabbitmq | 16.0.13 |
-| oci://registry-1.docker.io/bitnamicharts | redis | 21.2.14 |
 
 ## Add repository
 
@@ -94,8 +99,8 @@ helm show values opencti/opencti
 | connectorsGlobal.volumes | list | `[]` | Additional volumes on the output connector Deployment definition |
 | dnsConfig | object | `{}` | Configure DNS </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/ |
 | dnsPolicy | string | `"ClusterFirst"` | Configure DNS policy Options: ClusterFirst, Default, ClusterFirstWithHostNet, None </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/ |
-| elasticsearch | object | `{"clusterName":"elastic","coordinating":{"replicaCount":0},"data":{"persistence":{"enabled":false},"replicaCount":1},"enabled":true,"extraEnvVars":[{"name":"ES_JAVA_OPTS","value":"-Xms512M -Xmx512M"}],"ingest":{"enabled":false},"master":{"masterOnly":true,"persistence":{"enabled":false},"replicaCount":1},"sysctlImage":{"enabled":false}}` | ElasticSearch subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/elasticsearch/values.yaml |
-| elasticsearch.enabled | bool | `true` | Enable or disable ElasticSearch subchart |
+| eck-stack | object | `{"eck-elasticsearch":{"enabled":true,"http":{"tls":{"selfSignedCertificate":{"disabled":true}}},"nodeSets":[{"config":{"node.roles":["master","data","ingest"],"node.store.allow_mmap":false},"count":1,"name":"default","podTemplate":{"spec":{"containers":[{"name":"elasticsearch","resources":{"limits":{"memory":"2Gi"},"requests":{"cpu":"500m","memory":"2Gi"}}}],"volumes":[{"emptyDir":{},"name":"elasticsearch-data"}]}}}]},"eck-kibana":{"enabled":false},"enabled":false}` | ECK stack subchart deployment </br> Ref: https://github.com/elastic/cloud-on-k8s/blob/main/deploy/eck-stack/values.yaml |
+| eck-stack.enabled | bool | `false` | Enable or disable ElasticSearch subchart |
 | env | object | `{"APP__ADMIN__EMAIL":"admin@opencti.io","APP__ADMIN__PASSWORD":"ChangeMe","APP__ADMIN__TOKEN":"ChangeMe","APP__BASE_PATH":"/","APP__GRAPHQL__PLAYGROUND__ENABLED":false,"APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION":false,"APP__HEALTH_ACCESS_KEY":"ChangeMe","APP__TELEMETRY__METRICS__ENABLED":true,"ELASTICSEARCH__URL":"http://release-name-elasticsearch:9200","MINIO__ENDPOINT":"release-name-minio:9000","NODE_OPTIONS":"--max-old-space-size=8096","PROVIDERS__LOCAL__STRATEGY":"LocalStrategy","RABBITMQ__HOSTNAME":"release-name-rabbitmq","RABBITMQ__PASSWORD":"ChangeMe","RABBITMQ__PORT":5672,"RABBITMQ__PORT_MANAGEMENT":15672,"RABBITMQ__USERNAME":"user","REDIS__HOSTNAME":"release-name-redis-master","REDIS__MODE":"single","REDIS__PORT":6379}` | Environment variables to configure application </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform |
 | envFromConfigMap | object | `{}` | Variables from configMap |
 | envFromFiles | list | `[]` | Load all variables from files </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables |
@@ -114,33 +119,33 @@ helm show values opencti/opencti
 | lifecycle | object | `{}` | Configure lifecycle hooks </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ </br> Ref: https://learnk8s.io/graceful-shutdown |
 | livenessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":180,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | Configure liveness checker </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | livenessProbeCustom | object | `{}` | Custom livenessProbe |
-| minio | object | `{"auth":{"rootPassword":"ChangeMe","rootUser":"ChangeMe"},"enabled":true,"mode":"standalone","persistence":{"enabled":false}}` | MinIO subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/minio/values.yaml |
+| minio | object | `{"enabled":true,"mode":"standalone","persistence":{"enabled":false},"resources":{"requests":{"memory":"512Mi"}},"rootPassword":"ChangeMe","rootUser":"ChangeMe"}` | MinIO subchart deployment </br> Ref: https://github.com/minio/minio/blob/main/helm/minio/values.yaml |
 | minio.enabled | bool | `true` | Enable or disable MinIO subchart |
 | nameOverride | string | `""` | String to partially override opencti.fullname template (will maintain the release name) |
 | networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | NetworkPolicy configuration </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
 | networkPolicy.enabled | bool | `false` | Enable or disable NetworkPolicy |
 | networkPolicy.policyTypes | list | `[]` | Policy types |
 | nodeSelector | object | `{}` | Node labels for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector |
-| opensearch | object | `{"enabled":false,"opensearchJavaOpts":"-Xmx512M -Xms512M","persistence":{"enabled":false},"singleNode":true}` | OpenSearch subchart deployment </br> Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml |
-| opensearch.enabled | bool | `false` | Enable or disable OpenSearch subchart |
+| opensearch | object | `{"enabled":true,"opensearchJavaOpts":"-Xmx512M -Xms512M","persistence":{"enabled":false},"singleNode":true}` | OpenSearch subchart deployment </br> Ref: https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml |
+| opensearch.enabled | bool | `true` | Enable or disable OpenSearch subchart |
 | podAnnotations | object | `{}` | Configure annotations on Pods |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1}` | Pod Disruption Budget </br> Ref: https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/ |
 | podLabels | object | `{}` | Configure labels on Pods |
 | podSecurityContext | object | `{}` | Defines privilege and access control settings for a Pod </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| rabbitmq | object | `{"auth":{"erlangCookie":"ChangeMe","password":"ChangeMe","username":"user"},"clustering":{"enabled":false},"enabled":true,"persistence":{"enabled":false},"replicaCount":1}` | RabbitMQ subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml |
+| rabbitmq | object | `{"auth":{"erlangCookie":"ChangeMe","password":"ChangeMe","username":"user"},"clustering":{"enabled":false},"enabled":true,"global":{"security":{"allowInsecureImages":true}},"image":{"repository":"bitnamilegacy/rabbitmq","tag":"4.1.2-debian-12-r1"},"persistence":{"enabled":false},"replicaCount":1}` | RabbitMQ subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml |
 | rabbitmq.enabled | bool | `true` | Enable or disable RabbitMQ subchart |
 | readinessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1}` | Configure readinessProbe checker </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | readinessProbeCustom | object | `{}` | Custom readinessProbe |
-| readyChecker | object | `{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"services":[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis-master","port":6379}],"tag":"latest","timeout":5}` | Enable or disable ready-checker  |
-| readyChecker.enabled | bool | `true` | Enable or disable ready-checker |
+| readyChecker | object | `{"enabled":false,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"services":[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}],"tag":"latest","timeout":5}` | Enable or disable ready-checker |
+| readyChecker.enabled | bool | `false` | Enable or disable ready-checker |
 | readyChecker.pullPolicy | string | `"IfNotPresent"` | Pull policy for the image |
 | readyChecker.repository | string | `"busybox"` | Repository of the image |
 | readyChecker.retries | int | `30` | Number of retries before giving up |
-| readyChecker.services | list | `[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis-master","port":6379}]` | List services |
+| readyChecker.services | list | `[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}]` | List services |
 | readyChecker.tag | string | `"latest"` | Overrides the image tag |
 | readyChecker.timeout | int | `5` | Timeout for each check |
-| redis | object | `{"architecture":"standalone","auth":{"enabled":false},"enabled":true,"master":{"count":1,"persistence":{"enabled":false}},"replica":{"persistence":{"enabled":false},"replicaCount":1}}` | Redis subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml |
-| redis.enabled | bool | `true` | Enable or disable Redis subchart |
+| redis | object | `{"enabled":true,"storage":{"enabled":false}}` | Dragonfly subchart deployment (alias: Redis) </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml |
+| redis.enabled | bool | `true` | Enable or disable Dragonfly subchart |
 | replicaCount | int | `1` | Number of replicas for the service |
 | resources | object | `{}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
 | secrets | list | `[]` | Secrets values to create credentials and reference by envFromSecrets Generate Secret with following name: <release-name>-<name> </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/ |

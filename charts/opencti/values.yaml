@@ -347,10 +347,9 @@ startupProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Enable or disable ready-checker
-#
 readyChecker:
   # -- Enable or disable ready-checker
-  enabled: true
+  enabled: false
   # -- Repository of the image
   repository: busybox
   # -- Pull policy for the image
@@ -377,7 +376,7 @@ readyChecker:
     port: 9000
   - name: rabbitmq
     port: 5672
-  - name: redis-master
+  - name: redis
     port: 6379
 
 # -- Configure annotations on Pods
@@ -920,10 +919,10 @@ worker:
   dnsPolicy: ClusterFirst
 
 # -- OpenSearch subchart deployment
-# </br> Ref: https://github.com/opensearch-project/helm-charts/blob/opensearch-2.16.1/charts/opensearch/values.yaml
+# </br> Ref: https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml
 opensearch:
   # -- Enable or disable OpenSearch subchart
-  enabled: false
+  enabled: true
 
   # OpenSearch Java options
   opensearchJavaOpts: "-Xmx512M -Xms512M"
@@ -938,60 +937,53 @@ opensearch:
   persistence:
     enabled: false
 
-# -- ElasticSearch subchart deployment
-# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/elasticsearch/values.yaml
-elasticsearch:
+# -- ECK stack subchart deployment
+# </br> Ref: https://github.com/elastic/cloud-on-k8s/blob/main/deploy/eck-stack/values.yaml
+eck-stack:
   # -- Enable or disable ElasticSearch subchart
-  enabled: true
+  enabled: false
 
-  # Kernel settings modifier image
-  sysctlImage:
-    # Enable kernel settings modifier image
+  # ElasticSearch eck-elasticsearch
+  eck-elasticsearch:
+    enabled: true
+
+    # HTTP configuration
+    http:
+      tls:
+        selfSignedCertificate:
+          disabled: true
+
+    # Node configuration
+    nodeSets:
+      - name: default
+        count: 1
+        config:
+          node.roles: ["master", "data", "ingest"]
+          node.store.allow_mmap: false
+
+        # Pod template configuration
+        podTemplate:
+          spec:
+            containers:
+              - name: elasticsearch
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "2Gi"
+                  limits:
+                    memory: "2Gi"
+
+            # Volumes configuration
+            volumes:
+              - name: elasticsearch-data
+                emptyDir: {}
+
+  # ElasticSearch eck-kibana
+  eck-kibana:
     enabled: false
-
-  # Elasticsearch cluster name
-  clusterName: elastic
-
-  # Extra variables
-  extraEnvVars:
-    - name: ES_JAVA_OPTS
-      value: "-Xms512M -Xmx512M"
-
-  # Master-eligible nodes parameters
-  master:
-    # Deploy the Elasticsearch master-eligible nodes as master-only nodes. Recommended for high-demand deployments.
-    masterOnly: true
-    # Number of master-eligible replicas to deploy
-    replicaCount: 1
-    # Enable persistence using Persistent Volume Claims
-    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    persistence:
-      # Enable persistence using a `PersistentVolumeClaim`
-      enabled: false
-
-  # Data-only nodes parameters
-  data:
-    # Number of data-only replicas to deploy
-    replicaCount: 1
-
-    # Enable persistence using Persistent Volume Claims
-    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    persistence:
-      # Enable persistence using a `PersistentVolumeClaim`
-      enabled: false
-
-  # Ingest-only nodes parameters
-  ingest:
-    # Enable ingest nodes
-    enabled: false
-
-  # Coordinating-only nodes parameters
-  coordinating:
-    # Number of coordinating-only replicas to deploy
-    replicaCount: 0
 
 # -- MinIO subchart deployment
-# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/minio/values.yaml
+# </br> Ref: https://github.com/minio/minio/blob/main/helm/minio/values.yaml
 minio:
   # -- Enable or disable MinIO subchart
   enabled: true
@@ -1000,12 +992,10 @@ minio:
   # </br> Ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
   mode: standalone
 
-  # Minio authentication parameters
-  auth:
-    # Minio root username
-    rootUser: ChangeMe
-    # Password for Minio root user
-    rootPassword: ChangeMe
+  # Minio root username
+  rootUser: ChangeMe
+  # Password for Minio root user
+  rootPassword: ChangeMe
 
   # Enable persistence using Persistent Volume Claims
   # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
@@ -1013,11 +1003,26 @@ minio:
     # Enable MinIO data persistence using PVC. If false, use emptyDir
     enabled: false
 
+  # Resources
+  resources:
+    requests:
+      memory: 512Mi
+
 # -- RabbitMQ subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
 rabbitmq:
   # -- Enable or disable RabbitMQ subchart
   enabled: true
+
+  # RabbitMQ global settings
+  global:
+    security:
+      allowInsecureImages: true
+
+  # RabbitMQ image
+  image:
+    repository: bitnamilegacy/rabbitmq
+    tag: 4.1.2-debian-12-r1
 
   # Number of RabbitMQ replicas to deploy
   replicaCount: 1
@@ -1042,36 +1047,12 @@ rabbitmq:
     # Enable RabbitMQ data persistence using PVC
     enabled: false
 
-# -- Redis subchart deployment
-# </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+# -- Dragonfly subchart deployment (alias: Redis)
+# </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml
 redis:
-  # -- Enable or disable Redis subchart
+  # -- Enable or disable Dragonfly subchart
   enabled: true
 
-  # Redis architecture. Allowed values: `standalone` or `replication`
-  architecture: standalone
-  #  Redis Authentication parameters
-  # </br> Ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
-  auth:
-    # Enable password authentication
+  # Dragonfly storage
+  storage:
     enabled: false
-
-  # Redis master configuration parameters
-  master:
-    # Number of Redis master instances to deploy (experimental, requires additional configuration)
-    count: 1
-    # Persistence parameters
-    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    persistence:
-      # Enable persistence on Redis master nodes using Persistent Volume Claims
-      enabled: false
-
-  # Redis replicas configuration parameters
-  replica:
-    # Number of Redis replicas to deploy
-    replicaCount: 1
-    # Persistence parameters
-    # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    persistence:
-      # Enable persistence on Redis master nodes using Persistent Volume Claims
-      enabled: false

@@ -6,24 +6,71 @@ strategy:
 
 env:
   APP__ADMIN__EMAIL: admin@opencti.io
-  APP__ADMIN__PASSWORD: test
   APP__BASE_PATH: "/"
-  APP__HEALTH_ACCESS_KEY: f93747ff-2ea1-4717-900c-9df20b8e4429
-  APP__TELEMETRY__METRICS__ENABLED: true
+  APP__TELEMETRY__METRICS__ENABLED: false
   APP__GRAPHQL__PLAYGROUND__ENABLED: false
-  APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: false
-  ELASTICSEARCH__ENGINE_SELECTOR: elk
-  ELASTICSEARCH__URL: http://opencti-ci-elasticsearch:9200
+  APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: true
+
+  ## OPENSEARCH
+  ELASTICSEARCH__ENGINE_SELECTOR: opensearch
+  ELASTICSEARCH__URL: http://opencti-ci-opensearch:9200
+
+  ## STORAGE
   MINIO__ENDPOINT: opencti-ci-minio
+
+  ## MESSAGE QUEUE
   RABBITMQ__HOSTNAME: opencti-ci-rabbitmq
   RABBITMQ__PORT_MANAGEMENT: 15672
   RABBITMQ__PORT: 5672
   RABBITMQ__USERNAME: user
-  REDIS__HOSTNAME: opencti-ci-redis-master
+
+  ## CACHE
+  REDIS__HOSTNAME: opencti-ci-redis
   REDIS__MODE: single
   REDIS__PORT: 6379
 
+envFromSecrets:
+  APP__ADMIN__PASSWORD:
+    name: opencti-ci-credentials
+    key: APP__ADMIN__PASSWORD
+  APP__ADMIN__TOKEN:
+    name: opencti-ci-credentials
+    key: APP__ADMIN__TOKEN
+  APP__HEALTH_ACCESS_KEY:
+    name: opencti-ci-credentials
+    key: APP__HEALTH_ACCESS_KEY
+  MINIO__ACCESS_KEY:
+    name: opencti-ci-minio
+    key: rootUser
+  MINIO__SECRET_KEY:
+    name: opencti-ci-minio
+    key: rootPassword
+  RABBITMQ__PASSWORD:
+    name: opencti-ci-rabbitmq
+    key: rabbitmq-password
+
+secrets:
+  - name: credentials
+    data:
+      APP__ADMIN__PASSWORD: iraLehfJu1NRnQgwIBeH
+      APP__ADMIN__TOKEN: b1976749-8a53-4f49-bf04-cafa2a3458c1
+      APP__HEALTH_ACCESS_KEY: f93747ff-2ea1-4717-900c-9df20b8e4429
+
 testConnection: true
+
+readyChecker:
+  enabled: true
+  retries: 30
+  timeout: 5
+  services:
+  - name: opensearch
+    port: 9200
+  - name: minio
+    port: 9000
+  - name: rabbitmq
+    port: 5672
+  - name: redis
+    port: 6379
 
 livenessProbe:
   enabled: false
@@ -37,17 +84,10 @@ startupProbe:
 lifecycle:
   preStop:
     exec:
-      command: ["sh", "-c", "sleep 10"]
+      command: ["sh", "-c", "sleep 5"]
 
-initContainers:
-  - name: my-container
-    image: busybox
-    command: ['sh', '-c', 'echo "Hello, World!"']
+terminationGracePeriodSeconds: 20
 
-terminationGracePeriodSeconds: 40
-
-# -- Kubernetes service to expose Pod
-# </br> Ref: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   type: ClusterIP
   port: 80
@@ -57,19 +97,14 @@ service:
   appProtocol: HTTP
   externalTrafficPolicy: Local
   internalTrafficPolicy: Local
-  publishNotReadyAddresses: true
-  sessionAffinity: ClientIP
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 10800
+  publishNotReadyAddresses: false
+  sessionAffinity: None
   ipFamilies:
     - IPv4
   ipFamilyPolicy: SingleStack
   trafficDistribution: PreferClose
   labels:
     environment: ci
-  annotations:
-    foo: bar
   extraPorts:
     - name: grpc
       port: 9000
@@ -77,225 +112,255 @@ service:
       protocol: TCP
       appProtocol: GRPC
 
-podDisruptionBudget:
-  enabled: true
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
 
 autoscaling:
   enabled: true
-
-secrets:
-  - name: credentials
-    data:
-      APP__ADMIN__TOKEN: "b1976749-8a53-4f49-bf04-cafa2a3458c1"
-      RABBITMQ__PASSWORD: ChangeMe
-      OTHER_SECRET: |-
-        multiple
-        lines
-
-configMaps:
-  - name: configmap-name-ci
-    data:
-      my.key: >
-        my-content
-      my_var: my-value
-
-envFromSecrets:
-  APP__ADMIN__TOKEN:
-    name: opencti-ci-credentials
-    key: APP__ADMIN__TOKEN
-  RABBITMQ__PASSWORD:
-    name: opencti-ci-credentials
-    key: RABBITMQ__PASSWORD
-
-envFromConfigMap:
-  my_var_worker:
-    name: opencti-ci-configmap-name-ci
-    key: my_var
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
 
 topologySpreadConstraints:
   - maxSkew: 1
     topologyKey: kubernetes.io/os
     whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: opencti
 
-dnsConfig:
-  nameservers:
-    - 1.1.1.1
-  searches: []
-
-dnsPolicy: ClusterFirst
-
+##
+# OPENCTI WORKER
 worker:
   enabled: true
 
   readyChecker:
     enabled: true
-    retries: 60
-    timeout: 10
+    retries: 30
+    timeout: 5
 
   lifecycle:
     preStop:
       exec:
-        command: ["sh", "-c", "sleep 10"]
+        command: ["sh", "-c", "sleep 5"]
 
-  initContainers:
-    - name: my-container
-      image: busybox
-      command: ['sh', '-c', 'echo "Hello, World!"']
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
 
   strategy:
     type: Recreate
 
-  env:
-    MY_VARIABLE_WORKER_ENV: my_value
-
-  configMaps:
-    - name: configmap-name-worker-ci
-      data:
-        my.key: >
-          my-content
-        my_var_worker: my-value
-
-  envFromConfigMap:
-    my_var_worker:
-      name: opencti-ci-configmap-name-worker-ci
-      key: my_var_worker
-
-  terminationGracePeriodSeconds: 40
+  terminationGracePeriodSeconds: 20
 
   networkPolicy:
     enabled: true
-
-  podDisruptionBudget:
-    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: opencti-ci
+        ports:
+          - protocol: TCP
+            port: 4000
 
   autoscaling:
     enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
 
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/os
       whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: opencti
+          app.kubernetes.io/component: worker
 
   dnsConfig:
     nameservers:
       - 1.1.1.1
+      - 8.8.8.8
     searches: []
+    options:
+      - name: ndots
+        value: "2"
 
   dnsPolicy: ClusterFirst
 
+##
+# OPENCTI CONNECTOR
 connectorsGlobal:
   env:
-    MY_VARIABLE_ENV: my_value
     CONNECTOR_EXPOSE_METRICS: true
 
 connectors:
-- name: opencti
+  - name: opencti
+    enabled: true
+    replicas: 1
+
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 50m
+      limits:
+        memory: 256Mi
+
+    serviceMonitor:
+      enabled: false
+      interval: 30s
+      scrapeTimeout: 10s
+
+    image:
+      repository: opencti/connector-opencti
+      pullPolicy: IfNotPresent
+
+    readyChecker:
+      enabled: true
+      retries: 30
+      timeout: 5
+
+    lifecycle:
+      preStop:
+        exec:
+          command: ["sh", "-c", "sleep 5"]
+
+    terminationGracePeriodSeconds: 20
+
+    deploymentAnnotations:
+      ci: "true"
+      prometheus.io/scrape: "true"
+    podAnnotations:
+      ci: "true"
+    podLabels:
+      ci: "true"
+      app.kubernetes.io/component: connector
+
+    env:
+      CONNECTOR_ID: 399e6354-cc2c-4fe1-bb85-145a5bb043a9
+      CONNECTOR_NAME: "OpenCTI"
+      CONNECTOR_SCOPE: "marking-definition,identity,location"
+      CONNECTOR_TYPE: EXTERNAL_IMPORT
+
+    envFromFiles:
+      - secretRef:
+          name: opencti-ci-credentials
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/os
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: opencti
+            app.kubernetes.io/component: connector
+
+    dnsConfig:
+      nameservers:
+        - 1.1.1.1
+        - 8.8.8.8
+      searches: []
+      options:
+        - name: ndots
+          value: "2"
+
+    dnsPolicy: ClusterFirst
+    strategy:
+      type: Recreate
+
+##
+# OPENSEARCH
+opensearch:
   enabled: true
-  replicas: 1
-  podSecurityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 1000
-  serviceMonitor:
-    enabled: true
-    interval: 30s
-    scrapeTimeout: 10s
-  image:
-    repository: opencti/connector-opencti
-  serviceAccount:
-    create: true
-    name: ci-sa
-    automountServiceAccountToken: true
-  readyChecker:
-    enabled: true
-    retries: 60
-    timeout: 10
-  lifecycle:
-    preStop:
-      exec:
-        command: ["sh", "-c", "sleep 10"]
-  terminationGracePeriodSeconds: 40
-  deploymentAnnotations:
-    ci: "true"
-  podAnnotations:
-    ci: "true"
-  podLabels:
-    ci: "true"
-  env:
-    CONNECTOR_ID: 399e6354-cc2c-4fe1-bb85-145a5bb043a9
-    CONNECTOR_NAME: "OpenCTI"
-    CONNECTOR_SCOPE: "marking-definition,identity,location"
-    CONNECTOR_TYPE: EXTERNAL_IMPORT
-  envFromSecrets:
-    OPENCTI_TOKEN:
-      name: opencti-ci-credentials
-      key: APP__ADMIN__TOKEN
-  envFromFiles:
-    - secretRef:
-        name: opencti-ci-credentials
-  topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: kubernetes.io/os
-      whenUnsatisfiable: DoNotSchedule
-  dnsConfig:
-    nameservers:
-      - 1.1.1.1
-    searches: []
-  dnsPolicy: ClusterFirst
-  strategy:
-    type: Recreate
+  fullnameOverride: opencti-ci-opensearch
 
-elasticsearch:
-  fullnameOverride: opencti-ci-elasticsearch
-  master:
-    masterOnly: true
-    replicaCount: 1
-    resourcesPreset: "medium"
-    networkPolicy:
-      enabled: false
-    persistence:
-      enabled: false
-  data:
-    replicaCount: 1
-    resourcesPreset: "medium"
-    networkPolicy:
-      enabled: false
-    persistence:
-      enabled: false
-  coordinating:
-    replicaCount: 0
-  ingest:
-    enabled: false
-  sysctlImage:
+  nodeGroup: ""
+  opensearchJavaOpts: "-Xmx512M -Xms512M"
+  singleNode: true
+
+  config:
+    opensearch.yml: |
+      plugins.security.disabled: true
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+  persistence:
     enabled: false
 
+##
+# MINIO
 minio:
   fullnameOverride: opencti-ci-minio
-  networkPolicy:
-    enabled: false
+
+  rootUser: minio
+  rootPassword: uxLSbJGZzzhZxXUFgdAl
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+
   persistence:
     enabled: false
 
+##
+# RABBITMQ
 rabbitmq:
   fullnameOverride: opencti-ci-rabbitmq
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+
   auth:
-    existingPasswordSecret: opencti-ci-credentials
-    existingSecretPasswordKey: RABBITMQ__PASSWORD
+    password: K4we4CUebaRpISxWnMJn
     erlangCookie: b25c953e-2193-4b8e-9f3b-9a3a5ba76d75
+
   clustering:
     enabled: false
+
   networkPolicy:
     enabled: false
+
   persistence:
     enabled: false
 
+##
+# REDIS
 redis:
   fullnameOverride: opencti-ci-redis
-  architecture: standalone
-  auth:
-    enabled: false
-    sentinel: false
-    usePasswordFiles: false
-    usePasswordFileFromSecret: false
-  networkPolicy:
-    enabled: false
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+
+  extraArgs:
+    - --maxmemory=256mb
+    - --proactor_threads=1
+    - --num_shards=1

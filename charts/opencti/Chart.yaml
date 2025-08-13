@@ -21,13 +21,13 @@ keywords:
   - threat
   - analysis
 dependencies:
-  - name: elasticsearch
-    version: 22.1.4
-    repository: oci://registry-1.docker.io/bitnamicharts
-    condition: elasticsearch.enabled
+  - name: eck-stack
+    version: 0.16.0
+    repository: https://helm.elastic.co
+    condition: eck-stack.enabled
   - name: minio
-    version: 17.0.19
-    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 5.4.0
+    repository: https://charts.min.io/
     condition: minio.enabled
   - name: opensearch
     version: 3.1.0
@@ -37,7 +37,8 @@ dependencies:
     version: 16.0.13
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: rabbitmq.enabled
-  - name: redis
-    version: 21.2.14
-    repository: oci://registry-1.docker.io/bitnamicharts
+  - name: dragonfly
+    alias: redis
     condition: redis.enabled
+    repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+    version: v1.32.0
