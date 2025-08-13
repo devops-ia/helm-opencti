@@ -24,9 +24,9 @@ Application access:
   export NODE_IP=$(kubectl get nodes --namespace {{ $namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo "URL: http://$NODE_IP:$NODE_PORT"
 {{- else if contains "ClusterIP" .Values.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ $namespace }} -l "app.kubernetes.io/name={{ include "opencti.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  kubectl --namespace {{ $namespace }} port-forward $POD_NAME {{ .Values.service.port }}:{{ .Values.service.port }}
-  Access at: http://127.0.0.1:{{ .Values.service.port }}
+  export POD_NAME=$(kubectl get pods --namespace {{ $namespace }} -l "app.kubernetes.io/name={{ include "opencti.name" . }},opencti.component=server" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ $namespace }} port-forward $POD_NAME {{ .Values.service.targetPort | default .Values.service.port }}:{{ .Values.service.targetPort | default .Values.service.port }}
+  Access at: http://127.0.0.1:{{ .Values.service.targetPort | default .Values.service.port }}
 {{- end }}
 
 ===========
@@ -38,7 +38,7 @@ Application
 - Chart version: {{ .Chart.Version }}
 - OpenCTI version: {{ $version }}
 - Service type: {{ .Values.service.type }}
-- Port: {{ .Values.service.port }}
+- Port: {{ .Values.service.targetPort | default .Values.service.port }}
 
 =========
 Resources

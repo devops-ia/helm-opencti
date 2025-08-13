@@ -10,3 +10,5 @@ validate-maintainers: false
 validate-yaml: true
 chart-repos:
 - opensearch=https://opensearch-project.github.io/helm-charts/
+- elastic=https://helm.elastic.co
+- minio=https://charts.min.io/

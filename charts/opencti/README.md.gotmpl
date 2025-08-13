@@ -2,6 +2,11 @@
 
 {{ template "chart.description" . }}
 
+> [!NOTE]
+> The default `values.yaml` provided with this chart will **not work out-of-the-box**.
+> Please refer to the [`ci/ci-common-values.yaml`](./ci/ci-common-values.yaml) example for a working configuration suitable for CI/CD installations.
+> Additionally, make sure to read the [`docs/configuration.md`](./docs/configuration.md) guide for detailed configuration instructions and best practices.
+
 {{ template "chart.maintainersSection" . }}
 
 ## Prerequisites
