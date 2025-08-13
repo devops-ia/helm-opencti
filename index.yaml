@@ -3,6 +3,54 @@ entries:
   opencti:
   - apiVersion: v2
     appVersion: 6.7.10
+    created: "2025-08-13T09:39:54.483400065Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.16.0
+    - condition: minio.enabled
+      name: minio
+      repository: https://charts.min.io/
+      version: 5.4.0
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.1.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v1.32.0
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 89e06f8eaa52c6cbd1c505458e519fb21e170585e40cdcc2bea57871a90bfb8f
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v1.13.0/opencti-1.13.0.tgz
+    version: 1.13.0
+  - apiVersion: v2
+    appVersion: 6.7.10
     created: "2025-08-12T11:11:26.452037658Z"
     dependencies:
     - condition: elasticsearch.enabled
@@ -6805,4 +6853,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-08-12T11:11:26.452473135Z"
+generated: "2025-08-13T09:39:54.483755091Z"
