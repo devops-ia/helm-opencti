@@ -35,13 +35,8 @@ jobs:
 
       - name: Update dependencies
         run: |
-          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > $GITHUB_WORKSPACE/tmp-minor-output.log
-          awk '/TARGETS/{flag=1;next}/ACTIONS/{flag=0}flag' $GITHUB_WORKSPACE/tmp-minor-output.log > $GITHUB_WORKSPACE/clean-minor-output.log
-          chmod +x .github/hack/prepare_body_pr.sh
-          $GITHUB_WORKSPACE/.github/hack/prepare_body_pr.sh $GITHUB_WORKSPACE/clean-minor-output.log > $GITHUB_WORKSPACE/minor-output.log
-
-          # show PR body
-          cat minor-output.log
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > $GITHUB_WORKSPACE/minor-output.log
+          cat $GITHUB_WORKSPACE/minor-output.log
         shell: bash
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
