@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
@@ -31,18 +31,19 @@ jobs:
           done
 
       - name: Install updatecli
-        uses: updatecli/updatecli-action@v2
+        uses: updatecli/updatecli-action@2289ae9c945707079a248f5e4f5743a6592429ef # v2.90.0
+        with:
+          version: "v0.105.1"
 
       - name: Update dependencies
         run: |
-          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > $GITHUB_WORKSPACE/minor-output.log
-          cat $GITHUB_WORKSPACE/minor-output.log
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false
         shell: bash
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          UPDATECLI_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Update README.md Helm Chart
-        uses: losisin/helm-docs-github-action@v1
+        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
         with:
           chart-search-root: charts/opencti
 
@@ -53,7 +54,7 @@ jobs:
 
 
       - name: Create PR with changes (dry-run)
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         if: github.event_name == 'workflow_dispatch'
         with:
           add-paths: charts/opencti
@@ -69,7 +70,7 @@ jobs:
             auto-pr-bump-version
 
       - name: Create PR with changes
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         if: github.event_name == 'schedule'
         with:
           add-paths: charts/opencti

@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
@@ -29,7 +29,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@16ca923e6ccbb50770c415a0ccd43709a8c5f7a4 # v4.2.2
         id: semantic_release
         with:
           dry_run: true
@@ -57,7 +57,7 @@ jobs:
 
       - name: Run chart-releaser
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           charts_dir: charts
           config: .github/cr.yaml
@@ -67,7 +67,7 @@ jobs:
 
       - name: Login in to the Container registry
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: docker/login-action@v3
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -75,11 +75,11 @@ jobs:
 
       - name: Install Cosign
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
 
       - name: Install Oras
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: oras-project/setup-oras@v1
+        uses: oras-project/setup-oras@8d34698a59f5ffe24821f0b48ab62a3de8b64b20 # v1.2.3
 
       # ref: https://github.com/backstage/charts/blob/88240ce7a0726e3773ee0e4866fbe6325c15267b/.github/workflows/release.yml#L50
       - name: Publish and Sign OCI Charts
