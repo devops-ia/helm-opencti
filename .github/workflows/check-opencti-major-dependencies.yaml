@@ -31,8 +31,6 @@ jobs:
 
       - name: Install updatecli
         uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
-        with:
-          version: "v0.105.1"
 
       - name: Update dependencies
         run: |

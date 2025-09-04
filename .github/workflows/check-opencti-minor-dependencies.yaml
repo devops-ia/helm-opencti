@@ -32,12 +32,11 @@ jobs:
 
       - name: Install updatecli
         uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
-        with:
-          version: "v0.105.1"
 
       - name: Update dependencies
         run: |
-          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false | tee > $GITHUB_WORKSPACE/minor-output.log
+          cat $GITHUB_WORKSPACE/minor-output.log
         shell: bash
         env:
           UPDATECLI_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

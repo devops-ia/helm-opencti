@@ -35,6 +35,14 @@ sources:
         kind: semver
         pattern: '*' # replace with CI/CD updatecli
     sourceid: dragonfly
+  rabbitmq:
+    kind: helmchart
+    spec:
+      name: rabbitmq
+      url: oci://registry-1.docker.io/bitnamicharts
+      versionFilter:
+        kind: semver
+        pattern: '*'
 conditions: {}
 targets:
   eck-stack:
