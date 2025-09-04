@@ -30,7 +30,7 @@ dependencies:
     repository: https://charts.min.io/
     condition: minio.enabled
   - name: opensearch
-    version: 3.1.0
+    version: 3.2.1
     repository: https://opensearch-project.github.io/helm-charts/
     condition: opensearch.enabled
   - name: rabbitmq
@@ -41,4 +41,4 @@ dependencies:
     alias: redis
     condition: redis.enabled
     repository: oci://ghcr.io/dragonflydb/dragonfly/helm
-    version: v1.32.0
+    version: v1.33.1
