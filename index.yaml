@@ -3,6 +3,54 @@ entries:
   opencti:
   - apiVersion: v2
     appVersion: 6.7.17
+    created: "2025-09-05T11:10:11.898945642Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.16.0
+    - condition: minio.enabled
+      name: minio
+      repository: https://charts.min.io/
+      version: 5.4.0
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.2.1
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v1.33.1
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 9c339139261b090bc8c127b626acbf21834cd4b2f9197485cdb5f067267c683b
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v1.13.8/opencti-1.13.8.tgz
+    version: 1.13.8
+  - apiVersion: v2
+    appVersion: 6.7.17
     created: "2025-09-04T07:37:13.303709869Z"
     dependencies:
     - condition: eck-stack.enabled
@@ -7189,4 +7237,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-09-04T07:37:13.304082967Z"
+generated: "2025-09-05T11:10:11.89937891Z"
