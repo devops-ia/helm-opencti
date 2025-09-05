@@ -91,7 +91,36 @@ spec:
                   exit 1;
                 fi;
               done
+        {{- range $service := .readyChecker.services }}
+        - name: ready-checker-{{ $service.name }}
+          {{- if $.Values.global.imageRegistry }}
+          image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
+          {{- else }}
+          image: {{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}
+          {{- end }}
+          imagePullPolicy: {{ $.Values.readyChecker.pullPolicy }}
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              RETRY=0;
+              until [ $RETRY -eq {{ $.readyChecker.retries }} ];
+              do
+                ADDRESS="{{ if $service.address }}{{ $service.address }}{{ else }}{{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}{{ end }}";
+                if nc -zv $ADDRESS {{ $service.port }}; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is ready";
+                  exit 0;
+                fi;
+                echo "[$RETRY/{{ $.readyChecker.retries }}] waiting for service {{ $service.name }} with address $ADDRESS:{{ $service.port }} to become ready";
+                sleep {{ $.readyChecker.timeout }};
+                RETRY=$(($RETRY + 1));
+                if [ $RETRY -eq {{ $.readyChecker.retries }} ]; then
+                  echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is not ready";
+                  exit 1;
+                fi;
+              done
         {{- end }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ $connectorName }}-connector

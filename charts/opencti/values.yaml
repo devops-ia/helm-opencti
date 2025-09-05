@@ -246,7 +246,7 @@ networkPolicy:
     #       - 172.17.1.0/24
     #   - namespaceSelector:
     #       matchLabels:
-    #         project: myproject
+    #         nodepool: mynodepool
     #   - podSelector:
     #       matchLabels:
     #         role: frontend
@@ -541,69 +541,57 @@ connectorsGlobal:
 # -- Connectors
 # </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
 connectors: []
-# - name: connector-name
-#   enabled: true
-#   replicas: 1
-#   # -- Service Account for connector
-#   serviceAccount: {}
-#     # create: false
-#   # -- Image registry
-#   image: {}
-#     # repository:
-#     # pullPolicy:
-#     # tag: ""
-#   # -- Deployment annotations
-#   deploymentAnnotations: {}
-#   # -- Pod annotations
-#   podAnnotations: {}
-#   # -- Configure labels on Pods
-#   podLabels: {}
-#   # -- Enable or disable ready-checker waiting server is ready
-#   readyChecker: {}
-#     # enabled: true
-#     # repository: busybox
+# Example connector configuration
+# - name: connector-name # Required: unique name
+#   enabled: true        # Enable the connector
+#   replicas: 1          # Number of pods
+#
+#   # Image configuration
+#   image:
+#     # repository: ""
 #     # pullPolicy: IfNotPresent
-#     # tag: latest
-#     # retries: 30
-#     # timeout: 5
-#   # -- Lifecycle configuration
-#   lifecycle: {}
-#     # preStop:
-#     #   exec:
-#     #     command: ["sh", "-c", "sleep 10"]
-#   # -- Configure Pod termination grace period
-#   terminationGracePeriodSeconds: 30
-#   # -- Environment variables to configure application
+#     # tag: ""
+#
+#   # ServiceAccount (create=false to use existing)
+#   serviceAccount: {}
+#     # create: true
+#     # name: ""
+#     # automountServiceAccountToken: false
+#
+#   # Basic deployment metadata
+#   deploymentAnnotations: {}
+#   podAnnotations: {}
+#   podLabels: {}
+#
+#   # Environment and configuration
 #   env: {}
-#     # my_env: my_value
-#   # -- Variables from secrets
+#     # MY_ENV: my_value
 #   envFromSecrets: {}
-#     # MY_VARIABLE:
-#     #  name: <name-secret>
-#     #  key: secret_key
-#   # -- Variables from configMap
+#     # MY_SECRET_VAR:
+#     #   name: <secret-name>
+#     #   key: secret_key
 #   envFromConfigMap: {}
-#     # MY_VARIABLE:
-#     #  name: <name-configmap>
-#     #  key: key
-#   # -- Load all variables from files
+#     # MY_CONFIG_VAR:
+#     #   name: <configmap-name>
+#     #   key: key
 #   envFromFiles: []
 #     # - secretRef:
 #     #     name: <name-secret>
 #     # - configMapRef:
 #     #     name: <name-configmap>
-#   # -- Additional volumes on the output connector Deployment definition
+#
+#   # Volumes and mounts
 #   volumes: []
 #     # - name: foo
 #     #   secret:
 #     #     secretName: mysecret
 #     #     optional: false
-#   # -- Additional volumeMounts on the output connector Deployment definition
 #   volumeMounts: []
 #     # - name: foo
 #     #   mountPath: "/etc/foo"
 #     #   readOnly: true
-#   # -- The resources limits and requested
+#
+#   # Resources and scheduling
 #   resources: {}
 #     # limits:
 #     #   memory: 256Mi
@@ -611,40 +599,55 @@ connectors: []
 #     # requests:
 #     #   memory: 56Mi
 #     #   cpu: "50m"
-#   # -- Node labels for pod assignment
 #   nodeSelector: {}
-#     # project: "opencti"
-#   # -- Tolerations for pod assignment
 #   tolerations: []
-#     # - key: "project"
+#     # - key: "nodepool"
 #     #   operator: "Equal"
 #     #   value: "opencti"
 #     #   effect: "NoSchedule"
-#   # -- Affinity for pod assignment
 #   affinity: {}
-#   # -- Control how Pods are spread across your cluster
 #   topologySpreadConstraints: []
 #     # - maxSkew: 1
 #     #   topologyKey: zone
 #     #   whenUnsatisfiable: DoNotSchedule
-#   # -- Configure DNS
+#
+#   # DNS and network policy related
 #   dnsConfig: {}
 #     # nameservers:
 #     #   - 1.2.3.4
-#     #   - 5.6.7.8
 #     # searches:
 #     #   - ns1.svc.cluster.local
-#     #   - my.dns.search.suffix
 #     # option:
 #     #   - name: ndots
 #     #     value: "2"
-#     #   - name: edns0
-#     #   - name: timeout
-#     #     value: "3"
-#   # -- Configure DNS policy
-#   # Options: ClusterFirst, Default, ClusterFirstWithHostNet, None
 #   dnsPolicy: ClusterFirst
-#   # -- Configure strategy for the deployment
+#
+#   # Lifecycle / termination
+#   lifecycle: {}
+#     # preStop:
+#     #   exec:
+#     #     command: ["sh", "-c", "sleep 10"]
+#   terminationGracePeriodSeconds: 30
+#
+#   # Optional ready checker to wait for external services
+#   readyChecker: {}
+#     # enabled: true
+#     # repository: busybox
+#     # pullPolicy: IfNotPresent
+#     # tag: latest
+#     # retries: 30
+#     # timeout: 5
+#     # services:
+#     # - name: service_name
+#     #   port: service_port
+#     #   address: service_address  # (Optional) This parameter is optional. If
+#     #   not specified, the address for the check will be automatically
+#     #   determined assuming the service was installed using a subchart. It is
+#     #   useful to specify it when the service is provisioned differently (e.g.,
+#     #   an S3 bucket created in the Cloud or an Elasticsearch instance outside
+#     #   the Kubernetes cluster). The address can be an IP address or a DNS name.
+#
+#   # Deployment strategy (rolling update, etc.)
 #   strategy: {}
 #     # type: RollingUpdate
 #     # rollingUpdate:
@@ -814,7 +817,7 @@ worker:
       #       - 172.17.1.0/24
       #   - namespaceSelector:
       #       matchLabels:
-      #         project: myproject
+      #         nodepool: mynodepool
       #   - podSelector:
       #       matchLabels:
       #         role: frontend

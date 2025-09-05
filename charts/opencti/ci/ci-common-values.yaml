@@ -187,7 +187,7 @@ worker:
       labelSelector:
         matchLabels:
           app.kubernetes.io/name: opencti
-          app.kubernetes.io/component: worker
+          opencti.component: worker
 
   dnsConfig:
     nameservers:
@@ -246,7 +246,7 @@ connectors:
       ci: "true"
     podLabels:
       ci: "true"
-      app.kubernetes.io/component: connector
+      opencti.component: connector
 
     env:
       CONNECTOR_ID: 399e6354-cc2c-4fe1-bb85-145a5bb043a9
@@ -265,7 +265,7 @@ connectors:
         labelSelector:
           matchLabels:
             app.kubernetes.io/name: opencti
-            app.kubernetes.io/component: connector
+            opencti.component: connector
 
     dnsConfig:
       nameservers:
@@ -277,6 +277,7 @@ connectors:
           value: "2"
 
     dnsPolicy: ClusterFirst
+
     strategy:
       type: Recreate
 
