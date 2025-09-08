@@ -122,6 +122,15 @@ clustering:
         memory: "1Gi"
         cpu: "500m"
 
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/os
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: opencti
+            opencti.component: frontend
+
   ingestion:
     enabled: true
     replicaCount: 3
@@ -138,6 +147,15 @@ clustering:
       limits:
         memory: "2Gi"
         cpu: "1000m"
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/os
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: opencti
+            opencti.component: ingestion
 
 ##
 # OPENCTI WORKER

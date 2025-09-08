@@ -5,8 +5,16 @@ kind: Deployment
 metadata:
   name: {{ include "opencti.fullname" . }}-{{ $serverType }}
   labels:
+    {{- if .Values.clustering.enabled }}
+    {{- if eq $serverType "frontend" }}
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+    {{- else if eq $serverType "ingestion" }}
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+    {{- end }}
+    {{- else }}
     {{- include "opencti.serverLabels" . | nindent 4 }}
     opencti.component: {{ $serverType }}
+    {{- end }}
 spec:
   {{- if not .Values.clustering.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -21,8 +29,16 @@ spec:
   {{- end }}
   selector:
     matchLabels:
+      {{- if .Values.clustering.enabled }}
+      {{- if eq $serverType "frontend" }}
+      {{- include "opencti.selectorFrontendLabels" . | nindent 6 }}
+      {{- else if eq $serverType "ingestion" }}
+      {{- include "opencti.selectorIngestionLabels" . | nindent 6 }}
+      {{- end }}
+      {{- else }}
       {{- include "opencti.selectorServerLabels" . | nindent 6 }}
       opencti.component: {{ $serverType }}
+      {{- end }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -30,8 +46,16 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        {{- if .Values.clustering.enabled }}
+        {{- if eq $serverType "frontend" }}
+        {{- include "opencti.selectorFrontendLabels" . | nindent 8 }}
+        {{- else if eq $serverType "ingestion" }}
+        {{- include "opencti.selectorIngestionLabels" . | nindent 8 }}
+        {{- end }}
+        {{- else }}
         {{- include "opencti.selectorServerLabels" . | nindent 8 }}
         opencti.component: {{ $serverType }}
+        {{- end }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -304,6 +328,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with (.Values.clustering.frontend.topologySpreadConstraints | default .Values.topologySpreadConstraints) }}
+      {{- $_ := include "opencti.patchTopologySpreadConstraintsFrontend" $ }}
       topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -345,6 +370,7 @@ spec:
           {{- range $key, $value := $selectorLabels }}
             {{- $_ := set $constraint.labelSelector.matchLabels $key $value }}
           {{- end }}
+          {{- $_ := set $constraint.labelSelector.matchLabels "opencti.component" $serverType }}
         {{- end }}
         {{- toYaml $patchedConstraints | nindent 8 }}
       {{- end }}
