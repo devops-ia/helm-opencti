@@ -538,6 +538,170 @@ connectorsGlobal:
     #   mountPath: "/etc/foo"
     #   readOnly: true
 
+# -- OpenCTI Clustering configuration
+clustering:
+  # -- Enable or disable clustering mode
+  enabled: false
+
+  # -- Frontend cluster configuration (UI/API)
+  frontend:
+    # -- Enable frontend deployment
+    enabled: true
+
+    # -- Number of replicas for frontend
+    replicaCount: 2
+
+    # -- Environment variables específicas para frontend
+    # </br> https://docs.opencti.io/latest/deployment/clustering/#managers-and-schedulers
+    env:
+      NOTIFICATION_MANAGER__ENABLED: false
+      RULE_ENGINE__ENABLED: false
+      TASK_SCHEDULER__ENABLED: false
+
+    # -- Frontend service configuration
+    service:
+      # -- Kubernetes Service type
+      type: ClusterIP
+      # -- Kubernetes Service port
+      port: 80
+      # -- Pod expose port
+      targetPort: 4000
+      # -- Protocol for the service port
+      protocol: TCP
+      # -- Name for the service port
+      portName: http
+      # -- Application protocol (HTTP, HTTPS, etc.)
+      appProtocol: HTTP
+      # -- Additional labels for the service
+      labels: {}
+      # -- Annotations for the service
+      annotations: {}
+      # -- Pod extra ports
+      extraPorts: []
+
+    # -- Frontend ingress configuration
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: opencti-frontend.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+      tls: []
+
+    # -- Frontend resources
+    resources: {}
+      # limits:
+      #   cpu: "1000m"
+      #   memory: 1Gi
+      # requests:
+      #   cpu: "500m"
+      #   memory: 512Mi
+
+    # -- Frontend autoscaling
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+
+    # -- Frontend pod disruption budget
+    podDisruptionBudget:
+      enabled: false
+      maxUnavailable: 1
+      # minAvailable:
+
+    # -- Frontend network policy
+    networkPolicy:
+      enabled: false
+      policyTypes: []
+      ingress: []
+      egress: []
+
+    # -- Frontend affinity
+    affinity: {}
+
+    # -- Frontend tolerations
+    tolerations: []
+
+    # -- Frontend topology spread constraints
+    topologySpreadConstraints: []
+
+  # -- Ingestion cluster configuration (Processing/Workers)
+  ingestion:
+    # -- Enable ingestion deployment
+    enabled: true
+
+    # -- Number of replicas for ingestion
+    replicaCount: 3
+
+    # -- Environment variables específicas para ingestion
+    env: {}
+      # APP__SPECIFIC_INGESTION_VAR: value
+
+    # -- Ingestion service configuration (interno)
+    service:
+      # -- Kubernetes Service type
+      type: ClusterIP
+      # -- Kubernetes Service port
+      port: 80
+      # -- Pod expose port
+      targetPort: 4000
+      # -- Protocol for the service port
+      protocol: TCP
+      # -- Name for the service port
+      portName: http
+      # -- Application protocol (HTTP, HTTPS, etc.)
+      appProtocol: HTTP
+      # -- Additional labels for the service
+      labels: {}
+      # -- Annotations for the service
+      annotations: {}
+      # -- Pod extra ports
+      extraPorts: []
+
+    # -- Ingestion resources
+    resources: {}
+      # limits:
+      #   cpu: "2000m"
+      #   memory: 2Gi
+      # requests:
+      #   cpu: "1000m"
+      #   memory: 1Gi
+
+    # -- Ingestion autoscaling
+    autoscaling:
+      enabled: false
+      minReplicas: 3
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 85
+
+    # -- Ingestion pod disruption budget
+    podDisruptionBudget:
+      enabled: false
+      maxUnavailable: 2
+      # minAvailable:
+
+    # -- Ingestion network policy
+    networkPolicy:
+      enabled: false
+      policyTypes: []
+      ingress: []
+      egress: []
+
+    # -- Ingestion affinity
+    affinity: {}
+
+    # -- Ingestion tolerations
+    tolerations: []
+
+    # -- Ingestion topology spread constraints
+    topologySpreadConstraints: []
+
 # -- Connectors
 # </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master
 connectors: []

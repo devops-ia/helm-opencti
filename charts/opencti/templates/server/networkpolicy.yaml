@@ -1,3 +1,4 @@
+{{- if not .Values.clustering.enabled }}
 {{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -45,4 +46,108 @@ spec:
   - {}
   {{- end }}
 
+{{- end }}
+{{- else }}
+
+{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "opencti.fullname" . }}-frontend
+  labels:
+    {{- include "opencti.serverLabels" . | nindent 4 }}
+    opencti.component: frontend
+spec:
+  {{- if and (not .Values.clustering.frontend.networkPolicy.policyTypes) (not .Values.clustering.frontend.networkPolicy.ingress) (not .Values.clustering.frontend.networkPolicy.egress) }}
+  podSelector: {}
+  {{- else }}
+  podSelector:
+    matchLabels:
+      {{- include "opencti.selectorServerLabels" . | nindent 6 }}
+      opencti.component: frontend
+  {{- end }}
+
+  {{- if .Values.clustering.frontend.networkPolicy.policyTypes }}
+  {{- with .Values.clustering.frontend.networkPolicy.policyTypes }}
+  policyTypes:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  policyTypes:
+    - Ingress
+    - Egress
+  {{- end }}
+
+  {{- if .Values.clustering.frontend.networkPolicy.ingress }}
+  {{- with .Values.clustering.frontend.networkPolicy.ingress }}
+  ingress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  ingress:
+  - {}
+  {{- end }}
+
+  {{- if .Values.clustering.frontend.networkPolicy.egress }}
+  {{- with .Values.clustering.frontend.networkPolicy.egress }}
+  egress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  egress:
+  - {}
+  {{- end }}
+{{- end }}
+
+{{- if and .Values.clustering.ingestion.enabled .Values.clustering.ingestion.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "opencti.fullname" . }}-ingestion
+  labels:
+    {{- include "opencti.serverLabels" . | nindent 4 }}
+    opencti.component: ingestion
+spec:
+  {{- if and (not .Values.clustering.ingestion.networkPolicy.policyTypes) (not .Values.clustering.ingestion.networkPolicy.ingress) (not .Values.clustering.ingestion.networkPolicy.egress) }}
+  podSelector: {}
+  {{- else }}
+  podSelector:
+    matchLabels:
+      {{- include "opencti.selectorServerLabels" . | nindent 6 }}
+      opencti.component: ingestion
+  {{- end }}
+
+  {{- if .Values.clustering.ingestion.networkPolicy.policyTypes }}
+  {{- with .Values.clustering.ingestion.networkPolicy.policyTypes }}
+  policyTypes:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  policyTypes:
+    - Ingress
+    - Egress
+  {{- end }}
+
+  {{- if .Values.clustering.ingestion.networkPolicy.ingress }}
+  {{- with .Values.clustering.ingestion.networkPolicy.ingress }}
+  ingress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  ingress:
+  - {}
+  {{- end }}
+
+  {{- if .Values.clustering.ingestion.networkPolicy.egress }}
+  {{- with .Values.clustering.ingestion.networkPolicy.egress }}
+  egress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- else }}
+  egress:
+  - {}
+  {{- end }}
+{{- end }}
 {{- end }}

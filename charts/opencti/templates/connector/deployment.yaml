@@ -79,15 +79,27 @@ spec:
               RETRY=0;
               until [ $RETRY -eq {{ .readyChecker.retries }} ];
               do
-                if nc -zv {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server {{ $.Values.service.port }}; then
-                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
+                {{- if $.Values.clustering.enabled }}
+                {{- if $.Values.clustering.frontend.enabled }}
+                SERVICE_NAME="{{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-frontend";
+                SERVICE_PORT="{{ $.Values.clustering.frontend.service.port }}";
+                {{- else }}
+                SERVICE_NAME="{{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-ingestion";
+                SERVICE_PORT="{{ $.Values.clustering.ingestion.service.port }}";
+                {{- end }}
+                {{- else }}
+                SERVICE_NAME="{{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server";
+                SERVICE_PORT="{{ $.Values.service.port }}";
+                {{- end }}
+                if nc -zv $SERVICE_NAME $SERVICE_PORT; then
+                  echo "Service $SERVICE_NAME:$SERVICE_PORT is ready";
                   exit 0;
                 fi;
-                echo "[$RETRY/{{ .readyChecker.retries }}] waiting service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} is ready";
+                echo "[$RETRY/{{ .readyChecker.retries }}] waiting service $SERVICE_NAME:$SERVICE_PORT is ready";
                 sleep {{ .readyChecker.timeout }};
                 RETRY=$(($RETRY + 1));
                 if [ $RETRY -eq {{ .readyChecker.retries }} ]; then
-                  echo "Service {{ $.Values.fullnameOverride | default (include "opencti.fullname" $) }}-server:{{ $.Values.service.port }} did not become ready after {{ .readyChecker.retries }} retries";
+                  echo "Service $SERVICE_NAME:$SERVICE_PORT did not become ready after {{ .readyChecker.retries }} retries";
                   exit 1;
                 fi;
               done
@@ -184,12 +196,32 @@ spec:
             {{- end }}
             # Special handling for OPENCTI_URL which is constructed from other values
             {{- if not (hasKey $envList "OPENCTI_URL") }}
+            {{- if $.Values.clustering.enabled }}
+            {{- if $.Values.clustering.frontend.enabled }}
+            {{- if eq $.Values.env.APP__BASE_PATH "/" }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" $ }}-frontend:{{ $.Values.clustering.frontend.service.port }}"
+            {{- else }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" $ }}-frontend:{{ $.Values.clustering.frontend.service.port }}{{ $.Values.env.APP__BASE_PATH }}"
+            {{- end }}
+            {{- else }}
+            {{- if eq $.Values.env.APP__BASE_PATH "/" }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" $ }}-ingestion:{{ $.Values.clustering.ingestion.service.port }}"
+            {{- else }}
+            - name: OPENCTI_URL
+              value: "http://{{ include "opencti.fullname" $ }}-ingestion:{{ $.Values.clustering.ingestion.service.port }}{{ $.Values.env.APP__BASE_PATH }}"
+            {{- end }}
+            {{- end }}
+            {{- else }}
             {{- if eq $.Values.env.APP__BASE_PATH "/" }}
             - name: OPENCTI_URL
               value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}"
             {{- else }}
             - name: OPENCTI_URL
               value: "http://{{ include "opencti.fullname" $ }}-server:{{ $.Values.service.port }}{{ $.Values.env.APP__BASE_PATH }}"
+            {{- end }}
             {{- end }}
             {{- end }}
             # Special handling for OPENCTI_TOKEN which is constructed from other values

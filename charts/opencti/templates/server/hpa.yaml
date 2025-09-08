@@ -1,3 +1,4 @@
+{{- if not .Values.clustering.enabled }}
 {{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -19,7 +20,7 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.worker.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
@@ -29,4 +30,74 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
+{{- end }}
+{{- else }}
+{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "opencti.fullname" . }}-frontend
+  labels:
+    {{- include "opencti.serverLabels" . | nindent 4 }}
+    opencti.component: frontend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "opencti.fullname" . }}-frontend
+  minReplicas: {{ .Values.clustering.frontend.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.clustering.frontend.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.clustering.frontend.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.clustering.frontend.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.clustering.frontend.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.clustering.frontend.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
+{{- if and .Values.clustering.ingestion.enabled .Values.clustering.ingestion.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "opencti.fullname" . }}-ingestion
+  labels:
+    {{- include "opencti.serverLabels" . | nindent 4 }}
+    opencti.component: ingestion
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "opencti.fullname" . }}-ingestion
+  minReplicas: {{ .Values.clustering.ingestion.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.clustering.ingestion.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.clustering.ingestion.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.clustering.ingestion.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.clustering.ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.clustering.ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
 {{- end }}
