@@ -34,7 +34,7 @@ Can reference the secret using `envFromSecrets` in any (is the same `Secret` for
 #### Sample
 
 > [!NOTE]
-> Follow [`ci-common-values.yaml`](../ci/ci-common-values.yaml) to see the complete example.
+> Follow [`ci-standalone-values.yaml`](../ci/ci-standalone-values.yaml) to see the complete example.
 
 Following `secrets` should be cipher with external tool such as [SOPS](https://github.com/getsops/sops):
 

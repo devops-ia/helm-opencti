@@ -166,3 +166,96 @@ This works because Helm treats dictionaries as mutable objects and allows passin
 {{- include "opencti.patchSelectorWorkerLabels" (merge (dict "_target" $constraint (include "opencti.selectorWorkerLabels" $)) $) }}
 {{- end }}
 {{- end }}
+
+{{/* ---------------------------------------------------*/}}
+{{/* ---------------------------------------------------*/}}
+{{/* ---------------------------------------------------*/}}
+{{/* ---------------------------------------------------*/}}
+{{/* ---------------------------------------------------*/}}
+{{/* ---------------------------------------------------*/}}
+
+{{/*
+#######################
+CLUSTERING COMPONENTS SECTION
+#######################
+*/}}
+
+{{/*
+Frontend component label
+*/}}
+{{- define "opencti.frontendComponentLabel" -}}
+opencti.component: frontend
+{{- end -}}
+
+{{/*
+Ingestion component label
+*/}}
+{{- define "opencti.ingestionComponentLabel" -}}
+opencti.component: ingestion
+{{- end -}}
+
+{{/*
+Generate labels for frontend component
+*/}}
+{{- define "opencti.frontendLabels" -}}
+{{- toYaml (merge ((include "opencti.labels" .) | fromYaml) ((include "opencti.frontendComponentLabel" .) | fromYaml)) }}
+{{- end }}
+
+{{/*
+Generate selectorLabels for frontend component
+*/}}
+{{- define "opencti.selectorFrontendLabels" -}}
+{{- toYaml (merge ((include "opencti.selectorLabels" .) | fromYaml) ((include "opencti.frontendComponentLabel" .) | fromYaml)) }}
+{{- end }}
+
+{{/*
+Generate labels for ingestion component
+*/}}
+{{- define "opencti.ingestionLabels" -}}
+{{- toYaml (merge ((include "opencti.labels" .) | fromYaml) ((include "opencti.ingestionComponentLabel" .) | fromYaml)) }}
+{{- end }}
+
+{{/*
+Generate selectorLabels for ingestion component
+*/}}
+{{- define "opencti.selectorIngestionLabels" -}}
+{{- toYaml (merge ((include "opencti.selectorLabels" .) | fromYaml) ((include "opencti.ingestionComponentLabel" .) | fromYaml)) }}
+{{- end }}
+
+{{/*
+Patch the label selector for frontend component
+*/}}
+{{- define "opencti.patchSelectorFrontendLabels" -}}
+{{- if not (hasKey ._target "labelSelector") }}
+{{- $selectorLabels := (include "opencti.selectorFrontendLabels" .) | fromYaml }}
+{{- $_ := set ._target "labelSelector" (dict "matchLabels" $selectorLabels) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Patch the label selector for ingestion component
+*/}}
+{{- define "opencti.patchSelectorIngestionLabels" -}}
+{{- if not (hasKey ._target "labelSelector") }}
+{{- $selectorLabels := (include "opencti.selectorIngestionLabels" .) | fromYaml }}
+{{- $_ := set ._target "labelSelector" (dict "matchLabels" $selectorLabels) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Patch topology spread constraints for frontend
+*/}}
+{{- define "opencti.patchTopologySpreadConstraintsFrontend" -}}
+{{- range $constraint := .Values.clustering.frontend.topologySpreadConstraints }}
+{{- include "opencti.patchSelectorFrontendLabels" (merge (dict "_target" $constraint) $) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Patch topology spread constraints for ingestion
+*/}}
+{{- define "opencti.patchTopologySpreadConstraintsIngestion" -}}
+{{- range $constraint := .Values.clustering.ingestion.topologySpreadConstraints }}
+{{- include "opencti.patchSelectorIngestionLabels" (merge (dict "_target" $constraint) $) }}
+{{- end }}
+{{- end }}

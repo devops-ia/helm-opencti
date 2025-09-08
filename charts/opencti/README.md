@@ -4,7 +4,7 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 
 > [!NOTE]
 > The default `values.yaml` provided with this chart will **not work out-of-the-box**.
-> Please refer to the [`ci/ci-common-values.yaml`](./ci/ci-common-values.yaml) example for a working configuration suitable for CI/CD installations.
+> Please refer to the [`ci/ci-standalone-values.yaml`](./ci/ci-standalone-values.yaml) example for a working configuration suitable for CI/CD installations.
 > Additionally, make sure to read the [`docs/configuration.md`](./docs/configuration.md) guide for detailed configuration instructions and best practices.
 
 ## Maintainers
@@ -70,7 +70,11 @@ _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command doc
 
 ## Basic installation and examples
 
-See [basic installation](docs/configuration.md) and [examples](docs/examples.md).
+See [basic installation](docs/configuration.md), [clustering installation](docs/configuration-clustering-mode.md) and [examples](docs/examples.md).
+
+## Upgrades
+
+See [Upgrade guide: v1 to v2](docs/guides/UPGRADE-v1-to-v2.md)
 
 ## Configuration
 
@@ -87,6 +91,51 @@ helm show values opencti/opencti
 | affinity | object | `{}` | Affinity for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
 | args | list | `[]` | Configure args </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/ |
 | autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Autoscaling with CPU or memory utilization percentage </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
+| clustering | object | `{"enabled":false,"frontend":{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":10,"minReplicas":2,"targetCPUUtilizationPercentage":70,"targetMemoryUtilizationPercentage":80},"enabled":true,"env":{"NOTIFICATION_MANAGER__ENABLED":false,"RULE_ENGINE__ENABLED":false,"TASK_SCHEDULER__ENABLED":false},"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"opencti-frontend.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"podDisruptionBudget":{"enabled":false,"maxUnavailable":1},"replicaCount":2,"resources":{},"service":{"annotations":{},"appProtocol":"HTTP","extraPorts":[],"labels":{},"port":80,"portName":"http","protocol":"TCP","targetPort":4000,"type":"ClusterIP"},"tolerations":[],"topologySpreadConstraints":[]},"ingestion":{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":20,"minReplicas":3,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":85},"enabled":true,"env":{},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"podDisruptionBudget":{"enabled":false,"maxUnavailable":2},"replicaCount":3,"resources":{},"service":{"annotations":{},"appProtocol":"HTTP","extraPorts":[],"labels":{},"port":80,"portName":"http","protocol":"TCP","targetPort":4000,"type":"ClusterIP"},"tolerations":[],"topologySpreadConstraints":[]}}` | OpenCTI Clustering configuration |
+| clustering.enabled | bool | `false` | Enable or disable clustering mode |
+| clustering.frontend | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":10,"minReplicas":2,"targetCPUUtilizationPercentage":70,"targetMemoryUtilizationPercentage":80},"enabled":true,"env":{"NOTIFICATION_MANAGER__ENABLED":false,"RULE_ENGINE__ENABLED":false,"TASK_SCHEDULER__ENABLED":false},"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"opencti-frontend.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"podDisruptionBudget":{"enabled":false,"maxUnavailable":1},"replicaCount":2,"resources":{},"service":{"annotations":{},"appProtocol":"HTTP","extraPorts":[],"labels":{},"port":80,"portName":"http","protocol":"TCP","targetPort":4000,"type":"ClusterIP"},"tolerations":[],"topologySpreadConstraints":[]}` | Frontend cluster configuration (UI/API) |
+| clustering.frontend.affinity | object | `{}` | Frontend affinity |
+| clustering.frontend.autoscaling | object | `{"enabled":false,"maxReplicas":10,"minReplicas":2,"targetCPUUtilizationPercentage":70,"targetMemoryUtilizationPercentage":80}` | Frontend autoscaling |
+| clustering.frontend.enabled | bool | `true` | Enable frontend deployment |
+| clustering.frontend.env | object | `{"NOTIFICATION_MANAGER__ENABLED":false,"RULE_ENGINE__ENABLED":false,"TASK_SCHEDULER__ENABLED":false}` | Environment variables específicas para frontend </br> https://docs.opencti.io/latest/deployment/clustering/#managers-and-schedulers |
+| clustering.frontend.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"opencti-frontend.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Frontend ingress configuration |
+| clustering.frontend.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | Frontend network policy |
+| clustering.frontend.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1}` | Frontend pod disruption budget |
+| clustering.frontend.replicaCount | int | `2` | Number of replicas for frontend |
+| clustering.frontend.resources | object | `{}` | Frontend resources |
+| clustering.frontend.service | object | `{"annotations":{},"appProtocol":"HTTP","extraPorts":[],"labels":{},"port":80,"portName":"http","protocol":"TCP","targetPort":4000,"type":"ClusterIP"}` | Frontend service configuration |
+| clustering.frontend.service.annotations | object | `{}` | Annotations for the service |
+| clustering.frontend.service.appProtocol | string | `"HTTP"` | Application protocol (HTTP, HTTPS, etc.) |
+| clustering.frontend.service.extraPorts | list | `[]` | Pod extra ports |
+| clustering.frontend.service.labels | object | `{}` | Additional labels for the service |
+| clustering.frontend.service.port | int | `80` | Kubernetes Service port |
+| clustering.frontend.service.portName | string | `"http"` | Name for the service port |
+| clustering.frontend.service.protocol | string | `"TCP"` | Protocol for the service port |
+| clustering.frontend.service.targetPort | int | `4000` | Pod expose port |
+| clustering.frontend.service.type | string | `"ClusterIP"` | Kubernetes Service type |
+| clustering.frontend.tolerations | list | `[]` | Frontend tolerations |
+| clustering.frontend.topologySpreadConstraints | list | `[]` | Frontend topology spread constraints |
+| clustering.ingestion | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":20,"minReplicas":3,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":85},"enabled":true,"env":{},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"podDisruptionBudget":{"enabled":false,"maxUnavailable":2},"replicaCount":3,"resources":{},"service":{"annotations":{},"appProtocol":"HTTP","extraPorts":[],"labels":{},"port":80,"portName":"http","protocol":"TCP","targetPort":4000,"type":"ClusterIP"},"tolerations":[],"topologySpreadConstraints":[]}` | Ingestion cluster configuration (Processing/Workers) |
+| clustering.ingestion.affinity | object | `{}` | Ingestion affinity |
+| clustering.ingestion.autoscaling | object | `{"enabled":false,"maxReplicas":20,"minReplicas":3,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":85}` | Ingestion autoscaling |
+| clustering.ingestion.enabled | bool | `true` | Enable ingestion deployment |
+| clustering.ingestion.env | object | `{}` | Environment variables específicas para ingestion |
+| clustering.ingestion.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | Ingestion network policy |
+| clustering.ingestion.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":2}` | Ingestion pod disruption budget |
+| clustering.ingestion.replicaCount | int | `3` | Number of replicas for ingestion |
+| clustering.ingestion.resources | object | `{}` | Ingestion resources |
+| clustering.ingestion.service | object | `{"annotations":{},"appProtocol":"HTTP","extraPorts":[],"labels":{},"port":80,"portName":"http","protocol":"TCP","targetPort":4000,"type":"ClusterIP"}` | Ingestion service configuration (interno) |
+| clustering.ingestion.service.annotations | object | `{}` | Annotations for the service |
+| clustering.ingestion.service.appProtocol | string | `"HTTP"` | Application protocol (HTTP, HTTPS, etc.) |
+| clustering.ingestion.service.extraPorts | list | `[]` | Pod extra ports |
+| clustering.ingestion.service.labels | object | `{}` | Additional labels for the service |
+| clustering.ingestion.service.port | int | `80` | Kubernetes Service port |
+| clustering.ingestion.service.portName | string | `"http"` | Name for the service port |
+| clustering.ingestion.service.protocol | string | `"TCP"` | Protocol for the service port |
+| clustering.ingestion.service.targetPort | int | `4000` | Pod expose port |
+| clustering.ingestion.service.type | string | `"ClusterIP"` | Kubernetes Service type |
+| clustering.ingestion.tolerations | list | `[]` | Ingestion tolerations |
+| clustering.ingestion.topologySpreadConstraints | list | `[]` | Ingestion topology spread constraints |
 | command | list | `[]` | Configure command </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/ |
 | configMaps | list | `[]` | ConfigMap values to create configuration files Generate ConfigMap with following name: <release-name>-<name> </br> Ref: https://kubernetes.io/docs/concepts/configuration/configmap/ |
 | connectors | list | `[]` | Connectors </br> Ref: https://github.com/OpenCTI-Platform/connectors/tree/master |

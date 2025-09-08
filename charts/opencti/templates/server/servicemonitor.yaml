@@ -1,3 +1,4 @@
+{{- if not .Values.clustering.enabled }}
 {{- if and .Values.serviceMonitor.enabled .Values.env.APP__TELEMETRY__METRICS__ENABLED (lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "servicemonitors.monitoring.coreos.com") }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -21,4 +22,68 @@ spec:
     relabelings:
     {{- toYaml .Values.serviceMonitor.relabelings | nindent 4 }}
     {{- end }}
+{{- end }}
+{{- else }}
+{{- if and .Values.clustering.frontend.enabled (hasKey .Values.clustering.frontend "serviceMonitor") .Values.clustering.frontend.serviceMonitor.enabled .Values.env.APP__TELEMETRY__METRICS__ENABLED (lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "servicemonitors.monitoring.coreos.com") }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "opencti.fullname" . }}-frontend
+  labels:
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "opencti.selectorFrontendLabels" . | nindent 8 }}
+  endpoints:
+  - port: metrics
+    interval: {{ .Values.clustering.frontend.serviceMonitor.interval | default .Values.serviceMonitor.interval | quote }}
+    scrapeTimeout: {{ .Values.clustering.frontend.serviceMonitor.scrapeTimeout | default .Values.serviceMonitor.scrapeTimeout | quote }}
+    {{- if .Values.clustering.frontend.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{- toYaml .Values.clustering.frontend.serviceMonitor.metricRelabelings | nindent 4 }}
+    {{- else if .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{- toYaml .Values.serviceMonitor.metricRelabelings | nindent 4 }}
+    {{- end }}
+    {{- if .Values.clustering.frontend.serviceMonitor.relabelings }}
+    relabelings:
+    {{- toYaml .Values.clustering.frontend.serviceMonitor.relabelings | nindent 4 }}
+    {{- else if .Values.serviceMonitor.relabelings }}
+    relabelings:
+    {{- toYaml .Values.serviceMonitor.relabelings | nindent 4 }}
+    {{- end }}
+{{- end }}
+{{- if and .Values.clustering.ingestion.enabled (hasKey .Values.clustering.ingestion "serviceMonitor") .Values.clustering.ingestion.serviceMonitor.enabled .Values.env.APP__TELEMETRY__METRICS__ENABLED (lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "servicemonitors.monitoring.coreos.com") }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "opencti.fullname" . }}-ingestion
+  labels:
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "opencti.selectorIngestionLabels" . | nindent 8 }}
+  endpoints:
+  - port: metrics
+    interval: {{ .Values.clustering.ingestion.serviceMonitor.interval | default .Values.serviceMonitor.interval | quote }}
+    scrapeTimeout: {{ .Values.clustering.ingestion.serviceMonitor.scrapeTimeout | default .Values.serviceMonitor.scrapeTimeout | quote }}
+    {{- if .Values.clustering.ingestion.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{- toYaml .Values.clustering.ingestion.serviceMonitor.metricRelabelings | nindent 4 }}
+    {{- else if .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{- toYaml .Values.serviceMonitor.metricRelabelings | nindent 4 }}
+    {{- end }}
+    {{- if .Values.clustering.ingestion.serviceMonitor.relabelings }}
+    relabelings:
+    {{- toYaml .Values.clustering.ingestion.serviceMonitor.relabelings | nindent 4 }}
+    {{- else if .Values.serviceMonitor.relabelings }}
+    relabelings:
+    {{- toYaml .Values.serviceMonitor.relabelings | nindent 4 }}
+    {{- end }}
+{{- end }}
 {{- end }}

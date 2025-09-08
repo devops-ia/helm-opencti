@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > The default `values.yaml` provided with this chart will **not work out-of-the-box**.
-> Please refer to the [`ci/ci-common-values.yaml`](./ci/ci-common-values.yaml) example for a working configuration suitable for CI/CD installations.
+> Please refer to the [`ci/ci-standalone-values.yaml`](./ci/ci-standalone-values.yaml) example for a working configuration suitable for CI/CD installations.
 > Additionally, make sure to read the [`docs/configuration.md`](./docs/configuration.md) guide for detailed configuration instructions and best practices.
 
 {{ template "chart.maintainersSection" . }}
@@ -58,7 +58,11 @@ _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command doc
 
 ## Basic installation and examples
 
-See [basic installation](docs/configuration.md) and [examples](docs/examples.md).
+See [basic installation](docs/configuration.md), [clustering installation](docs/configuration-clustering-mode.md) and [examples](docs/examples.md).
+
+## Upgrades
+
+See [Upgrade guide: v1 to v2](docs/guides/UPGRADE-v1-to-v2.md)
 
 ## Configuration
 

@@ -4,6 +4,7 @@
 
 Application access:
 
+{{- if not .Values.clustering.enabled }}
 {{- if .Values.ingress.enabled }}
   {{- range $host := .Values.ingress.hosts }}
     {{- range .paths }}
@@ -28,6 +29,34 @@ Application access:
   kubectl --namespace {{ $namespace }} port-forward $POD_NAME {{ .Values.service.targetPort | default .Values.service.port }}:{{ .Values.service.targetPort | default .Values.service.port }}
   Access at: http://127.0.0.1:{{ .Values.service.targetPort | default .Values.service.port }}
 {{- end }}
+{{- else }}
+{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.ingress.enabled }}
+  {{- range $host := .Values.clustering.frontend.ingress.hosts }}
+    {{- range .paths }}
+      http{{ if $.Values.clustering.frontend.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.clustering.frontend.ingress.tls }}
+  (TLS/HTTPS enabled)
+  {{- end }}
+{{- else if and .Values.clustering.frontend.enabled (contains "LoadBalancer" .Values.clustering.frontend.service.type) }}
+  It may take a few minutes for the external IP to be assigned.
+  Run:
+    kubectl get svc --namespace {{ $namespace }} {{ $fullname }}-frontend -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+  Access at:
+    http://<EXTERNAL-IP>:{{ .Values.clustering.frontend.service.port }}
+{{- else if and .Values.clustering.frontend.enabled (contains "NodePort" .Values.clustering.frontend.service.type) }}
+  export NODE_PORT=$(kubectl get --namespace {{ $namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ $fullname }}-frontend)
+  export NODE_IP=$(kubectl get nodes --namespace {{ $namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "URL: http://$NODE_IP:$NODE_PORT"
+{{- else if .Values.clustering.frontend.enabled }}
+  export POD_NAME=$(kubectl get pods --namespace {{ $namespace }} -l "app.kubernetes.io/name={{ include "opencti.name" . }},opencti.component=frontend" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ $namespace }} port-forward $POD_NAME {{ .Values.clustering.frontend.service.targetPort | default .Values.clustering.frontend.service.port }}:{{ .Values.clustering.frontend.service.targetPort | default .Values.clustering.frontend.service.port }}
+  Access at: http://127.0.0.1:{{ .Values.clustering.frontend.service.targetPort | default .Values.clustering.frontend.service.port }}
+{{- else }}
+  Frontend component not enabled - no public access configured
+{{- end }}
+{{- end }}
 
 ===========
 Application
@@ -37,17 +66,34 @@ Application
 - Namespace: {{ $namespace }}
 - Chart version: {{ .Chart.Version }}
 - OpenCTI version: {{ $version }}
+{{- if not .Values.clustering.enabled }}
+- Mode: Single node
 - Service type: {{ .Values.service.type }}
 - Port: {{ .Values.service.targetPort | default .Values.service.port }}
+{{- else }}
+- Mode: Clustering
+- Frontend service type: {{ if .Values.clustering.frontend.enabled }}{{ .Values.clustering.frontend.service.type }}{{ else }}Not enabled{{ end }}
+- Ingestion service type: {{ if .Values.clustering.ingestion.enabled }}{{ .Values.clustering.ingestion.service.type }}{{ else }}Not enabled{{ end }}
+{{- end }}
 
 =========
 Resources
 =========
 
+{{- if not .Values.clustering.enabled }}
 - Server: {{ $fullname }}-server
+{{- else }}
+- Frontend: {{ if .Values.clustering.frontend.enabled }}{{ $fullname }}-frontend (replicas: {{ .Values.clustering.frontend.replicaCount | default 1 }}){{ else }}Not deployed{{ end }}
+- Ingestion: {{ if .Values.clustering.ingestion.enabled }}{{ $fullname }}-ingestion (replicas: {{ .Values.clustering.ingestion.replicaCount | default 1 }}){{ else }}Not deployed{{ end }}
+{{- end }}
 - Worker: {{- if and .Values.worker .Values.worker.enabled }}
     Enabled (replicas: {{ .Values.worker.replicaCount | default 1 }})
     Name: {{ $fullname }}-worker
+    {{- if .Values.clustering.enabled }}
+    Target: {{ if .Values.clustering.ingestion.enabled }}Ingestion cluster{{ else }}Frontend cluster{{ end }}
+    {{- else }}
+    Target: Server
+    {{- end }}
   {{- else }}
     Not deployed
   {{- end }}
@@ -58,6 +104,11 @@ Resources
   {{- if .enabled }}
   {{- $anyEnabled = true }}
     - {{ .name }} (replicas: {{ .replicas | default 1 }})
+      {{- if $.Values.clustering.enabled }}
+      Target: {{ if $.Values.clustering.frontend.enabled }}Frontend cluster{{ else }}Ingestion cluster{{ end }}
+      {{- else }}
+      Target: Server
+      {{- end }}
   {{- end }}
   {{- end }}
   {{- if not $anyEnabled }}
