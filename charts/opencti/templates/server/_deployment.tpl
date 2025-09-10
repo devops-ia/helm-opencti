@@ -1,5 +1,14 @@
 {{- define "opencti.deploymentTemplate" -}}
 {{- $serverType := .serverType -}}
+{{- $healthKey := "" }}
+{{- range .Values.secrets }}
+  {{- if and (eq $healthKey "") (hasKey .data "APP__HEALTH_ACCESS_KEY") }}
+    {{- $healthKey = index .data "APP__HEALTH_ACCESS_KEY" }}
+  {{- end }}
+{{- end }}
+{{- if eq $healthKey "" }}
+  {{- $healthKey = .Values.env.APP__HEALTH_ACCESS_KEY | default "" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -169,7 +178,7 @@ spec:
             {{- toYaml .Values.livenessProbeCustom | nindent 12 }}
             {{- else }}
             httpGet:
-              path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" .Values.env.APP__HEALTH_ACCESS_KEY) | quote }}
+              path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" $healthKey) | quote }}
               {{- if .Values.clustering.enabled }}
               {{- if eq $serverType "frontend" }}
               port: {{ .Values.clustering.frontend.service.targetPort | default .Values.service.targetPort | default .Values.service.port }}
@@ -192,7 +201,7 @@ spec:
             {{- toYaml .Values.readinessProbeCustom | nindent 12 }}
             {{- else }}
             httpGet:
-              path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" .Values.env.APP__HEALTH_ACCESS_KEY) | quote }}
+              path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" $healthKey) | quote }}
               {{- if .Values.clustering.enabled }}
               {{- if eq $serverType "frontend" }}
               port: {{ .Values.clustering.frontend.service.targetPort | default .Values.service.targetPort | default .Values.service.port }}
@@ -215,7 +224,7 @@ spec:
             {{- toYaml .Values.startupProbeCustom | nindent 12 }}
             {{- else }}
             httpGet:
-              path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" .Values.env.APP__HEALTH_ACCESS_KEY) | quote }}
+              path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" $healthKey) | quote }}
               {{- if .Values.clustering.enabled }}
               {{- if eq $serverType "frontend" }}
               port: {{ .Values.clustering.frontend.service.targetPort | default .Values.service.targetPort | default .Values.service.port }}

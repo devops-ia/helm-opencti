@@ -311,7 +311,7 @@ connectors:
 # OPENSEARCH
 opensearch:
   enabled: true
-  fullnameOverride: opencti-ci-opensearch
+  fullnameOverride: opencti-cluster-ci-opensearch
 
   nodeGroup: ""
   opensearchJavaOpts: "-Xmx512M -Xms512M"
