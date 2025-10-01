@@ -67,7 +67,7 @@ jobs:
 
       - name: Login in to the Container registry
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -75,11 +75,11 @@ jobs:
 
       - name: Install Cosign
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # v3.10.0
 
       - name: Install Oras
         if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
-        uses: oras-project/setup-oras@8d34698a59f5ffe24821f0b48ab62a3de8b64b20 # v1.2.3
+        uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1.2.4
 
       # ref: https://github.com/backstage/charts/blob/88240ce7a0726e3773ee0e4866fbe6325c15267b/.github/workflows/release.yml#L50
       - name: Publish and Sign OCI Charts
