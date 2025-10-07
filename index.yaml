@@ -2,6 +2,54 @@ apiVersion: v1
 entries:
   opencti:
   - apiVersion: v2
+    appVersion: 6.8.3
+    created: "2025-10-07T19:32:45.503821981Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.16.0
+    - condition: minio.enabled
+      name: minio
+      repository: https://charts.min.io/
+      version: 5.4.0
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.2.1
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v1.34.1
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: c097ffb55fe457fbf7df0476182e9d0d4961c01eb7c3833237753134ac6570cf
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v2.0.10/opencti-2.0.10.tgz
+    version: 2.0.10
+  - apiVersion: v2
     appVersion: 6.8.2
     created: "2025-10-02T07:03:37.444586629Z"
     dependencies:
@@ -7717,4 +7765,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-10-02T07:03:37.444996645Z"
+generated: "2025-10-07T19:32:45.50429728Z"
