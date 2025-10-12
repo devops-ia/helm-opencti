@@ -7,7 +7,6 @@ metadata:
   name: {{ include "opencti.fullname" . }}-{{ $serverType }}
   labels:
     {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: {{ $serverType }}
     {{- with $serviceConfig.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -109,5 +108,4 @@ spec:
     {{- end }}
   selector:
     {{- include "opencti.selectorServerLabels" . | nindent 4 }}
-    opencti.component: {{ $serverType }}
 {{- end -}}
