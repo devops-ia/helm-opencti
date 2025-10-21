@@ -22,7 +22,6 @@ metadata:
     {{- end }}
     {{- else }}
     {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: {{ $serverType }}
     {{- end }}
 spec:
   {{- if not .Values.clustering.enabled }}
@@ -46,7 +45,6 @@ spec:
       {{- end }}
       {{- else }}
       {{- include "opencti.selectorServerLabels" . | nindent 6 }}
-      opencti.component: {{ $serverType }}
       {{- end }}
   template:
     metadata:
@@ -63,7 +61,6 @@ spec:
         {{- end }}
         {{- else }}
         {{- include "opencti.selectorServerLabels" . | nindent 8 }}
-        opencti.component: {{ $serverType }}
         {{- end }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
