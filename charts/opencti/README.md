@@ -23,7 +23,7 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 |------------|------|---------|
 | https://charts.min.io/ | minio | 5.4.0 |
 | https://helm.elastic.co | eck-stack | 0.16.0 |
-| https://opensearch-project.github.io/helm-charts/ | opensearch | 3.3.0 |
+| https://opensearch-project.github.io/helm-charts/ | opensearch | 3.3.1 |
 | oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v1.34.2 |
 | oci://registry-1.docker.io/bitnamicharts | rabbitmq | 16.0.13 |
 
