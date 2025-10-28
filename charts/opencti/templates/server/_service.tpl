@@ -6,7 +6,15 @@ kind: Service
 metadata:
   name: {{ include "opencti.fullname" . }}-{{ $serverType }}
   labels:
+    {{- if .Values.clustering.enabled }}
+    {{- if eq $serverType "frontend" }}
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+    {{- else if eq $serverType "ingestion" }}
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
+    {{- end }}
+    {{- else }}
     {{- include "opencti.serverLabels" . | nindent 4 }}
+    {{- end }}
     {{- with $serviceConfig.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -107,5 +115,13 @@ spec:
       protocol: TCP
     {{- end }}
   selector:
+    {{- if .Values.clustering.enabled }}
+    {{- if eq $serverType "frontend" }}
+    {{- include "opencti.selectorFrontendLabels" . | nindent 4 }}
+    {{- else if eq $serverType "ingestion" }}
+    {{- include "opencti.selectorIngestionLabels" . | nindent 4 }}
+    {{- end }}
+    {{- else }}
     {{- include "opencti.selectorServerLabels" . | nindent 4 }}
+    {{- end }}
 {{- end -}}
