@@ -1223,3 +1223,6 @@ redis:
   # Dragonfly storage
   storage:
     enabled: false
+
+  extraArgs:
+    - --cache_mode=true
