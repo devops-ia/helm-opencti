@@ -193,7 +193,7 @@ helm show values opencti/opencti
 | readyChecker.services | list | `[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}]` | List services |
 | readyChecker.tag | string | `"latest"` | Overrides the image tag |
 | readyChecker.timeout | int | `5` | Timeout for each check |
-| redis | object | `{"enabled":true,"storage":{"enabled":false}}` | Dragonfly subchart deployment (alias: Redis) </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml |
+| redis | object | `{"enabled":true,"extraArgs":["--cache_mode=true"],"storage":{"enabled":false}}` | Dragonfly subchart deployment (alias: Redis) </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml |
 | redis.enabled | bool | `true` | Enable or disable Dragonfly subchart |
 | replicaCount | int | `1` | Number of replicas for the service |
 | resources | object | `{}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |

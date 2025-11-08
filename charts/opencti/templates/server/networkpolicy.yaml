@@ -56,8 +56,7 @@ kind: NetworkPolicy
 metadata:
   name: {{ include "opencti.fullname" . }}-frontend
   labels:
-    {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: frontend
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
 spec:
   {{- if and (not .Values.clustering.frontend.networkPolicy.policyTypes) (not .Values.clustering.frontend.networkPolicy.ingress) (not .Values.clustering.frontend.networkPolicy.egress) }}
   podSelector: {}
@@ -107,8 +106,7 @@ kind: NetworkPolicy
 metadata:
   name: {{ include "opencti.fullname" . }}-ingestion
   labels:
-    {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: ingestion
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
 spec:
   {{- if and (not .Values.clustering.ingestion.networkPolicy.policyTypes) (not .Values.clustering.ingestion.networkPolicy.ingress) (not .Values.clustering.ingestion.networkPolicy.egress) }}
   podSelector: {}
