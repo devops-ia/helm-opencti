@@ -3,6 +3,54 @@ entries:
   opencti:
   - apiVersion: v2
     appVersion: 6.8.10
+    created: "2025-11-08T21:32:53.104673028Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.17.0
+    - condition: minio.enabled
+      name: minio
+      repository: https://charts.min.io/
+      version: 5.4.0
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.3.2
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v1.34.2
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: ee32e674d3a800b82cf91e08a5bb697c439d6c81f269ba8b93b59b4da97a440f
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v2.1.4/opencti-2.1.4.tgz
+    version: 2.1.4
+  - apiVersion: v2
+    appVersion: 6.8.10
     created: "2025-11-01T10:13:23.431786397Z"
     dependencies:
     - condition: eck-stack.enabled
@@ -8389,4 +8437,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2025-11-01T10:13:23.432157875Z"
+generated: "2025-11-08T21:32:53.105111881Z"
