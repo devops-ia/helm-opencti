@@ -80,8 +80,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-frontend
   labels:
-    {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: frontend
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
   {{- with .Values.clustering.frontend.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

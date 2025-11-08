@@ -39,8 +39,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "opencti.fullname" . }}-frontend
   labels:
-    {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: frontend
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -73,8 +72,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "opencti.fullname" . }}-ingestion
   labels:
-    {{- include "opencti.serverLabels" . | nindent 4 }}
-    opencti.component: ingestion
+    {{- include "opencti.ingestionLabels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
