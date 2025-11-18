@@ -248,7 +248,7 @@ spec:
             {{- if not (hasKey $envList $key) }}
             - name: {{ $key | upper }}
               valueFrom:
-                secretKeyRef:
+                configMapRef:
                   name: {{ $value.name }}
                   key: {{ $value.key | default $key }}
             {{- $_ := set $envList $key true }}
