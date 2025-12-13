@@ -1,4 +1,4 @@
-name: Check OpenCTI new releases
+name: Check new releases
 
 on:
   workflow_dispatch:
