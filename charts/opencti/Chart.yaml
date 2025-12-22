@@ -30,7 +30,7 @@ dependencies:
     repository: https://charts.min.io/
     condition: minio.enabled
   - name: opensearch
-    version: 3.3.2
+    version: 3.4.0
     repository: https://opensearch-project.github.io/helm-charts/
     condition: opensearch.enabled
   - name: rabbitmq
