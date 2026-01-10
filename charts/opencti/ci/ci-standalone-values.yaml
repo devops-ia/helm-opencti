@@ -17,6 +17,7 @@ env:
 
   ## STORAGE
   MINIO__ENDPOINT: opencti-ci-minio
+  MINIO__PORT: 3900
 
   ## MESSAGE QUEUE
   RABBITMQ__HOSTNAME: opencti-ci-rabbitmq
@@ -55,6 +56,10 @@ secrets:
       APP__ADMIN__PASSWORD: iraLehfJu1NRnQgwIBeH
       APP__ADMIN__TOKEN: b1976749-8a53-4f49-bf04-cafa2a3458c1
       APP__HEALTH_ACCESS_KEY: f93747ff-2ea1-4717-900c-9df20b8e4429
+  - name: minio
+    data:
+      rootUser: GKb81872b6e545a0c633918529
+      rootPassword: a7c5a6bd2c62d9208b20f2671f25bceb7370f6fdc57b7c7a0ff00d4e7b8c0dae
 
 testConnection: true
 
@@ -66,7 +71,7 @@ readyChecker:
   - name: opensearch
     port: 9200
   - name: minio
-    port: 9000
+    port: 3900
   - name: rabbitmq
     port: 5672
   - name: redis
@@ -311,8 +316,15 @@ opensearch:
 minio:
   fullnameOverride: opencti-ci-minio
 
-  rootUser: minio
-  rootPassword: uxLSbJGZzzhZxXUFgdAl
+    # -- When using Garage S3 -- Enable or disable automatic setup
+  autosetup:
+    enabled: true
+    # zone: opencti
+    # size: 1G
+    version: v2.1.0
+
+  rootUser: GKb81872b6e545a0c633918529
+  rootPassword: a7c5a6bd2c62d9208b20f2671f25bceb7370f6fdc57b7c7a0ff00d4e7b8c0dae
 
   resources:
     requests:
@@ -322,7 +334,12 @@ minio:
       memory: 512Mi
 
   persistence:
-    enabled: false
+    enabled: true
+
+  garage:
+    s3:
+      api:
+        region: "us-east-1"
 
 ##
 # RABBITMQ
@@ -365,3 +382,4 @@ redis:
     - --maxmemory=256mb
     - --proactor_threads=1
     - --num_shards=1
+  

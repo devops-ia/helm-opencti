@@ -1,0 +1,161 @@
+{{ if .Values.minio.autosetup.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ include "opencti.fullname" . }}-garagenode-reader"
+  labels:
+    {{- include "opencti.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-upgrade, post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "{{ include "opencti.fullname" . }}-garagenode-read-role"
+  labels:
+    {{- include "opencti.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-upgrade, post-install
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": hook-succeeded
+rules:
+- apiGroups: ["deuxfleurs.fr"]
+  resources: ["garagenodes"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "{{ include "opencti.fullname" . }}-garagenode-read-binding"
+  labels:
+    {{- include "opencti.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-upgrade, post-install
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": hook-succeeded
+subjects:
+- kind: ServiceAccount
+  name: "{{ include "opencti.fullname" . }}-garagenode-reader"
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: "{{ include "opencti.fullname" . }}-garagenode-read-role"
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "opencti.fullname" . }}-init-garage-cluster"
+  labels:
+    {{- include "opencti.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-upgrade, post-install
+    "helm.sh/hook-weight": "4"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: "{{ include "opencti.fullname" . }}-garagenode-reader"
+      restartPolicy: Never
+      containers:
+      - name: alpine
+        image: alpine:3.19
+        env:
+            - name: GARAGE_RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "opencti.fullname" . }}-minio-rpc-secret"
+                  key: rpcSecret
+            - name: GARAGE_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "opencti.fullname" . }}-minio"
+                  key: rootUser
+            - name: GARAGE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "opencti.fullname" . }}-minio"
+                  key: rootPassword
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+
+          apk add --no-cache curl jq
+
+          # Download garage binary which must be equally set to the chart version
+          GARAGE_URL="https://garagehq.deuxfleurs.fr/_releases/{{ .Values.minio.autosetup.version }}/x86_64-unknown-linux-musl/garage"
+          GARAGE_BIN="/usr/local/bin/garage"
+
+          GARAGE_RPC_ID=""
+          GARAGE_ZONE="{{ .Values.minio.autosetup.zone | default "opencti" }}"
+          GARAGE_SIZE="{{ .Values.minio.autosetup.size | default "1G"  }}"
+
+          echo "Downloading garage binary..."
+          curl -fsSL "$GARAGE_URL" -o "$GARAGE_BIN"
+          chmod +x "$GARAGE_BIN"
+
+          # Verify binary
+          "$GARAGE_BIN" --help >/dev/null 2>&1 || true
+
+          LABEL_SELECTOR="garage.deuxfleurs.fr/service={{ include "opencti.fullname" . }}-minio"
+          NAMESPACE={{ .Release.Namespace }}
+          API_GROUP="deuxfleurs.fr"
+          API_VERSION="v1"
+          RESOURCE="garagenodes"
+
+          API="https://kubernetes.default.svc/apis/${API_GROUP}/${API_VERSION}/${RESOURCE}?labelSelector=${LABEL_SELECTOR}"
+
+          JSON=$(curl --silent \
+            --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+            -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+            "$API")
+
+          GARAGE_RPC_ID=$(echo "$JSON" | jq -r '.items[0] | "\(.metadata.name)@\(.spec.address):\(.spec.port)"')
+          GARAGE_LAYOUT_INIT=
+
+          if $GARAGE_BIN -h $GARAGE_RPC_ID layout show | grep -e "No nodes currently have an assigned role" -e "No nodes currently have a role"; then
+            
+            GARAGE_LAYOUT_INIT=true
+            echo "Current init state is $GARAGE_LAYOUT_INIT"
+
+            echo "$JSON" | jq -c '.items[] | {name: .metadata.name, address: .spec.address, port: .spec.port}' \
+            | while read -r node; do
+                NAME=$(echo "$node" | jq -r '.name')
+                ADDR=$(echo "$node" | jq -r '.address')
+                PORT=$(echo "$node" | jq -r '.port')
+
+                echo "Running: garage -h ${NAME}@${ADDR}:${PORT} status"
+                $GARAGE_BIN -h "${NAME}@${ADDR}:${PORT}" status
+                echo "Provisioning: "Creating initial layout for ${GARAGE_ZONE} with size ${GARAGE_SIZE}
+                $GARAGE_BIN -h "${NAME}@${ADDR}:${PORT}" layout assign -z ${GARAGE_ZONE} -c ${GARAGE_SIZE} ${NAME}
+              done
+              echo "Ready to apply layout using $GARAGE_RPC_ID."
+              $GARAGE_BIN -h $GARAGE_RPC_ID layout show
+
+              # Current version  grep version | awk '{print $5}'
+
+              GARAGE_LAYOUT_VERSION=$($GARAGE_BIN -h $GARAGE_RPC_ID layout show | grep version | grep -i current | awk '{print $5 + 1}')
+              echo "Applying version > $GARAGE_LAYOUT_VERSION <"
+              $GARAGE_BIN -h $GARAGE_RPC_ID layout apply --version $GARAGE_LAYOUT_VERSION
+
+              # Create default bucket called opencti-bucket
+              $GARAGE_BIN -h $GARAGE_RPC_ID bucket create opencti-bucket
+
+              # Assign Access key and Secret key
+              $GARAGE_BIN -h $GARAGE_RPC_ID key import -n opencti-key $GARAGE_ACCESS_KEY $GARAGE_SECRET_KEY --yes
+
+              # Assign to bucket
+              $GARAGE_BIN -h $GARAGE_RPC_ID bucket allow --read --write --owner opencti-bucket --key opencti-key
+
+              $GARAGE_BIN -h $GARAGE_RPC_ID bucket info opencti-bucket
+          else
+            echo "Detected that a layout might be already applied, backing off for signing roles."
+            GARAGE_LAYOUT_INIT=false
+          fi
+
+{{- end }}

@@ -25,10 +25,6 @@ dependencies:
     version: 0.17.0
     repository: https://helm.elastic.co
     condition: eck-stack.enabled
-  - name: minio
-    version: 5.4.0
-    repository: https://charts.min.io/
-    condition: minio.enabled
   - name: opensearch
     version: 3.4.0
     repository: https://opensearch-project.github.io/helm-charts/
@@ -42,3 +38,8 @@ dependencies:
     condition: redis.enabled
     repository: oci://ghcr.io/dragonflydb/dragonfly/helm
     version: v1.35.1
+  - name: garage
+    alias: minio
+    version: 1.2.0
+    repository: https://charts.derwitt.dev
+    condition: minio.enabled

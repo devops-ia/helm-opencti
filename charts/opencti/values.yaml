@@ -68,7 +68,8 @@ env:
   NODE_OPTIONS: "--max-old-space-size=8096"
   PROVIDERS__LOCAL__STRATEGY: LocalStrategy
   # MINIO
-  MINIO__ENDPOINT: release-name-minio:9000
+  MINIO__ENDPOINT: release-name-minio
+  MINIO__PORT: 3900
   # ELASTICSEARCH
   ELASTICSEARCH__URL: http://release-name-elasticsearch:9200
   # RABBITMQ
@@ -105,7 +106,7 @@ envFromFiles: []
   # - configMapRef:
   #     name: <name-configmap>
 
-# -- Secrets values to create credentials and reference by envFromSecrets
+# -- Secrets values to create credentials, minio (creds) and reference by envFromSecrets
 # Generate Secret with following name: <release-name>-<name>
 # </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/
 secrets: []
@@ -114,6 +115,10 @@ secrets: []
   #     my.key: |-
   #       my-content
   #     my_var: my-value
+  # - name: minio
+  #  data:
+  #    rootUser: GK-my-12-bytes
+  #    rootPassword: my-32-bytes-sha256-hash
 
 # -- ConfigMap values to create configuration files
 # Generate ConfigMap with following name: <release-name>-<name>
@@ -373,7 +378,7 @@ readyChecker:
   - name: elasticsearch
     port: 9200
   - name: minio
-    port: 9000
+    port: 3900
   - name: rabbitmq
     port: 5672
   - name: redis
@@ -1156,24 +1161,47 @@ minio:
   enabled: true
 
   # mode Minio server mode (`standalone` or `distributed`)
+  # If you are going to use Minio instead of Garage ensure that the port is updated accordingly. 9000 for Minio and 3900 for Garage S3 
   # </br> Ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
   mode: standalone
 
   # Minio root username
+  # When using Garage S3 this user must be a 12-bytes hex starting with 'GK' like example 'GKb81872b6e545a0c633918529'
+  # Bash example using OpenSSL. 'openssl rand -hex 12'
   rootUser: ChangeMe
   # Password for Minio root user
+  # When using Garage S3 this password must be a 32-bytes SHA-256 Hash (hex) like example 'bbfcc5dba6e5b406843f3a3d0fb19356549c7297e60d3129073e37c258f56624'
+  # Bash example using OpenSSL. 'echo -n "some input string" | sha256sum'
   rootPassword: ChangeMe
 
   # Enable persistence using Persistent Volume Claims
   # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   persistence:
     # Enable MinIO data persistence using PVC. If false, use emptyDir
-    enabled: false
+    # When using Garage S3 it's strongly advised that persistence is enabled due a caveat in their current Helm implementation
+    enabled: true
 
   # Resources
   resources:
     requests:
       memory: 512Mi
+  
+  # When using Garage S3 -- Enable or disable automatic setup, which configures a 'opencti' layout with a storage size of '1G'
+  # including a default bucket called 'opencti-bucket' with a assigned key 'opencti-key' that is configured using 'rootUser' and 'rootPassword' values.
+  # Autosetup runs as 'post-install' and 'post-update' hook.
+  # Ensure that the autosetup.version is always matching the deployed Garage Nodes.
+  autosetup:
+    enabled: false
+    version: v2.1.0
+    # zone: opencti
+    # size: 1G
+
+  # Should be enabled using garage otherwise OpenCTI crashes due
+  # AmazonS3Exception: The authorization header is malformed; the region is wrong
+  garage:
+    s3:
+      api:
+        region: "us-east-1"
 
 # -- RabbitMQ subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
