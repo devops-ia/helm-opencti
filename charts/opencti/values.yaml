@@ -355,7 +355,7 @@ readyChecker:
   # -- Pull policy for the image
   pullPolicy: IfNotPresent
   # -- Overrides the image tag
-  tag: latest
+  tag: 1.37.0
   # -- Number of retries before giving up
   retries: 30
   # -- Timeout for each check
@@ -857,7 +857,7 @@ worker:
     # -- Pull policy for the image
     pullPolicy: IfNotPresent
     # -- Overrides the image tag
-    tag: latest
+    tag: 1.37.0
     # -- Number of retries before giving up
     retries: 30
     # -- Timeout for each check
