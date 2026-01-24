@@ -11,9 +11,9 @@ spec:
   containers:
     - name: wget
       {{- if .Values.global.imageRegistry }}
-      image: "{{ .Values.global.imageRegistry }}/busybox"
+      image: "{{ .Values.global.imageRegistry }}/busybox:1.37.0"
       {{- else }}
-      image: busybox
+      image: busybox:1.37.0
       {{- end }}
       command: ['wget']
       args: ['{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}']
