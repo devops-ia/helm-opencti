@@ -185,13 +185,13 @@ helm show values opencti/opencti
 | rabbitmq.enabled | bool | `true` | Enable or disable RabbitMQ subchart |
 | readinessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":10,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1}` | Configure readinessProbe checker </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | readinessProbeCustom | object | `{}` | Custom readinessProbe |
-| readyChecker | object | `{"enabled":false,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"services":[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}],"tag":"latest","timeout":5}` | Enable or disable ready-checker |
+| readyChecker | object | `{"enabled":false,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"services":[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}],"tag":"1.37.0","timeout":5}` | Enable or disable ready-checker |
 | readyChecker.enabled | bool | `false` | Enable or disable ready-checker |
 | readyChecker.pullPolicy | string | `"IfNotPresent"` | Pull policy for the image |
 | readyChecker.repository | string | `"busybox"` | Repository of the image |
 | readyChecker.retries | int | `30` | Number of retries before giving up |
 | readyChecker.services | list | `[{"name":"elasticsearch","port":9200},{"name":"minio","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}]` | List services |
-| readyChecker.tag | string | `"latest"` | Overrides the image tag |
+| readyChecker.tag | string | `"1.37.0"` | Overrides the image tag |
 | readyChecker.timeout | int | `5` | Timeout for each check |
 | redis | object | `{"enabled":true,"extraArgs":["--cache_mode=true"],"storage":{"enabled":false}}` | Dragonfly subchart deployment (alias: Redis) </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml |
 | redis.enabled | bool | `true` | Enable or disable Dragonfly subchart |
@@ -226,7 +226,7 @@ helm show values opencti/opencti
 | topologySpreadConstraints | list | `[]` | Control how Pods are spread across your cluster </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#example-multiple-topologyspreadconstraints |
 | volumeMounts | list | `[]` | Additional volumeMounts on the output Deployment definition |
 | volumes | list | `[]` | Additional volumes on the output Deployment definition |
-| worker | object | `{"affinity":{},"args":[],"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"command":[],"configMaps":[],"dnsConfig":{},"dnsPolicy":"ClusterFirst","enabled":true,"env":{"WORKER_LOG_LEVEL":"info","WORKER_TELEMETRY_ENABLED":true},"envFromConfigMap":{},"envFromFiles":[],"envFromSecrets":{},"image":{"pullPolicy":"IfNotPresent","repository":"opencti/worker","tag":""},"imagePullSecrets":[],"initContainers":[],"lifecycle":{},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"nodeSelector":{},"podAnnotations":{},"podDisruptionBudget":{"enabled":false,"maxUnavailable":1},"podLabels":{},"podSecurityContext":{},"readyChecker":{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"tag":"latest","timeout":5},"replicaCount":1,"resources":{},"secrets":[],"securityContext":{},"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"},"strategy":{},"terminationGracePeriodSeconds":30,"tolerations":[],"topologySpreadConstraints":[],"volumeMounts":[],"volumes":[]}` | OpenCTI worker deployment configuration </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers |
+| worker | object | `{"affinity":{},"args":[],"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"command":[],"configMaps":[],"dnsConfig":{},"dnsPolicy":"ClusterFirst","enabled":true,"env":{"WORKER_LOG_LEVEL":"info","WORKER_TELEMETRY_ENABLED":true},"envFromConfigMap":{},"envFromFiles":[],"envFromSecrets":{},"image":{"pullPolicy":"IfNotPresent","repository":"opencti/worker","tag":""},"imagePullSecrets":[],"initContainers":[],"lifecycle":{},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"nodeSelector":{},"podAnnotations":{},"podDisruptionBudget":{"enabled":false,"maxUnavailable":1},"podLabels":{},"podSecurityContext":{},"readyChecker":{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"tag":"1.37.0","timeout":5},"replicaCount":1,"resources":{},"secrets":[],"securityContext":{},"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"},"strategy":{},"terminationGracePeriodSeconds":30,"tolerations":[],"topologySpreadConstraints":[],"volumeMounts":[],"volumes":[]}` | OpenCTI worker deployment configuration </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers |
 | worker.affinity | object | `{}` | Affinity for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
 | worker.args | list | `[]` | Configure args </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/ |
 | worker.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Autoscaling with CPU or memory utilization percentage </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
@@ -254,12 +254,12 @@ helm show values opencti/opencti
 | worker.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1}` | Pod Disruption Budget </br> Ref: https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/ |
 | worker.podLabels | object | `{}` | Configure labels on Pods |
 | worker.podSecurityContext | object | `{}` | Defines privilege and access control settings for a Pod </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| worker.readyChecker | object | `{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"tag":"latest","timeout":5}` | Enable or disable ready-checker waiting server is ready |
+| worker.readyChecker | object | `{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"tag":"1.37.0","timeout":5}` | Enable or disable ready-checker waiting server is ready |
 | worker.readyChecker.enabled | bool | `true` | Enable or disable ready-checker |
 | worker.readyChecker.pullPolicy | string | `"IfNotPresent"` | Pull policy for the image |
 | worker.readyChecker.repository | string | `"busybox"` | Repository of the image |
 | worker.readyChecker.retries | int | `30` | Number of retries before giving up |
-| worker.readyChecker.tag | string | `"latest"` | Overrides the image tag |
+| worker.readyChecker.tag | string | `"1.37.0"` | Overrides the image tag |
 | worker.readyChecker.timeout | int | `5` | Timeout for each check |
 | worker.replicaCount | int | `1` | Number of replicas for the service |
 | worker.resources | object | `{}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
