@@ -388,19 +388,19 @@ podLabels: {}
 # -- Defines privilege and access control settings for a Pod
 # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  fsGroup: 2000
 
 # -- Defines privilege and access control settings for a Container
 # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
 
 # -- Ingress configuration to expose app
 # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
@@ -722,6 +722,12 @@ connectors: []
 #     # name: ""
 #     # automountServiceAccountToken: false
 #
+#   # Defines privilege and access control settings for a Pod
+#   podSecurityContext: {}
+#
+#   # Defines privilege and access control settings for a Container
+#   securityContext: {}
+#
 #   # Basic deployment metadata
 #   deploymentAnnotations: {}
 #   podAnnotations: {}
@@ -872,19 +878,19 @@ worker:
   # -- Defines privilege and access control settings for a Pod
   # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
   # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  podSecurityContext: {}
-    # fsGroup: 2000
+  podSecurityContext:
+    fsGroup: 2000
 
   # -- Defines privilege and access control settings for a Container
   # </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
   # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
 
   # -- Configure lifecycle hooks
   # </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
@@ -897,6 +903,75 @@ worker:
   # -- Configure Pod termination grace period
   # </br> Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination
   terminationGracePeriodSeconds: 30
+
+  # -- Configure liveness checker
+  # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+  livenessProbe:
+    enabled: false
+    failureThreshold: 3
+    initialDelaySeconds: 180
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # -- Custom livenessProbe
+  livenessProbeCustom: {}
+    # exec:
+    #   command:
+    #     - pgrep
+    #     - -f
+    #     - worker
+    # failureThreshold: 3
+    # initialDelaySeconds: 180
+    # periodSeconds: 10
+    # successThreshold: 1
+    # timeoutSeconds: 5
+
+  # -- Configure readinessProbe checker
+  # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+  readinessProbe:
+    enabled: false
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+
+  # -- Custom readinessProbe
+  readinessProbeCustom: {}
+    # exec:
+    #   command:
+    #     - pgrep
+    #     - -f
+    #     - worker
+    # failureThreshold: 3
+    # initialDelaySeconds: 10
+    # periodSeconds: 10
+    # successThreshold: 1
+    # timeoutSeconds: 1
+
+  # -- Configure startupProbe checker
+  # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
+  startupProbe:
+    enabled: false
+    failureThreshold: 30
+    initialDelaySeconds: 180
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # -- Custom startupProbe
+  startupProbeCustom: {}
+    # exec:
+    #   command:
+    #     - pgrep
+    #     - -f
+    #     - worker
+    # failureThreshold: 3
+    # initialDelaySeconds: 180
+    # periodSeconds: 10
+    # successThreshold: 1
+    # timeoutSeconds: 5
 
   # -- Environment variables to configure application
   # </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform

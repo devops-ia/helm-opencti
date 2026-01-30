@@ -66,6 +66,8 @@ spec:
       {{- if .readyChecker.enabled }}
       initContainers:
         - name: ready-checker-server
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
           {{- if $.Values.global.imageRegistry }}
           image: "{{ $.Values.global.imageRegistry }}/{{ .readyChecker.image | default "busybox" }}:{{ .readyChecker.tag | default "latest" }}"
           {{- else }}
@@ -105,6 +107,8 @@ spec:
               done
         {{- range $service := .readyChecker.services }}
         - name: ready-checker-{{ $service.name }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
           {{- if $.Values.global.imageRegistry }}
           image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
           {{- else }}
