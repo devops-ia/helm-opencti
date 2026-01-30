@@ -2,6 +2,11 @@ name: Release OpenCTI chart
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Chart version tag to release (e.g. v1.2.3)"
+        required: true
+        type: string
   push:
     branches:
       - main
@@ -21,6 +26,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '' }}
           fetch-depth: 0
 
       - name: Configure Git
@@ -29,6 +35,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Semantic Release
+        if: github.event_name != 'workflow_dispatch'
         uses: cycjimmy/semantic-release-action@b12c8f6015dc215fe37bc154d4ad456dd3833c90 # v6.0.0
         id: semantic_release
         with:
@@ -40,14 +47,16 @@ jobs:
 
       - name: Update Chart version
         id: chart_version
-        if: steps.semantic_release.outputs.new_release_published == 'true'
+        if: steps.semantic_release.outputs.new_release_published == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          sed -i 's/^version: .*/version: ${{ steps.semantic_release.outputs.new_release_git_tag }}/g' charts/opencti/Chart.yaml
-          echo "CHART_VERSION=${{ steps.semantic_release.outputs.new_release_git_tag }}" >> $GITHUB_OUTPUT
+          VERSION=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || steps.semantic_release.outputs.new_release_git_tag }}
+          VERSION=${VERSION#v}
+          sed -i "s/^version: .*/version: ${VERSION}/g" charts/opencti/Chart.yaml
+          echo "CHART_VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists
         id: tag_exists
-        if: steps.semantic_release.outputs.new_release_published == 'true'
+        if: steps.chart_version.outputs.CHART_VERSION != '' && github.event_name != 'workflow_dispatch'
         run: |
           TAG_EXISTS=true
           if ! [ $(git tag -l "v${{ steps.chart_version.outputs.CHART_VERSION }}") ]; then
@@ -56,7 +65,7 @@ jobs:
           echo TAG_EXISTS=$TAG_EXISTS >> $GITHUB_OUTPUT
 
       - name: Run chart-releaser
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false' || github.event_name == 'workflow_dispatch'
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           charts_dir: charts
@@ -66,7 +75,7 @@ jobs:
           CR_SKIP_EXISTING: true
 
       - name: Login in to the Container registry
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false' || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           registry: ghcr.io
@@ -74,16 +83,16 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Cosign
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false' || github.event_name == 'workflow_dispatch'
         uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Install Oras
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false' || github.event_name == 'workflow_dispatch'
         uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1.2.4
 
       # ref: https://github.com/backstage/charts/blob/88240ce7a0726e3773ee0e4866fbe6325c15267b/.github/workflows/release.yml#L50
       - name: Publish and Sign OCI Charts
-        if: steps.tag_exists.outputs.TAG_EXISTS == 'false'
+        if: steps.tag_exists.outputs.TAG_EXISTS == 'false' || github.event_name == 'workflow_dispatch'
         run: |
           for chart in `find .cr-release-packages -name '*.tgz' -print`; do
             helm push ${chart} oci://ghcr.io/${GITHUB_REPOSITORY} |& tee helm-push-output.log
