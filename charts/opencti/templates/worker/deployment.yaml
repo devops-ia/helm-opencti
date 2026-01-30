@@ -51,6 +51,8 @@ spec:
       {{- if .Values.worker.readyChecker.enabled }}
       initContainers:
         - name: ready-checker-server
+          securityContext:
+            {{- toYaml .Values.worker.securityContext | nindent 12 }}
           {{- if $.Values.global.imageRegistry }}
           image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.worker.readyChecker.repository }}:{{ $.Values.worker.readyChecker.tag }}"
           {{- else }}
@@ -114,6 +116,48 @@ spec:
               containerPort: {{ .Values.worker.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
               protocol: TCP
             {{- end }}
+          {{- if .Values.worker.livenessProbe.enabled }}
+          livenessProbe:
+            {{- if .Values.worker.livenessProbeCustom }}
+            {{- toYaml .Values.worker.livenessProbeCustom | nindent 12 }}
+            {{- else }}
+            tcpSocket:
+              port: {{ .Values.worker.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
+            failureThreshold: {{ .Values.worker.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.worker.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.worker.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.worker.livenessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.worker.livenessProbe.timeoutSeconds }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.worker.readinessProbe.enabled }}
+          readinessProbe:
+            {{- if .Values.worker.readinessProbeCustom }}
+            {{- toYaml .Values.worker.readinessProbeCustom | nindent 12 }}
+            {{- else }}
+            tcpSocket:
+              port: {{ .Values.worker.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
+            failureThreshold: {{ .Values.worker.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.worker.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.worker.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.worker.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.worker.readinessProbe.timeoutSeconds }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.worker.startupProbe.enabled }}
+          startupProbe:
+            {{- if .Values.worker.startupProbeCustom }}
+            {{- toYaml .Values.worker.startupProbeCustom | nindent 12 }}
+            {{- else }}
+            tcpSocket:
+              port: {{ .Values.worker.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
+            failureThreshold: {{ .Values.worker.startupProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.worker.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.worker.startupProbe.periodSeconds }}
+            successThreshold: {{ .Values.worker.startupProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.worker.startupProbe.timeoutSeconds }}
+            {{- end }}
+          {{- end }}
           lifecycle:
             {{- with .Values.worker.lifecycle }}
             {{- toYaml . | nindent 12 }}

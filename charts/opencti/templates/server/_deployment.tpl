@@ -80,6 +80,8 @@ spec:
       {{- if .Values.readyChecker.enabled }}
         {{- range $service := .Values.readyChecker.services }}
         - name: ready-checker-{{ $service.name }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
           {{- if $.Values.global.imageRegistry }}
           image: "{{ $.Values.global.imageRegistry }}/{{ $.Values.readyChecker.repository }}:{{ $.Values.readyChecker.tag }}"
           {{- else }}
