@@ -7,7 +7,7 @@ strategy:
 env:
   APP__ADMIN__EMAIL: admin@opencti.io
   APP__BASE_PATH: "/"
-  APP__TELEMETRY__METRICS__ENABLED: false
+  APP__TELEMETRY__METRICS__ENABLED: true
   APP__GRAPHQL__PLAYGROUND__ENABLED: false
   APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: true
 
@@ -120,21 +120,6 @@ resources:
     memory: "1Gi"
     cpu: "500m"
 
-autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
-
-topologySpreadConstraints:
-  - maxSkew: 1
-    topologyKey: kubernetes.io/os
-    whenUnsatisfiable: DoNotSchedule
-    labelSelector:
-      matchLabels:
-        app.kubernetes.io/name: opencti
-
 ##
 # OPENCTI WORKER
 worker:
@@ -162,44 +147,6 @@ worker:
 
   terminationGracePeriodSeconds: 20
 
-  networkPolicy:
-    enabled: true
-    ingress:
-      - from:
-          - namespaceSelector:
-              matchLabels:
-                name: opencti-ci
-        ports:
-          - protocol: TCP
-            port: 4000
-
-  autoscaling:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 70
-    targetMemoryUtilizationPercentage: 80
-
-  topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: kubernetes.io/os
-      whenUnsatisfiable: DoNotSchedule
-      labelSelector:
-        matchLabels:
-          app.kubernetes.io/name: opencti
-          opencti.component: worker
-
-  dnsConfig:
-    nameservers:
-      - 1.1.1.1
-      - 8.8.8.8
-    searches: []
-    options:
-      - name: ndots
-        value: "2"
-
-  dnsPolicy: ClusterFirst
-
 ##
 # OPENCTI CONNECTOR
 connectorsGlobal:
@@ -220,8 +167,6 @@ connectors:
 
     serviceMonitor:
       enabled: false
-      interval: 30s
-      scrapeTimeout: 10s
 
     image:
       repository: opencti/connector-opencti
@@ -257,26 +202,6 @@ connectors:
     envFromFiles:
       - secretRef:
           name: opencti-ci-credentials
-
-    topologySpreadConstraints:
-      - maxSkew: 1
-        topologyKey: kubernetes.io/os
-        whenUnsatisfiable: DoNotSchedule
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: opencti
-            opencti.component: connector
-
-    dnsConfig:
-      nameservers:
-        - 1.1.1.1
-        - 8.8.8.8
-      searches: []
-      options:
-        - name: ndots
-          value: "2"
-
-    dnsPolicy: ClusterFirst
 
     strategy:
       type: Recreate
