@@ -22,7 +22,7 @@ keywords:
   - analysis
 dependencies:
   - name: eck-stack
-    version: 0.17.0
+    version: 0.18.0
     repository: https://helm.elastic.co
     condition: eck-stack.enabled
   - name: minio
