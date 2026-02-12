@@ -312,15 +312,25 @@ spec:
             {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
             {{- end }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
+            {{- if .Values.securityContext.readOnlyRootFilesystem }}
+            # Automatically mount /tmp as writable when readOnlyRootFilesystem is enabled
+            - name: tmp
+              mountPath: /tmp
+            {{- end }}
+            {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
-      {{- with .Values.volumes }}
       volumes:
+        {{- if .Values.securityContext.readOnlyRootFilesystem }}
+        # Automatically provide writable /tmp when readOnlyRootFilesystem is enabled
+        - name: tmp
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
