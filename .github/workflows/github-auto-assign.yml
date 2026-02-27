@@ -1,0 +1,19 @@
+name: Auto-assign Issue
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened, ready_for_review]
+
+jobs:
+  auto-assign:
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    uses: devops-ia/.github/.github/workflows/github-auto-assign.yml@main
+    with:
+      teams: devops-ia
+    secrets:
+      PAT_GITHUB: ${{ secrets.PAT_GITHUB }}

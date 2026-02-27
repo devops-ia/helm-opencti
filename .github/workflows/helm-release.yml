@@ -1,0 +1,26 @@
+name: Release Helm Chart (single)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Chart version tag to release (e.g. v1.2.3)"
+        required: false
+        type: string
+  push:
+    branches:
+      - main
+    paths:
+      - "charts/opencti/**"
+
+jobs:
+  release:
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    uses: devops-ia/.github/.github/workflows/helm-release.yml@main
+    with:
+      chart_name: opencti
+      charts_dir: charts
+      tag: ${{ inputs.tag || '' }}

@@ -1,14 +1,22 @@
 version: 2
 updates:
-- package-ecosystem: github-actions
-  directory: "/"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  labels:
-  - enhancement
-  - dependency-management
-  groups:
-    github-actions:
-      patterns:
-        - "*"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    labels:
+      - enhancement
+      - dependency-management
+    assignees:
+      - devops-ia/devops-ia
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
+      include: scope
+    rebase-strategy: auto
+    pull-request-branch-name:
+      separator: "-"

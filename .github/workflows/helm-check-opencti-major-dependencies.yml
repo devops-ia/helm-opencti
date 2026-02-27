@@ -1,7 +1,7 @@
 name: Check OpenCTI major dependencies releases
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
 
 on:

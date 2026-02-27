@@ -6,7 +6,8 @@ on:
     - cron: '0 0 * * *' # every day
 
 permissions:
-  contents: write
+  contents: read
+  pull-requests: write
 
 jobs:
   check-and-update-opencti:
