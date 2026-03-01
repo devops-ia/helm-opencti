@@ -22,7 +22,7 @@ keywords:
   - analysis
 dependencies:
   - name: eck-stack
-    version: 0.18.0
+    version: 0.18.1
     repository: https://helm.elastic.co
     condition: eck-stack.enabled
   - name: minio
@@ -41,4 +41,4 @@ dependencies:
     alias: redis
     condition: redis.enabled
     repository: oci://ghcr.io/dragonflydb/dragonfly/helm
-    version: v1.36.0
+    version: v1.37.0
