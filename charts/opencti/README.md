@@ -22,9 +22,9 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.min.io/ | minio | 5.4.0 |
-| https://helm.elastic.co | eck-stack | 0.18.0 |
+| https://helm.elastic.co | eck-stack | 0.18.1 |
 | https://opensearch-project.github.io/helm-charts/ | opensearch | 3.5.0 |
-| oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v1.36.0 |
+| oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v1.37.0 |
 | oci://registry-1.docker.io/bitnamicharts | rabbitmq | 16.0.13 |
 
 ## Add repository
