@@ -2,6 +2,54 @@ apiVersion: v1
 entries:
   opencti:
   - apiVersion: v2
+    appVersion: 7.260305.0
+    created: "2026-03-06T15:48:39.476832923Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.18.1
+    - condition: minio.enabled
+      name: minio
+      repository: https://charts.min.io/
+      version: 5.4.0
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.5.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v1.37.0
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 9b9c0a091b23560b1ff11468cd819b9566f352817e7a0a21234c5863296fa1b4
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v2.3.11/opencti-2.3.11.tgz
+    version: 2.3.11
+  - apiVersion: v2
     appVersion: 7.260227.0
     created: "2026-02-28T07:59:38.774808924Z"
     dependencies:
@@ -9973,4 +10021,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2026-02-28T07:59:38.775329167Z"
+generated: "2026-03-06T15:48:39.477291247Z"
