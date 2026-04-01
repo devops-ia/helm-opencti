@@ -31,7 +31,7 @@ jobs:
           done
 
       - name: Install updatecli
-        uses: updatecli/updatecli-action@4b17f4ea784de29f71f85f9bc4955402ba1ae53c # v2.100.0
+        uses: updatecli/updatecli-action@2cc8e6d8e356d76b0280cdd03766c36596a0614e # v3.0.0
 
       - name: Update dependencies
         run: |
@@ -42,7 +42,7 @@ jobs:
           UPDATECLI_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Update README.md Helm Chart
-        uses: losisin/helm-docs-github-action@6f957579ac122ecc167bf515fe84e828686c9a15 # v1.7.1
+        uses: losisin/helm-docs-github-action@2ccf3e77eb70dc80d62f8cc26f15d0a96b75fef4 # v1.8.0
         with:
           chart-search-root: charts/opencti
 
