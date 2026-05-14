@@ -40,10 +40,6 @@ env:
   APP__GRAPHQL__PLAYGROUND__ENABLED: false
   APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: true
 
-  ## Worker
-  WORKER_TELEMETRY_ENABLED: false
-  WORKER_PROMETHEUS_TELEMETRY_PORT: 14270
-
   ## OPENSEARCH
   ELASTICSEARCH__ENGINE_SELECTOR: opensearch
   ELASTICSEARCH__URL: http://<release-name>-opensearch:9200
@@ -173,6 +169,10 @@ topologySpreadConstraints:
 # OpenCTI Worker Configuration
 worker:
   enabled: true
+
+  env:
+    WORKER_TELEMETRY_ENABLED: false
+    WORKER_PROMETHEUS_TELEMETRY_PORT: 14270
 
   readyChecker:
     enabled: true
