@@ -1,4 +1,4 @@
-{{- if .Values.env.APP__TELEMETRY__METRICS__ENABLED }}
+{{- if .Values.env.WORKER__TELEMETRY__ENABLED }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,8 +10,8 @@ spec:
   clusterIP: None
   ports:
     - name: metrics
-      port: {{ .Values.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
-      targetPort: {{ .Values.env.WORKER_PROMETHEUS_TELEMETRY_PORT | default 14269 }}
+      port: {{ .Values.env.WORKER__PROMETHEUS_TELEMETRY__PORT | default 14270 }}
+      targetPort: {{ .Values.env.WORKER__PROMETHEUS_TELEMETRY__PORT | default 14270 }}
       protocol: TCP
   selector:
     {{- include "opencti.selectorWorkerLabels" . | nindent 4 }}
