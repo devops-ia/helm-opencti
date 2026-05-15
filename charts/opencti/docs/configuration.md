@@ -170,6 +170,10 @@ topologySpreadConstraints:
 worker:
   enabled: true
 
+  env:
+    WORKER_TELEMETRY_ENABLED: false
+    WORKER_PROMETHEUS_TELEMETRY_PORT: 14270
+
   readyChecker:
     enabled: true
     retries: 30
