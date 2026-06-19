@@ -5,7 +5,16 @@
 Application access:
 
 {{- if not .Values.clustering.enabled }}
-{{- if .Values.ingress.enabled }}
+{{- if .Values.gateway.enabled }}
+  {{- if .Values.gateway.hostnames }}
+  {{- range .Values.gateway.hostnames }}
+    {{ . }}
+  {{- end }}
+  {{- else }}
+  (Gateway API / HTTPRoute - no hostnames configured)
+  {{- end }}
+  (Gateway API / HTTPRoute)
+{{- else if .Values.ingress.enabled }}
   {{- range $host := .Values.ingress.hosts }}
     {{- range .paths }}
       http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
@@ -30,7 +39,16 @@ Application access:
   Access at: http://127.0.0.1:{{ .Values.service.targetPort | default .Values.service.port }}
 {{- end }}
 {{- else }}
-{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.ingress.enabled }}
+{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.gateway.enabled }}
+  {{- if .Values.clustering.frontend.gateway.hostnames }}
+  {{- range .Values.clustering.frontend.gateway.hostnames }}
+    {{ . }}
+  {{- end }}
+  {{- else }}
+  (Gateway API / HTTPRoute - no hostnames configured)
+  {{- end }}
+  (Gateway API / HTTPRoute)
+{{- else if and .Values.clustering.frontend.enabled .Values.clustering.frontend.ingress.enabled }}
   {{- range $host := .Values.clustering.frontend.ingress.hosts }}
     {{- range .paths }}
       http{{ if $.Values.clustering.frontend.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}

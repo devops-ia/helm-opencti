@@ -71,6 +71,20 @@ clustering:
           hosts:
             - opencti.example.com
 
+    # Alternatively, use Gateway API instead of Ingress (requires CRDs installed):
+    # gateway:
+    #   enabled: true
+    #   parentRefs:
+    #     - name: my-gateway
+    #       namespace: default
+    #   hostnames:
+    #     - opencti.example.com
+    #   rules:
+    #     - matches:
+    #         - path:
+    #             type: PathPrefix
+    #             value: /
+
     # Frontend resources
     resources:
       requests:
@@ -324,6 +338,20 @@ To migrate from single mode to clustering:
          enabled: true
          hosts:
            - host: your-opencti-domain.com
+   ```
+
+   Or use Gateway API if your cluster has the CRDs installed:
+
+   ```yaml
+   clustering:
+     frontend:
+       gateway:
+         enabled: true
+         parentRefs:
+           - name: my-gateway
+             namespace: default
+         hostnames:
+           - your-opencti-domain.com
    ```
 
 4. **Deploy and verify**:

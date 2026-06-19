@@ -35,6 +35,9 @@ envFromSecrets:
   APP__HEALTH_ACCESS_KEY:
     name: opencti-cluster-ci-credentials
     key: APP__HEALTH_ACCESS_KEY
+  APP__ENCRYPTION_KEY:
+    name: opencti-cluster-ci-credentials
+    key: APP__ENCRYPTION_KEY
   MINIO__ACCESS_KEY:
     name: opencti-cluster-ci-minio
     key: rootUser
@@ -51,6 +54,7 @@ secrets:
       APP__ADMIN__PASSWORD: iraLehfJu1NRnQgwIBeH
       APP__ADMIN__TOKEN: b1976749-8a53-4f49-bf04-cafa2a3458c1
       APP__HEALTH_ACCESS_KEY: f93747ff-2ea1-4717-900c-9df20b8e4429
+      APP__ENCRYPTION_KEY: ht7eLhv06KCwDzlsDQkzup3fnGEMkx1G1MtV5XJb5+c=
 
 testConnection: true
 
@@ -113,6 +117,20 @@ clustering:
             - path: /
               pathType: ImplementationSpecific
       tls: []
+
+    gateway:
+      enabled: false
+      parentRefs:
+        - name: ""
+          namespace: ""
+      hostnames: []
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /
+      filters: []
+      annotations: {}
 
     resources:
       requests:

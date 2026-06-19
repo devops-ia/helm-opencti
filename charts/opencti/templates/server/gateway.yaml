@@ -1,0 +1,29 @@
+{{- if not .Values.clustering.enabled }}
+{{- if and .Values.gateway.enabled .Values.gateway.create -}}
+{{- $fullName := include "opencti.fullname" . -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ $fullName }}-gateway
+  labels:
+    {{- include "opencti.serverLabels" . | nindent 4 }}
+spec:
+  gatewayClassName: {{ required "gateway.className is required when gateway.create is true" .Values.gateway.className }}
+  listeners:
+    {{- toYaml .Values.gateway.listeners | nindent 4 }}
+{{- end }}
+{{- else }}
+{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.gateway.enabled .Values.clustering.frontend.gateway.create -}}
+{{- $fullName := include "opencti.fullname" . -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ $fullName }}-frontend-gateway
+  labels:
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+spec:
+  gatewayClassName: {{ required "clustering.frontend.gateway.className is required when create is true" .Values.clustering.frontend.gateway.className }}
+  listeners:
+    {{- toYaml .Values.clustering.frontend.gateway.listeners | nindent 4 }}
+{{- end }}
+{{- end }}
