@@ -411,7 +411,7 @@ env:
   ...
 ```
 
-Expose service:
+Expose service using Ingress:
 
 ```yaml
 ingress:
@@ -422,6 +422,25 @@ ingress:
         - path: /
           pathType: Prefix
 ```
+
+Or use [Gateway API](https://gateway-api.sigs.k8s.io/) (requires CRDs installed in the cluster - see [getting started](https://gateway-api.sigs.k8s.io/guides/)):
+
+```yaml
+gateway:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: default
+  hostnames:
+    - demo.mydomain.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+```
+
+Both can be enabled simultaneously when migrating from Ingress to Gateway API. TLS is configured at the `Gateway` resource level, not in the `HTTPRoute`.
 
 ### OpenCTI Worker
 

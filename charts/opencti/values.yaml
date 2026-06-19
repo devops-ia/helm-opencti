@@ -420,6 +420,44 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# -- Gateway API configuration (Gateway + HTTPRoute resources)
+# </br> Ref: https://gateway-api.sigs.k8s.io/
+# </br> Requires Gateway API CRDs installed in the cluster.
+# </br> TLS is configured at the Gateway listener level, not the HTTPRoute.
+gateway:
+  enabled: false
+  # -- Set to true to let the chart create and manage the Gateway resource.
+  # -- Set to false to attach to a pre-existing Gateway via parentRefs.
+  create: false
+  # -- GatewayClass name - required when create is true
+  className: ""
+  # -- Gateway listeners - used only when create is true
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+  # -- References to parent Gateway resources.
+  # -- Ignored when create is true (auto-wired to the chart-managed Gateway).
+  parentRefs:
+    - name: ""
+      namespace: ""
+      # sectionName: ""
+  # -- Hostnames to match (leave empty to match all hostnames)
+  hostnames: []
+  #  - chart-example.local
+  # -- Route rules (backendRefs are auto-generated from service config)
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+  # -- Additional request/response filters
+  filters: []
+  # -- Additional labels for the HTTPRoute
+  labels: {}
+  # -- Annotations for the HTTPRoute
+  annotations: {}
+
 # -- The resources limits and requested
 # </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources: {}
@@ -590,6 +628,44 @@ clustering:
             - path: /
               pathType: ImplementationSpecific
       tls: []
+
+    # -- Frontend Gateway API configuration (Gateway + HTTPRoute resources)
+    # </br> Ref: https://gateway-api.sigs.k8s.io/
+    # </br> Requires Gateway API CRDs installed in the cluster.
+    # </br> TLS is configured at the Gateway listener level, not the HTTPRoute.
+    gateway:
+      enabled: false
+      # -- Set to true to let the chart create and manage the Gateway resource.
+      # -- Set to false to attach to a pre-existing Gateway via parentRefs.
+      create: false
+      # -- GatewayClass name - required when create is true
+      className: ""
+      # -- Gateway listeners - used only when create is true
+      listeners:
+        - name: http
+          protocol: HTTP
+          port: 80
+      # -- References to parent Gateway resources.
+      # -- Ignored when create is true (auto-wired to the chart-managed Gateway).
+      parentRefs:
+        - name: ""
+          namespace: ""
+          # sectionName: ""
+      # -- Hostnames to match (leave empty to match all hostnames)
+      hostnames: []
+      #  - opencti-frontend.local
+      # -- Route rules (backendRefs are auto-generated from frontend service config)
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /
+      # -- Additional request/response filters
+      filters: []
+      # -- Additional labels for the HTTPRoute
+      labels: {}
+      # -- Annotations for the HTTPRoute
+      annotations: {}
 
     # -- Frontend resources
     resources: {}

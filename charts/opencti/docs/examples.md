@@ -496,6 +496,7 @@ spec:
 ### Configure metrics
 
 You can enable Prometheus metric scraping with a serviceMonitor object
+
 ```yaml
 connectors:
 - name: sample-misp

@@ -1,0 +1,83 @@
+{{- if not .Values.clustering.enabled }}
+{{- if .Values.gateway.enabled -}}
+{{- $fullName := include "opencti.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "opencti.serverLabels" . | nindent 4 }}
+  {{- with .Values.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- if .Values.gateway.create }}
+    - name: {{ $fullName }}-gateway
+      namespace: {{ .Release.Namespace }}
+    {{- else }}
+    {{- toYaml .Values.gateway.parentRefs | nindent 4 }}
+    {{- end }}
+  {{- if .Values.gateway.hostnames }}
+  hostnames:
+    {{- toYaml .Values.gateway.hostnames | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.gateway.rules }}
+    - {{- if .matches }}
+      matches:
+        {{- toYaml .matches | nindent 8 }}
+      {{- end }}
+      {{- if .filters }}
+      filters:
+        {{- toYaml .filters | nindent 8 }}
+      {{- end }}
+      backendRefs:
+        - name: {{ $fullName }}-server
+          port: {{ $svcPort }}
+    {{- end }}
+{{- end }}
+{{- else }}
+{{- if and .Values.clustering.frontend.enabled .Values.clustering.frontend.gateway.enabled -}}
+{{- $fullName := include "opencti.fullname" . -}}
+{{- $svcPort := .Values.clustering.frontend.service.port -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-frontend
+  labels:
+    {{- include "opencti.frontendLabels" . | nindent 4 }}
+  {{- with .Values.clustering.frontend.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- if .Values.clustering.frontend.gateway.create }}
+    - name: {{ $fullName }}-frontend-gateway
+      namespace: {{ .Release.Namespace }}
+    {{- else }}
+    {{- toYaml .Values.clustering.frontend.gateway.parentRefs | nindent 4 }}
+    {{- end }}
+  {{- if .Values.clustering.frontend.gateway.hostnames }}
+  hostnames:
+    {{- toYaml .Values.clustering.frontend.gateway.hostnames | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.clustering.frontend.gateway.rules }}
+    - {{- if .matches }}
+      matches:
+        {{- toYaml .matches | nindent 8 }}
+      {{- end }}
+      {{- if .filters }}
+      filters:
+        {{- toYaml .filters | nindent 8 }}
+      {{- end }}
+      backendRefs:
+        - name: {{ $fullName }}-frontend
+          port: {{ $svcPort }}
+    {{- end }}
+{{- end }}
+{{- end }}
