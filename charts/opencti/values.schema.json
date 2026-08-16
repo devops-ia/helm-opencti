@@ -150,6 +150,14 @@
           "type": "string",
           "description": "MinIO endpoint"
         },
+        "MINIO__ACCESS_KEY": {
+          "type": "string",
+          "description": "MinIO access key, must match the minio subchart's rootUser when using the bundled MinIO"
+        },
+        "MINIO__SECRET_KEY": {
+          "type": "string",
+          "description": "MinIO secret key, must match the minio subchart's rootPassword when using the bundled MinIO"
+        },
         "ELASTICSEARCH__URL": {
           "type": "string",
           "description": "Elasticsearch URL"
@@ -199,6 +207,10 @@
         "APP__HEALTH_ACCESS_KEY": {
           "type": "string",
           "description": "Health check access key"
+        },
+        "APP__ENCRYPTION_KEY": {
+          "type": "string",
+          "description": "Platform encryption key, 32 bytes base64-encoded (openssl rand -base64 32). Required since OpenCTI 7.260803.0"
         }
       }
     },
