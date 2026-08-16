@@ -190,7 +190,7 @@ env:
   ELASTICSEARCH__URL: http://opencti-cluster-opensearch:9200
 
   ## STORAGE
-  MINIO__ENDPOINT: opencti-cluster-minio
+  MINIO__ENDPOINT: opencti-cluster-rustfs-svc
 
   ## MESSAGE QUEUE
   RABBITMQ__HOSTNAME: opencti-cluster-rabbitmq
@@ -266,7 +266,7 @@ In clustering mode, components connect as follows:
 - **Users** → Frontend cluster (via Ingress)
 - **Workers** → Ingestion cluster (for data processing)
 - **Connectors** → Frontend cluster (for API access)
-- **Both clusters** → Shared dependencies (OpenSearch, MinIO, RabbitMQ, Redis)
+- **Both clusters** → Shared dependencies (OpenSearch, RustFS, RabbitMQ, Redis)
 
 ## Scaling considerations
 

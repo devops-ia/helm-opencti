@@ -8,15 +8,15 @@ sources:
         kind: semver
         pattern: '*' # replace with CI/CD updatecli
     sourceid: eck-stack
-  minio:
+  rustfs:
     kind: helmchart
     spec:
-      url: https://charts.min.io/
-      name: minio
+      url: https://charts.rustfs.com
+      name: rustfs
       versionFilter:
         kind: semver
         pattern: '*' # replace with CI/CD updatecli
-    sourceid: minio
+    sourceid: rustfs
   opensearch:
     kind: helmchart
     spec:
@@ -52,13 +52,13 @@ targets:
       file: charts/opencti/Chart.yaml
       key: $.dependencies[0].version
     sourceid: eck-stack
-  minio:
+  rustfs:
     name: bump chart dependencies
     kind: yaml
     spec:
       file: charts/opencti/Chart.yaml
       key: $.dependencies[1].version
-    sourceid: minio
+    sourceid: rustfs
   opensearch:
     name: bump chart dependencies
     kind: yaml

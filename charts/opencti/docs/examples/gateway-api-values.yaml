@@ -15,7 +15,7 @@ env:
   ELASTICSEARCH__URL: http://opencti-gw-test-opensearch:9200
 
   ## STORAGE
-  MINIO__ENDPOINT: opencti-gw-test-minio
+  MINIO__ENDPOINT: opencti-gw-test-rustfs-svc
   MINIO__ACCESS_KEY: minio
   MINIO__SECRET_KEY: minio123456
 
@@ -60,7 +60,8 @@ readyChecker:
   services:
     - name: opensearch
       port: 9200
-    - name: minio
+    - name: rustfs
+      address: opencti-gw-test-rustfs-svc
       port: 9000
     - name: rabbitmq
       port: 5672
@@ -156,12 +157,23 @@ opensearch:
     enabled: false
 
 ##
-# MINIO
-minio:
-  fullnameOverride: opencti-gw-test-minio
+# RUSTFS
+rustfs:
+  fullnameOverride: opencti-gw-test-rustfs
 
-  rootUser: minio
-  rootPassword: minio123456
+  mode:
+    standalone:
+      enabled: true
+    distributed:
+      enabled: false
+
+  ingress:
+    enabled: false
+
+  secret:
+    rustfs:
+      access_key: minio
+      secret_key: minio123456
 
   resources:
     requests:
@@ -169,11 +181,6 @@ minio:
       cpu: 100m
     limits:
       memory: 512Mi
-
-  persistence:
-    enabled: false
-
-  mode: standalone
 
 ##
 # RABBITMQ

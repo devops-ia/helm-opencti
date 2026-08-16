@@ -68,8 +68,8 @@ env:
   APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: false
   NODE_OPTIONS: "--max-old-space-size=8096"
   PROVIDERS__LOCAL__STRATEGY: LocalStrategy
-  # MINIO
-  MINIO__ENDPOINT: release-name-minio:9000
+  # MINIO (S3-compatible object storage, backed by the rustfs subchart below)
+  MINIO__ENDPOINT: release-name-rustfs-svc:9000
   MINIO__ACCESS_KEY: ChangeMe
   MINIO__SECRET_KEY: ChangeMe
   # ELASTICSEARCH
@@ -207,8 +207,8 @@ service:
   #   - IPv6
   # -- IP family policy (SingleStack, PreferDualStack, RequireDualStack)
   # ipFamilyPolicy: SingleStack
-  # -- Traffic distribution (PreferClose)
-  # trafficDistribution: PreferClose
+  # -- Traffic distribution (PreferSameZone)
+  # trafficDistribution: PreferSameZone
   # -- Additional labels for the service
   labels: {}
   #  environment: production
@@ -287,14 +287,18 @@ lifecycle: {}
 terminationGracePeriodSeconds: 30
 
 # -- Configure liveness checker
+# startupProbe already gates liveness until the app is confirmed up, so
+# initialDelaySeconds stays 0. failureThreshold/periodSeconds/timeoutSeconds
+# are relaxed (90s of tolerance) so GC pauses or transient load don't kill a
+# healthy-but-busy pod.
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 livenessProbe:
   enabled: true
-  failureThreshold: 3
-  initialDelaySeconds: 180
-  periodSeconds: 10
+  failureThreshold: 6
+  initialDelaySeconds: 0
+  periodSeconds: 15
   successThreshold: 1
-  timeoutSeconds: 5
+  timeoutSeconds: 10
 
 # -- Custom livenessProbe
 livenessProbeCustom: {}
@@ -308,14 +312,17 @@ livenessProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Configure readinessProbe checker
+# A failed readinessProbe only pulls the pod out of Service rotation, it
+# never restarts the container, so this can stay stricter than liveness.
+# timeoutSeconds is relaxed from 1s (too tight under load, caused flapping).
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 readinessProbe:
   enabled: true
   failureThreshold: 3
-  initialDelaySeconds: 10
+  initialDelaySeconds: 0
   periodSeconds: 10
   successThreshold: 1
-  timeoutSeconds: 1
+  timeoutSeconds: 5
 
 # -- Custom readinessProbe
 readinessProbeCustom: {}
@@ -329,11 +336,14 @@ readinessProbeCustom: {}
   # timeoutSeconds: 5
 
 # -- Configure startupProbe checker
+# initialDelaySeconds is 0: failureThreshold * periodSeconds (300s) already
+# covers slow first-boot init (observed ~90-150s in practice), so there's no
+# reason to blindly wait before the first check on top of that budget.
 # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
 startupProbe:
   enabled: true
   failureThreshold: 30
-  initialDelaySeconds: 180
+  initialDelaySeconds: 0
   periodSeconds: 10
   successThreshold: 1
   timeoutSeconds: 5
@@ -375,7 +385,11 @@ readyChecker:
   #   the Kubernetes cluster). The address can be an IP address or a DNS name.
   - name: elasticsearch
     port: 9200
-  - name: minio
+  # NOTE: rustfs's Service name always has a "-svc" suffix regardless of
+  # fullnameOverride, so address must stay explicit here (unlike the other
+  # entries, which can rely on auto-detection).
+  - name: rustfs
+    address: release-name-rustfs-svc
     port: 9000
   - name: rabbitmq
     port: 5672
@@ -987,11 +1001,11 @@ worker:
   # </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes
   livenessProbe:
     enabled: false
-    failureThreshold: 3
-    initialDelaySeconds: 180
-    periodSeconds: 10
+    failureThreshold: 6
+    initialDelaySeconds: 0
+    periodSeconds: 15
     successThreshold: 1
-    timeoutSeconds: 5
+    timeoutSeconds: 10
 
   # -- Custom livenessProbe
   livenessProbeCustom: {}
@@ -1011,10 +1025,10 @@ worker:
   readinessProbe:
     enabled: false
     failureThreshold: 3
-    initialDelaySeconds: 10
+    initialDelaySeconds: 0
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 1
+    timeoutSeconds: 5
 
   # -- Custom readinessProbe
   readinessProbeCustom: {}
@@ -1034,7 +1048,7 @@ worker:
   startupProbe:
     enabled: false
     failureThreshold: 30
-    initialDelaySeconds: 180
+    initialDelaySeconds: 0
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 5
@@ -1303,26 +1317,41 @@ eck-stack:
   eck-kibana:
     enabled: false
 
-# -- MinIO subchart deployment
-# </br> Ref: https://github.com/minio/minio/blob/main/helm/minio/values.yaml
-minio:
-  # -- Enable or disable MinIO subchart
+# -- RustFS subchart deployment (S3-compatible object storage, standalone mode)
+# </br> Ref: https://github.com/rustfs/rustfs/tree/main/helm/rustfs
+rustfs:
+  # -- Enable or disable RustFS subchart
   enabled: true
 
-  # mode Minio server mode (`standalone` or `distributed`)
-  # </br> Ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
-  mode: standalone
+  # RustFS server mode: standalone (single pod, matches this chart's default
+  # footprint) or distributed (multi-pod, erasure-coded, RustFS's own default)
+  # </br> Ref: https://docs.rustfs.com/en/installation/cloud-native/helm-chart/installation
+  mode:
+    standalone:
+      enabled: true
+    distributed:
+      enabled: false
 
-  # Minio root username
-  rootUser: ChangeMe
-  # Password for Minio root user
-  rootPassword: ChangeMe
-
-  # Enable persistence using Persistent Volume Claims
-  # </br> Ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-  persistence:
-    # Enable MinIO data persistence using PVC. If false, use emptyDir
+  # Do not expose an Ingress for the object-storage backend
+  ingress:
     enabled: false
+
+  # RustFS access/secret key. Rendering fails unless these are non-default
+  # values, or secret.existingSecret / secret.allowInsecureDefaults is used.
+  secret:
+    rustfs:
+      access_key: ChangeMe
+      secret_key: ChangeMe
+
+  # NOTE: unlike MinIO, RustFS standalone mode has no emptyDir option — it
+  # always provisions PVCs (see storageclass.dataStorageSize/logStorageSize,
+  # default 256Mi each) via the chart's own defaults.
+  # storageclass.name defaults to "local-path" upstream, which doesn't exist
+  # on most clusters. Left empty here so the cluster's default StorageClass
+  # is used instead (matching MinIO's previous behavior) — override if your
+  # cluster needs an explicit StorageClass name.
+  storageclass:
+    name: ""
 
   # Resources
   resources:

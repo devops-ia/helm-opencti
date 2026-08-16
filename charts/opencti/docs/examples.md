@@ -130,7 +130,8 @@ readyChecker:
   - name: elasticsearch
     port: 9200
     address: 172.0.0.1
-  - name: minio
+  - name: rustfs
+    address: opencti-ci-rustfs-svc
     port: 9000
   - name: rabbitmq
     port: 5672
@@ -206,7 +207,7 @@ Output:
                   exit 1;
                 fi;
               done
-        - name: ready-checker-minio
+        - name: ready-checker-rustfs
           image: busybox:latest
           imagePullPolicy: IfNotPresent
           command:
@@ -216,16 +217,16 @@ Output:
               RETRY=0;
               until [ $RETRY -eq 30 ];
               do
-                ADDRESS="opencti-ci-minio";
+                ADDRESS="opencti-ci-rustfs-svc";
                 if nc -zv $ADDRESS 9000; then
-                  echo "Service minio with address $ADDRESS:9000 is ready";
+                  echo "Service rustfs with address $ADDRESS:9000 is ready";
                   exit 0;
                 fi;
-                echo "[$RETRY/30] waiting for service minio with address $ADDRESS:9000 to become ready";
+                echo "[$RETRY/30] waiting for service rustfs with address $ADDRESS:9000 to become ready";
                 sleep 5;
                 RETRY=$(($RETRY + 1));
                 if [ $RETRY -eq 30 ]; then
-                  echo "Service minio with address $ADDRESS:9000 is not ready";
+                  echo "Service rustfs with address $ADDRESS:9000 is not ready";
                   exit 1;
                 fi;
               done

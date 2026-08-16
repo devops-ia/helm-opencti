@@ -564,7 +564,7 @@ curl -f http://localhost:8081/health
 ### Component connectivity matrix
 
 | Component | v1 Target | v2 Single Mode | v2 Clustering Mode |
-|-----------|-----------|----------------|-------------------|
+| ----------- | ----------- | ---------------- | ------------------- |
 | Users (Ingress) | `{release}-server` | `{release}-server` | `{release}-frontend` |
 | Workers | `{release}-server` | `{release}-server` | `{release}-ingestion` |
 | Connectors | `{release}-server` | `{release}-server` | `{release}-frontend` |
@@ -637,7 +637,7 @@ clustering:
 #### Health check endpoints
 
 | Component | Health Check URL | Purpose |
-|-----------|------------------|---------|
+| ----------- | ------------------ | --------- |
 | Frontend | `http://{frontend-svc}/health` | UI/API availability |
 | Ingestion | `http://{ingestion-svc}/health` | Processing capability |
 | Workers | Pod logs | Connection status |

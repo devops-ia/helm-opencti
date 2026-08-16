@@ -85,7 +85,7 @@ The chart creates three resources for Gateway API:
 - `HTTPRoute/opencti-gw-test` - routes traffic to the OpenCTI server service
 - `Service/opencti-gw-test-server` - the ClusterIP backend
 
-> The `readyChecker` waits for OpenSearch, MinIO, RabbitMQ, and Redis before starting the server. First install takes 3–5 minutes while images are pulled.
+> The `readyChecker` waits for OpenSearch, RustFS, RabbitMQ, and Redis before starting the server. First install takes 3–5 minutes while images are pulled.
 
 Wait for the Gateway to get an address (OrbStack assigns a local IP to the LoadBalancer):
 
@@ -196,7 +196,7 @@ OrbStack must have Kubernetes running with LoadBalancer support. Verify with `or
 kubectl logs -n opencti -l app.kubernetes.io/name=opencti -c ready-checker
 ```
 
-One of the dependencies (OpenSearch, MinIO, RabbitMQ, Redis) hasn't started yet. Check:
+One of the dependencies (OpenSearch, RustFS, RabbitMQ, Redis) hasn't started yet. Check:
 
 ```bash
 kubectl get pods -n opencti
