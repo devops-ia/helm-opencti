@@ -16,7 +16,7 @@ env:
   ELASTICSEARCH__URL: http://opencti-ci-opensearch:9200
 
   ## STORAGE
-  MINIO__ENDPOINT: opencti-ci-minio
+  MINIO__ENDPOINT: opencti-ci-rustfs-svc
 
   ## MESSAGE QUEUE
   RABBITMQ__HOSTNAME: opencti-ci-rabbitmq
@@ -43,11 +43,11 @@ envFromSecrets:
     name: opencti-ci-credentials
     key: APP__ENCRYPTION_KEY
   MINIO__ACCESS_KEY:
-    name: opencti-ci-minio
-    key: rootUser
+    name: opencti-ci-rustfs-secret
+    key: RUSTFS_ACCESS_KEY
   MINIO__SECRET_KEY:
-    name: opencti-ci-minio
-    key: rootPassword
+    name: opencti-ci-rustfs-secret
+    key: RUSTFS_SECRET_KEY
   RABBITMQ__PASSWORD:
     name: opencti-ci-rabbitmq
     key: rabbitmq-password
@@ -69,7 +69,8 @@ readyChecker:
   services:
   - name: opensearch
     port: 9200
-  - name: minio
+  - name: rustfs
+    address: opencti-ci-rustfs-svc
     port: 9000
   - name: rabbitmq
     port: 5672
@@ -106,7 +107,7 @@ service:
   ipFamilies:
     - IPv4
   ipFamilyPolicy: SingleStack
-  trafficDistribution: PreferClose
+  trafficDistribution: PreferSameZone
   labels:
     environment: ci
   extraPorts:
@@ -236,12 +237,23 @@ opensearch:
     enabled: false
 
 ##
-# MINIO
-minio:
-  fullnameOverride: opencti-ci-minio
+# RUSTFS
+rustfs:
+  fullnameOverride: opencti-ci-rustfs
 
-  rootUser: minio
-  rootPassword: uxLSbJGZzzhZxXUFgdAl
+  mode:
+    standalone:
+      enabled: true
+    distributed:
+      enabled: false
+
+  ingress:
+    enabled: false
+
+  secret:
+    rustfs:
+      access_key: minio
+      secret_key: uxLSbJGZzzhZxXUFgdAl
 
   resources:
     requests:
@@ -249,9 +261,6 @@ minio:
       cpu: 100m
     limits:
       memory: 512Mi
-
-  persistence:
-    enabled: false
 
 ##
 # RABBITMQ

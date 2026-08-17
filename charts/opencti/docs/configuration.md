@@ -16,7 +16,7 @@ Basic installation will deploy the following components:
 * OpenCTI worker
 * OpenCTI connectors
 * ElasticSearch / OpenSearch
-* MinIO
+* RustFS
 * RabbitMQ
 * Redis
 
@@ -45,7 +45,7 @@ env:
   ELASTICSEARCH__URL: http://<release-name>-opensearch:9200
 
   ## STORAGE
-  MINIO__ENDPOINT: <release-name>-minio
+  MINIO__ENDPOINT: <release-name>-rustfs-svc
 
   ## MESSAGE QUEUE
   RABBITMQ__HOSTNAME: <release-name>-rabbitmq
@@ -66,11 +66,11 @@ envFromSecrets:
     name: <release-name>-credentials
     key: APP__ADMIN__TOKEN
   MINIO__ACCESS_KEY:
-    name: opencti-<release-name>-minio
-    key: rootUser
+    name: opencti-<release-name>-rustfs-secret
+    key: RUSTFS_ACCESS_KEY
   MINIO__SECRET_KEY:
-    name: opencti-<release-name>-minio
-    key: rootPassword
+    name: opencti-<release-name>-rustfs-secret
+    key: RUSTFS_SECRET_KEY
   RABBITMQ__PASSWORD:
     name: opencti-<release-name>-rabbitmq
     key: rabbitmq-password
@@ -91,7 +91,8 @@ readyChecker:
   services:
   - name: opensearch
     port: 9200
-  - name: minio
+  - name: rustfs
+    address: <release-name>-rustfs-svc
     port: 9000
   - name: rabbitmq
     port: 5672
@@ -130,7 +131,7 @@ service:
   ipFamilies:
     - IPv4
   ipFamilyPolicy: SingleStack
-  trafficDistribution: PreferClose
+  trafficDistribution: PreferSameZone
   labels:
     environment: production
   extraPorts:
@@ -335,12 +336,23 @@ opensearch:
   persistence:
     enabled: false
 
-# MinIO Configuration
-minio:
-  fullnameOverride: opencti-<release-name>-minio
+# RustFS Configuration
+rustfs:
+  fullnameOverride: opencti-<release-name>-rustfs
 
-  rootUser: minio
-  rootPassword: uxLSbJGZzzhZxXUFgdAl
+  mode:
+    standalone:
+      enabled: true
+    distributed:
+      enabled: false
+
+  ingress:
+    enabled: false
+
+  secret:
+    rustfs:
+      access_key: minio
+      secret_key: uxLSbJGZzzhZxXUFgdAl
 
   resources:
     requests:
@@ -348,9 +360,6 @@ minio:
       cpu: 100m
     limits:
       memory: 512Mi
-
-  persistence:
-    enabled: false
 
 # RabbitMQ Configuration
 rabbitmq:
@@ -656,25 +665,36 @@ opensearch.securityConfig.internalUsersSecret: <release-name>-credentials
 
 More info. [chart values](https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml)
 
-### MinIO
+### RustFS
 
-Server block to configure MinIO:
+Server block to configure RustFS (note the `-svc` suffix — RustFS's Service name always carries it, regardless of `fullnameOverride`):
 
 ```yaml
 env:
 ...
-  MINIO__ENDPOINT: <release-name>-minio
+  MINIO__ENDPOINT: <release-name>-rustfs-svc
 ```
 
 Basic config:
 
 ```yaml
-minio:
+rustfs:
   enabled: true
-  fullnameOverride: <release-name>-minio
+  fullnameOverride: <release-name>-rustfs
 
-  rootUser: minio
-  rootPassword: uxLSbJGZzzhZxXUFgdAl
+  mode:
+    standalone:
+      enabled: true
+    distributed:
+      enabled: false
+
+  ingress:
+    enabled: false
+
+  secret:
+    rustfs:
+      access_key: minio
+      secret_key: uxLSbJGZzzhZxXUFgdAl
 
   resources:
     requests:
@@ -682,12 +702,11 @@ minio:
       cpu: 100m
     limits:
       memory: 512Mi
-
-  persistence:
-    enabled: false
 ```
 
-Move `minio.rootUser` and `minio.rootPassword` to `secrets` block for `auth`:
+> RustFS standalone mode always provisions PersistentVolumeClaims (no emptyDir option). `rustfs.storageclass.name` defaults to `""` in this chart so the cluster's default StorageClass is used — override it if your cluster needs an explicit name.
+
+Move `rustfs.secret.rustfs.access_key` and `secret_key` to `secrets` block for `envFromSecrets`:
 
 ```yaml
 secrets:
@@ -709,13 +728,13 @@ envFromSecrets:
     key: root-password
 ```
 
-Configure Minio `minio.auth` with existing secret:
+Configure RustFS with an existing secret (must contain keys `RUSTFS_ACCESS_KEY`/`RUSTFS_SECRET_KEY`):
 
 ```yaml
-minio.auth.existingSecret: <release-name>-credentials
+rustfs.secret.existingSecret: <release-name>-credentials
 ```
 
-More info. [chart values](https://github.com/minio/minio/blob/main/helm/minio/values.yaml)
+More info. [chart values](https://github.com/rustfs/rustfs/tree/main/helm/rustfs)
 
 ### RabbitMQ
 
@@ -839,7 +858,8 @@ readyChecker:
   services:
   - name: opensearch
     port: 9200
-  - name: minio
+  - name: rustfs
+    address: <release-name>-rustfs-svc
     port: 9000
   - name: rabbitmq
     port: 5672

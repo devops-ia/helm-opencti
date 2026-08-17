@@ -148,7 +148,15 @@
         },
         "MINIO__ENDPOINT": {
           "type": "string",
-          "description": "MinIO endpoint"
+          "description": "S3-compatible endpoint (backed by the rustfs subchart, service name has a -svc suffix)"
+        },
+        "MINIO__ACCESS_KEY": {
+          "type": "string",
+          "description": "S3 access key, must match the rustfs subchart's secret.rustfs.access_key when using the bundled RustFS"
+        },
+        "MINIO__SECRET_KEY": {
+          "type": "string",
+          "description": "S3 secret key, must match the rustfs subchart's secret.rustfs.secret_key when using the bundled RustFS"
         },
         "MINIO__ACCESS_KEY": {
           "type": "string",
@@ -648,36 +656,53 @@
         }
       }
     },
-    "minio": {
+    "rustfs": {
       "type": "object",
+      "description": "RustFS subchart deployment (S3-compatible object storage, standalone mode)",
       "properties": {
         "enabled": {
           "type": "boolean",
-          "default": true
+          "default": true,
+          "description": "Enable or disable RustFS subchart"
         },
         "mode": {
-          "type": "string",
-          "enum": ["standalone", "distributed"],
-          "default": "standalone"
-        },
-        "auth": {
           "type": "object",
           "properties": {
-            "rootUser": {
-              "type": "string"
+            "standalone": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
             },
-            "rootPassword": {
-              "type": "string"
+            "distributed": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
             }
-          },
-          "required": ["rootUser", "rootPassword"]
+          }
         },
-        "persistence": {
+        "secret": {
           "type": "object",
           "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": false
+            "rustfs": {
+              "type": "object",
+              "properties": {
+                "access_key": {
+                  "type": "string",
+                  "description": "RustFS access key"
+                },
+                "secret_key": {
+                  "type": "string",
+                  "description": "RustFS secret key"
+                }
+              }
             }
           }
         }
@@ -1541,46 +1566,6 @@
               "type": "integer",
               "default": 0,
               "description": "Number of coordinating-only replicas"
-            }
-          }
-        }
-      }
-    },
-    "minio": {
-      "type": "object",
-      "description": "MinIO subchart deployment",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable or disable MinIO subchart"
-        },
-        "mode": {
-          "type": "string",
-          "enum": ["standalone", "distributed"],
-          "default": "standalone",
-          "description": "MinIO server mode"
-        },
-        "auth": {
-          "type": "object",
-          "properties": {
-            "rootUser": {
-              "type": "string",
-              "description": "MinIO root username"
-            },
-            "rootPassword": {
-              "type": "string",
-              "description": "Password for MinIO root user"
-            }
-          }
-        },
-        "persistence": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": false,
-              "description": "Enable MinIO data persistence using PVC"
             }
           }
         }
