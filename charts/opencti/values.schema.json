@@ -158,6 +158,14 @@
           "type": "string",
           "description": "S3 secret key, must match the rustfs subchart's secret.rustfs.secret_key when using the bundled RustFS"
         },
+        "MINIO__ACCESS_KEY": {
+          "type": "string",
+          "description": "MinIO access key, must match the minio subchart's rootUser when using the bundled MinIO"
+        },
+        "MINIO__SECRET_KEY": {
+          "type": "string",
+          "description": "MinIO secret key, must match the minio subchart's rootPassword when using the bundled MinIO"
+        },
         "ELASTICSEARCH__URL": {
           "type": "string",
           "description": "Elasticsearch URL"
