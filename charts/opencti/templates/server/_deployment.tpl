@@ -9,6 +9,17 @@
 {{- if eq $healthKey "" }}
   {{- $healthKey = .Values.env.APP__HEALTH_ACCESS_KEY | default "" }}
 {{- end }}
+{{- $healthKeyExternal := and (eq $healthKey "") (.Values.envFromSecrets) (hasKey .Values.envFromSecrets "APP__HEALTH_ACCESS_KEY") }}
+{{- $healthPath := .Values.service.healthPath | default "/health" }}
+{{- $probePort := .Values.service.targetPort | default .Values.service.port }}
+{{- if .Values.clustering.enabled }}
+  {{- if eq $serverType "frontend" }}
+    {{- $probePort = .Values.clustering.frontend.service.targetPort | default .Values.service.targetPort | default .Values.service.port }}
+  {{- else if eq $serverType "ingestion" }}
+    {{- $probePort = .Values.clustering.ingestion.service.targetPort | default .Values.service.targetPort | default .Values.service.port }}
+  {{- end }}
+{{- end }}
+{{- $healthExecCommand := list "node" "-e" (printf "require('http').get({host:'127.0.0.1',port:%v,path:'%s?health_access_key='+process.env.APP__HEALTH_ACCESS_KEY},r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))" $probePort $healthPath) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -175,6 +186,10 @@ spec:
           livenessProbe:
             {{- if .Values.livenessProbeCustom }}
             {{- toYaml .Values.livenessProbeCustom | nindent 12 }}
+            {{- else if $healthKeyExternal }}
+            exec:
+              command:
+                {{- toYaml $healthExecCommand | nindent 16 }}
             {{- else }}
             httpGet:
               path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" $healthKey) | quote }}
@@ -198,6 +213,10 @@ spec:
           readinessProbe:
             {{- if .Values.readinessProbeCustom }}
             {{- toYaml .Values.readinessProbeCustom | nindent 12 }}
+            {{- else if $healthKeyExternal }}
+            exec:
+              command:
+                {{- toYaml $healthExecCommand | nindent 16 }}
             {{- else }}
             httpGet:
               path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" $healthKey) | quote }}
@@ -221,6 +240,10 @@ spec:
           startupProbe:
             {{- if .Values.startupProbeCustom }}
             {{- toYaml .Values.startupProbeCustom | nindent 12 }}
+            {{- else if $healthKeyExternal }}
+            exec:
+              command:
+                {{- toYaml $healthExecCommand | nindent 16 }}
             {{- else }}
             httpGet:
               path: {{ .Values.service.healthPath | default (printf "/health?health_access_key=%s" $healthKey) | quote }}

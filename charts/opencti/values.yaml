@@ -62,6 +62,7 @@ env:
   APP__ADMIN__EMAIL: admin@opencti.io
   APP__ADMIN__PASSWORD: ChangeMe
   APP__ADMIN__TOKEN: ChangeMe
+  APP__ENCRYPTION_KEY: ChangeMe  # openssl rand -base64 32
   APP__BASE_PATH: "/"
   APP__GRAPHQL__PLAYGROUND__ENABLED: false
   APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION: false
@@ -69,6 +70,8 @@ env:
   PROVIDERS__LOCAL__STRATEGY: LocalStrategy
   # MINIO
   MINIO__ENDPOINT: release-name-minio:9000
+  MINIO__ACCESS_KEY: ChangeMe
+  MINIO__SECRET_KEY: ChangeMe
   # ELASTICSEARCH
   ELASTICSEARCH__URL: http://release-name-elasticsearch:9200
   # RABBITMQ
