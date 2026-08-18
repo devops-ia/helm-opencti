@@ -74,7 +74,7 @@ See [basic installation](docs/configuration.md), [clustering installation](docs/
 
 ## Upgrades
 
-See [Upgrade guide: v1 to v2](docs/guides/UPGRADE-v1-to-v2.md)
+See [Upgrade guide: v2 to v3](docs/guides/UPGRADE-v2-to-v3.md)
 
 ## Configuration
 
@@ -109,7 +109,7 @@ helm show values opencti/opencti
 | clustering.frontend.gateway.parentRefs | list | `[{"name":"","namespace":""}]` | Ignored when create is true (auto-wired to the chart-managed Gateway). |
 | clustering.frontend.gateway.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | Route rules (backendRefs are auto-generated from frontend service config) |
 | clustering.frontend.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"opencti-frontend.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Frontend ingress configuration |
-| clustering.frontend.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | Frontend network policy |
+| clustering.frontend.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | Frontend network policy Leaving ingress/egress empty below while enabled is a permissive (allow-all) policy - uncomment the examples to actually restrict traffic. |
 | clustering.frontend.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1}` | Frontend pod disruption budget |
 | clustering.frontend.replicaCount | int | `2` | Number of replicas for frontend |
 | clustering.frontend.resources | object | `{}` | Frontend resources |
@@ -130,7 +130,7 @@ helm show values opencti/opencti
 | clustering.ingestion.autoscaling | object | `{"enabled":false,"maxReplicas":20,"minReplicas":3,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":85}` | Ingestion autoscaling |
 | clustering.ingestion.enabled | bool | `true` | Enable ingestion deployment |
 | clustering.ingestion.env | object | `{}` | Environment variables específicas para ingestion |
-| clustering.ingestion.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | Ingestion network policy |
+| clustering.ingestion.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | Ingestion network policy Ingestion never receives inbound traffic from other pods, so set this to just [Egress] when ingress is left empty below - otherwise the chart's default Ingress+Egress fallback also renders an allow-all ingress rule. |
 | clustering.ingestion.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":2}` | Ingestion pod disruption budget |
 | clustering.ingestion.replicaCount | int | `3` | Number of replicas for ingestion |
 | clustering.ingestion.resources | object | `{}` | Ingestion resources |
@@ -189,8 +189,8 @@ helm show values opencti/opencti
 | livenessProbe | object | `{"enabled":true,"failureThreshold":6,"initialDelaySeconds":0,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":10}` | Configure liveness checker startupProbe already gates liveness until the app is confirmed up, so initialDelaySeconds stays 0. failureThreshold/periodSeconds/timeoutSeconds are relaxed (90s of tolerance) so GC pauses or transient load don't kill a healthy-but-busy pod. </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | livenessProbeCustom | object | `{}` | Custom livenessProbe |
 | nameOverride | string | `""` | String to partially override opencti.fullname template (will maintain the release name) |
-| networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | NetworkPolicy configuration </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
-| networkPolicy.enabled | bool | `false` | Enable or disable NetworkPolicy |
+| networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | NetworkPolicy configuration for the server </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
+| networkPolicy.enabled | bool | `false` | Enable or disable NetworkPolicy Leaving ingress/egress empty below while enabled is a permissive (allow-all) policy - uncomment the examples to actually restrict traffic. |
 | networkPolicy.policyTypes | list | `[]` | Policy types |
 | nodeSelector | object | `{}` | Node labels for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector |
 | opensearch | object | `{"enabled":true,"opensearchJavaOpts":"-Xmx512M -Xms512M","persistence":{"enabled":false},"singleNode":true}` | OpenSearch subchart deployment </br> Ref: https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml |
@@ -268,9 +268,9 @@ helm show values opencti/opencti
 | worker.lifecycle | object | `{}` | Configure lifecycle hooks </br> Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ </br> Ref: https://learnk8s.io/graceful-shutdown |
 | worker.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"initialDelaySeconds":0,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":10}` | Configure liveness checker </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | worker.livenessProbeCustom | object | `{}` | Custom livenessProbe |
-| worker.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | NetworkPolicy configuration </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
-| worker.networkPolicy.enabled | bool | `false` | Enable or disable NetworkPolicy |
-| worker.networkPolicy.policyTypes | list | `[]` | Policy types |
+| worker.networkPolicy | object | `{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]}` | NetworkPolicy configuration for the worker </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
+| worker.networkPolicy.enabled | bool | `false` | Enable or disable NetworkPolicy Leaving ingress/egress empty below while enabled is a permissive (allow-all) policy - uncomment the examples to actually restrict traffic. |
+| worker.networkPolicy.policyTypes | list | `[]` | Policy types Workers never receive inbound traffic from other pods, so set this to just [Egress] when ingress is left empty below - otherwise the chart's default Ingress+Egress fallback also renders an allow-all ingress rule. |
 | worker.nodeSelector | object | `{}` | Node labels for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector |
 | worker.podAnnotations | object | `{}` | Configure annotations on Pods |
 | worker.podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1}` | Pod Disruption Budget </br> Ref: https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/ |

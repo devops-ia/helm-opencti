@@ -232,37 +232,62 @@ service:
   #    protocol: TCP
   #    appProtocol: GRPC
 
-# -- NetworkPolicy configuration
+# -- NetworkPolicy configuration for the server
 # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
   # -- Enable or disable NetworkPolicy
+  # Leaving ingress/egress empty below while enabled is a permissive (allow-all)
+  # policy - uncomment the examples to actually restrict traffic.
   enabled: false
   # -- Policy types
   policyTypes: []
     # - Ingress
     # - Egress
   ingress: []
+    # Only worker and connector pods call back into the server (port 4000,
+    # plus 9000 if service.extraPorts exposes a gRPC port).
     # - from:
-    #   - ipBlock:
-    #       cidr: 172.17.0.0/16
-    #       except:
-    #       - 172.17.1.0/24
-    #   - namespaceSelector:
-    #       matchLabels:
-    #         nodepool: mynodepool
     #   - podSelector:
     #       matchLabels:
-    #         role: frontend
+    #         app.kubernetes.io/name: opencti
+    #   ports:
+    #   - protocol: TCP
+    #     port: 4000
+  egress: []
+    # DNS is required for the server to resolve its dependencies.
+    # - ports:
+    #   - protocol: UDP
+    #     port: 53
+    #   - protocol: TCP
+    #     port: 53
+    # - to:
+    #   - podSelector:
+    #       matchLabels:
+    #         app.kubernetes.io/name: opensearch
+    #   ports:
+    #   - protocol: TCP
+    #     port: 9200
+    # - to:
+    #   - podSelector:
+    #       matchLabels:
+    #         app.kubernetes.io/name: rustfs
+    #   ports:
+    #   - protocol: TCP
+    #     port: 9000
+    # - to:
+    #   - podSelector:
+    #       matchLabels:
+    #         app.kubernetes.io/name: rabbitmq
+    #   ports:
+    #   - protocol: TCP
+    #     port: 5672
+    # - to:
+    #   - podSelector:
+    #       matchLabels:
+    #         app.kubernetes.io/name: redis
     #   ports:
     #   - protocol: TCP
     #     port: 6379
-  egress: []
-    # - to:
-    #   - ipBlock:
-    #       cidr: 10.0.0.0/24
-    #   ports:
-    #   - protocol: TCP
-    #     port: 5978
 
 # -- Enable ServiceMonitor to get metrics
 # </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
@@ -708,11 +733,54 @@ clustering:
       # minAvailable:
 
     # -- Frontend network policy
+    # Leaving ingress/egress empty below while enabled is a permissive
+    # (allow-all) policy - uncomment the examples to actually restrict traffic.
     networkPolicy:
       enabled: false
       policyTypes: []
       ingress: []
+        # Only ingestion and connector pods call back into the frontend.
+        # - from:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: opencti
+        #   ports:
+        #   - protocol: TCP
+        #     port: 4000
       egress: []
+        # - ports:
+        #   - protocol: UDP
+        #     port: 53
+        #   - protocol: TCP
+        #     port: 53
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: opensearch
+        #   ports:
+        #   - protocol: TCP
+        #     port: 9200
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: rustfs
+        #   ports:
+        #   - protocol: TCP
+        #     port: 9000
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: rabbitmq
+        #   ports:
+        #   - protocol: TCP
+        #     port: 5672
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: redis
+        #   ports:
+        #   - protocol: TCP
+        #     port: 6379
 
     # -- Frontend affinity
     affinity: {}
@@ -780,11 +848,49 @@ clustering:
       # minAvailable:
 
     # -- Ingestion network policy
+    # Ingestion never receives inbound traffic from other pods, so set this to
+    # just [Egress] when ingress is left empty below - otherwise the chart's
+    # default Ingress+Egress fallback also renders an allow-all ingress rule.
     networkPolicy:
       enabled: false
       policyTypes: []
+        # - Egress
       ingress: []
       egress: []
+        # - ports:
+        #   - protocol: UDP
+        #     port: 53
+        #   - protocol: TCP
+        #     port: 53
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: opencti
+        #         opencti.component: frontend
+        #   ports:
+        #   - protocol: TCP
+        #     port: 4000
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: opensearch
+        #   ports:
+        #   - protocol: TCP
+        #     port: 9200
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: rustfs
+        #   ports:
+        #   - protocol: TCP
+        #     port: 9000
+        # - to:
+        #   - podSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: rabbitmq
+        #   ports:
+        #   - protocol: TCP
+        #     port: 5672
 
     # -- Ingestion affinity
     affinity: {}
@@ -1132,37 +1238,56 @@ worker:
     # - echo
     # - "Hello, World!"
 
-  # -- NetworkPolicy configuration
+  # -- NetworkPolicy configuration for the worker
   # </br> Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
   networkPolicy:
     # -- Enable or disable NetworkPolicy
+    # Leaving ingress/egress empty below while enabled is a permissive (allow-all)
+    # policy - uncomment the examples to actually restrict traffic.
     enabled: false
     # -- Policy types
+    # Workers never receive inbound traffic from other pods, so set this to
+    # just [Egress] when ingress is left empty below - otherwise the chart's
+    # default Ingress+Egress fallback also renders an allow-all ingress rule.
     policyTypes: []
-      # - Ingress
       # - Egress
     ingress: []
-      # - from:
-      #   - ipBlock:
-      #       cidr: 172.17.0.0/16
-      #       except:
-      #       - 172.17.1.0/24
-      #   - namespaceSelector:
-      #       matchLabels:
-      #         nodepool: mynodepool
+    egress: []
+      # DNS is required for the worker to resolve its dependencies.
+      # - ports:
+      #   - protocol: UDP
+      #     port: 53
+      #   - protocol: TCP
+      #     port: 53
+      # - to:
       #   - podSelector:
       #       matchLabels:
-      #         role: frontend
+      #         app.kubernetes.io/name: opencti
+      #         opencti.component: server
       #   ports:
       #   - protocol: TCP
-      #     port: 6379
-    egress: []
+      #     port: 4000
       # - to:
-      #   - ipBlock:
-      #       cidr: 10.0.0.0/24
+      #   - podSelector:
+      #       matchLabels:
+      #         app.kubernetes.io/name: opensearch
       #   ports:
       #   - protocol: TCP
-      #     port: 5978
+      #     port: 9200
+      # - to:
+      #   - podSelector:
+      #       matchLabels:
+      #         app.kubernetes.io/name: rustfs
+      #   ports:
+      #   - protocol: TCP
+      #     port: 9000
+      # - to:
+      #   - podSelector:
+      #       matchLabels:
+      #         app.kubernetes.io/name: rabbitmq
+      #   ports:
+      #   - protocol: TCP
+      #     port: 5672
 
   # -- Enable ServiceMonitor to get metrics
   # </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor
