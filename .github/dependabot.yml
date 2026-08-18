@@ -8,6 +8,9 @@ updates:
     labels:
       - enhancement
       - dependency-management
+    assignees:
+      - ialejandro
+      - amartingarcia
     groups:
       github-actions:
         patterns:
