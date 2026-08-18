@@ -8,8 +8,6 @@ updates:
     labels:
       - enhancement
       - dependency-management
-    assignees:
-      - devops-ia/devops-ia
     groups:
       github-actions:
         patterns:
