@@ -57,7 +57,7 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: update OpenCTI version to ${{ steps.latest_release.outputs.latest_release }}"
           signoff: false
-          branch: fix/upgrade-opencti-appversion-${{ steps.latest_release.outputs.latest_release }}
+          branch: chore/upgrade-opencti-appversion-${{ steps.latest_release.outputs.latest_release }}
           delete-branch: true
           title: 'fix: [opencti] new release: ${{ steps.latest_release.outputs.latest_release }}'
           body: |

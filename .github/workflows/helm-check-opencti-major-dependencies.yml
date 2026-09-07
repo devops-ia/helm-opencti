@@ -74,9 +74,9 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: update major dependencies version"
           signoff: false
-          branch: fix/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
+          branch: chore/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
           delete-branch: true
-          title: '[opencti] upgrade major dependencies (${{ steps.date.outputs.date }})'
+          title: 'fix: [opencti] upgrade major dependencies (${{ steps.date.outputs.date }})'
           body-path: major-output.log
           labels: |
             auto-pr-bump-version
