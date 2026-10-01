@@ -21,10 +21,10 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com | rustfs | 0.12.0 |
+| https://charts.rustfs.com | rustfs | 1.0.0 |
 | https://helm.elastic.co | eck-stack | 0.20.0 |
-| https://opensearch-project.github.io/helm-charts/ | opensearch | 3.8.0 |
-| oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v1.40.2 |
+| https://opensearch-project.github.io/helm-charts/ | opensearch | 3.9.0 |
+| oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v2.0.0 |
 | oci://registry-1.docker.io/bitnamicharts | rabbitmq | 16.0.13 |
 
 ## Add repository
