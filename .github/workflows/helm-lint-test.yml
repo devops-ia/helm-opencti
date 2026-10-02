@@ -9,3 +9,5 @@ jobs:
     permissions:
       contents: read
     uses: devops-ia/.github/.github/workflows/helm-lint-test.yml@main
+    with:
+      helm_extra_args: "--timeout 900s"
