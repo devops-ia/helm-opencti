@@ -1,0 +1,16 @@
+name: Enable Auto-merge
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  enable-auto-merge:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: devops-ia/.github/.github/workflows/github-auto-merge-enable.yml@main
+    with:
+      merge_method: squash
+    secrets:
+      PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
