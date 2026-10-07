@@ -69,7 +69,8 @@ env:
   NODE_OPTIONS: "--max-old-space-size=8096"
   PROVIDERS__LOCAL__STRATEGY: LocalStrategy
   # MINIO (RUSTFS)
-  MINIO__ENDPOINT: release-name-rustfs-svc:9000
+  MINIO__ENDPOINT: release-name-rustfs-svc
+  MINIO__PORT: 9000
   MINIO__ACCESS_KEY: ChangeMe
   MINIO__SECRET_KEY: ChangeMe
   # ELASTICSEARCH
