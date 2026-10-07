@@ -15,7 +15,9 @@ spec:
       {{- else }}
       image: busybox:1.37.0
       {{- end }}
-      command: ['wget']
-      args: ['{{ include "opencti.fullname" . }}-server:{{ .Values.service.port }}']
+      # Retry: the server may still be starting right after an upgrade (e.g. probes disabled)
+      command: ['sh', '-c']
+      args:
+        - for i in $(seq 1 24); do wget -q -T 5 -O /dev/null {{ include "opencti.fullname" . }}-server:{{ .Values.service.port }} && exit 0; sleep 10; done; exit 1
   restartPolicy: Never
 {{ end }}
