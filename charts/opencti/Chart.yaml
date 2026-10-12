@@ -41,4 +41,4 @@ dependencies:
     alias: redis
     condition: redis.enabled
     repository: oci://ghcr.io/dragonflydb/dragonfly/helm
-    version: v2.0.0
+    version: v2.0.2
