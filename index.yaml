@@ -3,6 +3,54 @@ entries:
   opencti:
   - apiVersion: v2
     appVersion: 7.261023.1
+    created: "2026-10-26T04:24:09.328920259Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.20.0
+    - condition: rustfs.enabled
+      name: rustfs
+      repository: https://charts.rustfs.com
+      version: 1.0.4
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.9.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v2.0.2
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 0533fe5c262701ec07b249936bd329f6e9406fb12062e59aad5f53b38a48dc30
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v3.0.26/opencti-3.0.26.tgz
+    version: 3.0.26
+  - apiVersion: v2
+    appVersion: 7.261023.1
     created: "2026-10-24T04:21:47.976160678Z"
     dependencies:
     - condition: eck-stack.enabled
@@ -13525,4 +13573,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2026-10-24T04:21:47.976741698Z"
+generated: "2026-10-26T04:24:09.329516609Z"
