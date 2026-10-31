@@ -2,6 +2,54 @@ apiVersion: v1
 entries:
   opencti:
   - apiVersion: v2
+    appVersion: 7.261030.1
+    created: "2026-10-31T05:13:54.593940881Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.20.0
+    - condition: rustfs.enabled
+      name: rustfs
+      repository: https://charts.rustfs.com
+      version: 1.0.4
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.9.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v2.0.2
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: 72e3a8a7f84097d7a7a07172a8035d2d3c5ee453e61c54271352b7d034b6aab5
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v3.0.28/opencti-3.0.28.tgz
+    version: 3.0.28
+  - apiVersion: v2
     appVersion: 7.261026.0
     created: "2026-10-27T04:47:05.953602746Z"
     dependencies:
@@ -13621,4 +13669,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2026-10-27T04:47:05.954072231Z"
+generated: "2026-10-31T05:13:54.594583058Z"
