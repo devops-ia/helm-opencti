@@ -105,6 +105,7 @@ spec:
                   exit 1;
                 fi;
               done
+        {{- $rc := .readyChecker }}
         {{- range $service := .readyChecker.services }}
         - name: ready-checker-{{ $service.name }}
           securityContext:
@@ -120,17 +121,17 @@ spec:
             - '-c'
             - |
               RETRY=0;
-              until [ $RETRY -eq {{ $.readyChecker.retries }} ];
+              until [ $RETRY -eq {{ $rc.retries }} ];
               do
                 ADDRESS="{{ if $service.address }}{{ $service.address }}{{ else }}{{ $.Values.fullnameOverride | default $.Release.Name }}-{{ $service.name }}{{ end }}";
                 if nc -zv $ADDRESS {{ $service.port }}; then
                   echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is ready";
                   exit 0;
                 fi;
-                echo "[$RETRY/{{ $.readyChecker.retries }}] waiting for service {{ $service.name }} with address $ADDRESS:{{ $service.port }} to become ready";
-                sleep {{ $.readyChecker.timeout }};
+                echo "[$RETRY/{{ $rc.retries }}] waiting for service {{ $service.name }} with address $ADDRESS:{{ $service.port }} to become ready";
+                sleep {{ $rc.timeout }};
                 RETRY=$(($RETRY + 1));
-                if [ $RETRY -eq {{ $.readyChecker.retries }} ]; then
+                if [ $RETRY -eq {{ $rc.retries }} ]; then
                   echo "Service {{ $service.name }} with address $ADDRESS:{{ $service.port }} is not ready";
                   exit 1;
                 fi;

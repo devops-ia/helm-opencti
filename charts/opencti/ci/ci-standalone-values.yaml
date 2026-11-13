@@ -125,6 +125,21 @@ resources:
     memory: "1Gi"
     cpu: "500m"
 
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/os
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: opencti
+
 ##
 # OPENCTI WORKER
 worker:
@@ -151,6 +166,44 @@ worker:
     type: Recreate
 
   terminationGracePeriodSeconds: 20
+
+  networkPolicy:
+    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: opencti-ci
+        ports:
+          - protocol: TCP
+            port: 4000
+
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/os
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: opencti
+          opencti.component: worker
+
+  dnsConfig:
+    nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+    searches: []
+    options:
+      - name: ndots
+        value: "2"
+
+  dnsPolicy: ClusterFirst
 
 ##
 # OPENCTI CONNECTOR

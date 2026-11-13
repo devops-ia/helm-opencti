@@ -23,7 +23,8 @@ helm template opencti charts/opencti --debug
 ```bash
 # Install the chart in a test namespace
 kubectl create namespace opencti-test
-helm install opencti-test charts/opencti --namespace opencti-test
+helm install opencti-test charts/opencti --namespace opencti-test \
+  --values charts/opencti/ci/ci-standalone-values.yaml
 ```
 
 ### 4. Verification steps
@@ -51,7 +52,7 @@ kubectl port-forward svc/opencti-test 8080:8080 -n opencti-test
 - OpenCTI platform UI accessibility
 - ElasticSearch connection
 - RabbitMQ status
-- MinIO/S3 connectivity
+- RustFS/S3 connectivity
 - Redis cluster status
 
 ### 5. Functional testing
@@ -95,5 +96,5 @@ For CI/CD pipelines, you can use the following tools:
 Example CI test command:
 
 ```bash
-ct lint-and-install --config ct.yaml
+ct lint-and-install --config .github/ct.yaml
 ```

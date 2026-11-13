@@ -16,8 +16,11 @@ A Helm chart to deploy Open Cyber Threat Intelligence platform
 ## Prerequisites
 
 * Helm 3+
+* Kubernetes 1.23+
 
 ## Requirements
+
+Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
@@ -74,7 +77,24 @@ See [basic installation](docs/configuration.md), [clustering installation](docs/
 
 ## Upgrades
 
-See [Upgrade guide: v2 to v3](docs/guides/UPGRADE-v2-to-v3.md)
+* [Upgrade guide: v3 to v4](docs/guides/UPGRADE-v3-to-v4.md)
+* [Upgrade guide: v2 to v3](docs/guides/UPGRADE-v2-to-v3.md)
+
+## Sizing
+
+Minimum sizing from the [upstream documentation](https://docs.opencti.io/latest/deployment/overview/):
+
+| Component | CPU | Memory | Disk | In this chart |
+|---|---|---|---|---|
+| OpenCTI server | 2 cores | 8 GB | none | chart default (requests) |
+| Worker | 1 core | 128 MB | none | chart default (requests) |
+| Connector | 1 core | 128 MB | none | set per item |
+| OpenSearch / Elasticsearch | 2 cores | 8 GB | 16 GB SSD | set `opensearch.resources` |
+| Redis (Dragonfly) | 1 core | 1 GB | 16 GB SSD | set `redis.resources` |
+| RabbitMQ | 1 core | 512 MB | 2 GB | set `rabbitmq.resources` |
+| S3 storage (RustFS) | 1 core | 128 MB | 16 GB SSD | set `rustfs.resources` |
+
+The server requests 2 CPU and 8Gi by default, so it will not schedule on a small node. Lower `resources.requests` for local or test clusters, as [`ci/ci-standalone-values.yaml`](./ci/ci-standalone-values.yaml) does. The bundled dependencies keep small defaults and no persistence. Size them before going to production.
 
 ## Configuration
 
@@ -158,7 +178,7 @@ helm show values opencti/opencti
 | connectorsGlobal.volumes | list | `[]` | Additional volumes on the output connector Deployment definition |
 | dnsConfig | object | `{}` | Configure DNS </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/ |
 | dnsPolicy | string | `"ClusterFirst"` | Configure DNS policy Options: ClusterFirst, Default, ClusterFirstWithHostNet, None </br> Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/ |
-| eck-stack | object | `{"eck-elasticsearch":{"enabled":true,"http":{"tls":{"selfSignedCertificate":{"disabled":true}}},"nodeSets":[{"config":{"node.roles":["master","data","ingest"],"node.store.allow_mmap":false},"count":1,"name":"default","podTemplate":{"spec":{"containers":[{"name":"elasticsearch","resources":{"limits":{"memory":"2Gi"},"requests":{"cpu":"500m","memory":"2Gi"}}}],"volumes":[{"emptyDir":{},"name":"elasticsearch-data"}]}}}]},"eck-kibana":{"enabled":false},"enabled":false}` | ECK stack subchart deployment </br> Ref: https://github.com/elastic/cloud-on-k8s/blob/main/deploy/eck-stack/values.yaml |
+| eck-stack | object | `{"eck-elasticsearch":{"enabled":true,"http":{"tls":{"selfSignedCertificate":{"disabled":true}}},"nodeSets":[{"config":{"node.roles":["master","data","ingest"],"node.store.allow_mmap":false},"count":1,"name":"default","podTemplate":{"spec":{"containers":[{"name":"elasticsearch","resources":{"limits":{"memory":"2Gi"},"requests":{"cpu":"500m","memory":"2Gi"}}}],"volumes":[{"emptyDir":{},"name":"elasticsearch-data"}]}}}]},"eck-kibana":{"enabled":false},"enabled":false}` | ECK stack subchart deployment </br> Ref: https://github.com/elastic/cloud-on-k8s/blob/main/deploy/eck-stack/values.yaml </br> Recommended for production: 2 cores, 8 GB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself. |
 | eck-stack.enabled | bool | `false` | Enable or disable ElasticSearch subchart |
 | env | object | `{"APP__ADMIN__EMAIL":"admin@opencti.io","APP__ADMIN__PASSWORD":"ChangeMe","APP__ADMIN__TOKEN":"ChangeMe","APP__BASE_PATH":"/","APP__ENCRYPTION_KEY":"ChangeMe","APP__GRAPHQL__PLAYGROUND__ENABLED":false,"APP__GRAPHQL__PLAYGROUND__FORCE_DISABLED_INTROSPECTION":false,"APP__HEALTH_ACCESS_KEY":"ChangeMe","APP__TELEMETRY__METRICS__ENABLED":true,"ELASTICSEARCH__URL":"http://release-name-elasticsearch:9200","MINIO__ACCESS_KEY":"ChangeMe","MINIO__ENDPOINT":"release-name-rustfs-svc","MINIO__PORT":9000,"MINIO__SECRET_KEY":"ChangeMe","NODE_OPTIONS":"--max-old-space-size=8096","PROVIDERS__LOCAL__STRATEGY":"LocalStrategy","RABBITMQ__HOSTNAME":"release-name-rabbitmq","RABBITMQ__PASSWORD":"ChangeMe","RABBITMQ__PORT":5672,"RABBITMQ__PORT_MANAGEMENT":15672,"RABBITMQ__USERNAME":"user","REDIS__HOSTNAME":"release-name-redis-master","REDIS__MODE":"single","REDIS__PORT":6379}` | Environment variables to configure application </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform |
 | envFromConfigMap | object | `{}` | Variables from configMap |
@@ -193,13 +213,13 @@ helm show values opencti/opencti
 | networkPolicy.enabled | bool | `false` | Enable or disable NetworkPolicy Leaving ingress/egress empty below while enabled is a permissive (allow-all) policy - uncomment the examples to actually restrict traffic. |
 | networkPolicy.policyTypes | list | `[]` | Policy types |
 | nodeSelector | object | `{}` | Node labels for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector |
-| opensearch | object | `{"enabled":true,"opensearchJavaOpts":"-Xmx512M -Xms512M","persistence":{"enabled":false},"singleNode":true}` | OpenSearch subchart deployment </br> Ref: https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml |
+| opensearch | object | `{"enabled":true,"opensearchJavaOpts":"-Xmx512M -Xms512M","persistence":{"enabled":false},"singleNode":true}` | OpenSearch subchart deployment </br> Ref: https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml </br> Recommended for production: 2 cores, 8 GB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself. |
 | opensearch.enabled | bool | `true` | Enable or disable OpenSearch subchart |
 | podAnnotations | object | `{}` | Configure annotations on Pods |
 | podDisruptionBudget | object | `{"enabled":false,"maxUnavailable":1}` | Pod Disruption Budget </br> Ref: https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/ |
 | podLabels | object | `{}` | Configure labels on Pods |
 | podSecurityContext | object | `{"fsGroup":2000}` | Defines privilege and access control settings for a Pod </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| rabbitmq | object | `{"auth":{"erlangCookie":"ChangeMe","password":"ChangeMe","username":"user"},"clustering":{"enabled":false},"enabled":true,"global":{"security":{"allowInsecureImages":true}},"image":{"repository":"bitnamilegacy/rabbitmq","tag":"4.1.2-debian-12-r1"},"persistence":{"enabled":false},"replicaCount":1}` | RabbitMQ subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml |
+| rabbitmq | object | `{"auth":{"erlangCookie":"ChangeMe","password":"ChangeMe","username":"user"},"clustering":{"enabled":false},"enabled":true,"global":{"security":{"allowInsecureImages":true}},"image":{"repository":"bitnamilegacy/rabbitmq","tag":"4.1.2-debian-12-r1"},"persistence":{"enabled":false},"replicaCount":1}` | RabbitMQ subchart deployment </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml </br> Recommended for production: 1 core, 512 MB RAM, 2 GB disk. Defaults stay small; set resources and persistence yourself. |
 | rabbitmq.enabled | bool | `true` | Enable or disable RabbitMQ subchart |
 | readinessProbe | object | `{"enabled":true,"failureThreshold":3,"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | Configure readinessProbe checker A failed readinessProbe only pulls the pod out of Service rotation, it never restarts the container, so this can stay stricter than liveness. timeoutSeconds is relaxed from 1s (too tight under load, caused flapping). </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes |
 | readinessProbeCustom | object | `{}` | Custom readinessProbe |
@@ -211,11 +231,11 @@ helm show values opencti/opencti
 | readyChecker.services | list | `[{"name":"elasticsearch","port":9200},{"address":"release-name-rustfs-svc","name":"rustfs","port":9000},{"name":"rabbitmq","port":5672},{"name":"redis","port":6379}]` | List services |
 | readyChecker.tag | string | `"1.37.0"` | Overrides the image tag |
 | readyChecker.timeout | int | `5` | Timeout for each check |
-| redis | object | `{"enabled":true,"extraArgs":["--cache_mode=true"],"storage":{"enabled":false}}` | Dragonfly subchart deployment (alias: Redis) </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml |
+| redis | object | `{"enabled":true,"extraArgs":["--cache_mode=true"],"storage":{"enabled":false}}` | Dragonfly subchart deployment (alias: Redis) </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml </br> Recommended for production: 1 core, 1 GB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself. |
 | redis.enabled | bool | `true` | Enable or disable Dragonfly subchart |
 | replicaCount | int | `1` | Number of replicas for the service |
-| resources | object | `{}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
-| rustfs | object | `{"enabled":true,"ingress":{"enabled":false},"mode":{"distributed":{"enabled":false},"standalone":{"enabled":true}},"resources":{"requests":{"memory":"512Mi"}},"secret":{"rustfs":{"access_key":"ChangeMe","secret_key":"ChangeMe"}},"storageclass":{"name":""}}` | RustFS subchart deployment (S3-compatible object storage, standalone mode) </br> Ref: https://github.com/rustfs/rustfs/tree/main/helm/rustfs |
+| resources | object | `{"requests":{"cpu":2,"memory":"8Gi"}}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ </br> Defaults follow the OpenCTI Core minimum (2 cores, 8 GB). </br> Ref: https://docs.opencti.io/latest/deployment/overview/ |
+| rustfs | object | `{"enabled":true,"ingress":{"enabled":false},"mode":{"distributed":{"enabled":false},"standalone":{"enabled":true}},"resources":{"requests":{"memory":"512Mi"}},"secret":{"rustfs":{"access_key":"ChangeMe","secret_key":"ChangeMe"}},"storageclass":{"name":""}}` | RustFS subchart deployment (S3-compatible object storage, standalone mode) </br> Ref: https://github.com/rustfs/rustfs/tree/main/helm/rustfs </br> Recommended for production: 1 core, 128 MB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself. |
 | rustfs.enabled | bool | `true` | Enable or disable RustFS subchart |
 | secrets | list | `[]` | Secrets values to create credentials and reference by envFromSecrets Generate Secret with following name: <release-name>-<name> </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/ |
 | securityContext | object | `{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1000}` | Defines privilege and access control settings for a Container </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
@@ -246,7 +266,7 @@ helm show values opencti/opencti
 | topologySpreadConstraints | list | `[]` | Control how Pods are spread across your cluster </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#example-multiple-topologyspreadconstraints |
 | volumeMounts | list | `[]` | Additional volumeMounts on the output Deployment definition |
 | volumes | list | `[]` | Additional volumes on the output Deployment definition |
-| worker | object | `{"affinity":{},"args":[],"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"command":[],"configMaps":[],"dnsConfig":{},"dnsPolicy":"ClusterFirst","enabled":true,"env":{"WORKER_LOG_LEVEL":"info","WORKER_TELEMETRY_ENABLED":true},"envFromConfigMap":{},"envFromFiles":[],"envFromSecrets":{},"image":{"pullPolicy":"IfNotPresent","repository":"opencti/worker","tag":""},"imagePullSecrets":[],"initContainers":[],"lifecycle":{},"livenessProbe":{"enabled":false,"failureThreshold":6,"initialDelaySeconds":0,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":10},"livenessProbeCustom":{},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"nodeSelector":{},"podAnnotations":{},"podDisruptionBudget":{"enabled":false,"maxUnavailable":1},"podLabels":{},"podSecurityContext":{"fsGroup":2000},"readinessProbe":{"enabled":false,"failureThreshold":3,"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"readinessProbeCustom":{},"readyChecker":{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"tag":"1.37.0","timeout":5},"replicaCount":1,"resources":{},"secrets":[],"securityContext":{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1000},"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"},"startupProbe":{"enabled":false,"failureThreshold":30,"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"startupProbeCustom":{},"strategy":{},"terminationGracePeriodSeconds":30,"tolerations":[],"topologySpreadConstraints":[],"volumeMounts":[],"volumes":[]}` | OpenCTI worker deployment configuration </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers |
+| worker | object | `{"affinity":{},"args":[],"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"command":[],"configMaps":[],"dnsConfig":{},"dnsPolicy":"ClusterFirst","enabled":true,"env":{"WORKER_LOG_LEVEL":"info","WORKER_TELEMETRY_ENABLED":true},"envFromConfigMap":{},"envFromFiles":[],"envFromSecrets":{},"image":{"pullPolicy":"IfNotPresent","repository":"opencti/worker","tag":""},"imagePullSecrets":[],"initContainers":[],"lifecycle":{},"livenessProbe":{"enabled":false,"failureThreshold":6,"initialDelaySeconds":0,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":10},"livenessProbeCustom":{},"networkPolicy":{"egress":[],"enabled":false,"ingress":[],"policyTypes":[]},"nodeSelector":{},"podAnnotations":{},"podDisruptionBudget":{"enabled":false,"maxUnavailable":1},"podLabels":{},"podSecurityContext":{"fsGroup":2000},"readinessProbe":{"enabled":false,"failureThreshold":3,"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"readinessProbeCustom":{},"readyChecker":{"enabled":true,"pullPolicy":"IfNotPresent","repository":"busybox","retries":30,"tag":"1.37.0","timeout":5},"replicaCount":1,"resources":{"requests":{"cpu":1,"memory":"128Mi"}},"secrets":[],"securityContext":{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1000},"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"},"startupProbe":{"enabled":false,"failureThreshold":30,"initialDelaySeconds":0,"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"startupProbeCustom":{},"strategy":{},"terminationGracePeriodSeconds":30,"tolerations":[],"topologySpreadConstraints":[],"volumeMounts":[],"volumes":[]}` | OpenCTI worker deployment configuration </br> Ref: https://docs.opencti.io/latest/deployment/overview/#workers |
 | worker.affinity | object | `{}` | Affinity for pod assignment </br> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
 | worker.args | list | `[]` | Configure args </br> Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/ |
 | worker.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Autoscaling with CPU or memory utilization percentage </br> Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
@@ -286,7 +306,7 @@ helm show values opencti/opencti
 | worker.readyChecker.tag | string | `"1.37.0"` | Overrides the image tag |
 | worker.readyChecker.timeout | int | `5` | Timeout for each check |
 | worker.replicaCount | int | `1` | Number of replicas for the service |
-| worker.resources | object | `{}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ |
+| worker.resources | object | `{"requests":{"cpu":1,"memory":"128Mi"}}` | The resources limits and requested </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ </br> Defaults follow the OpenCTI worker minimum (1 core, 128 MB). </br> Ref: https://docs.opencti.io/latest/deployment/overview/ |
 | worker.secrets | list | `[]` | Secrets values to create credentials and reference by envFromSecrets Generate Secret with following name: <release-name>-<name> </br> Ref: https://kubernetes.io/docs/concepts/configuration/secret/ |
 | worker.securityContext | object | `{"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1000}` | Defines privilege and access control settings for a Container </br> Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/ </br> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
 | worker.serviceMonitor | object | `{"enabled":false,"interval":"30s","metricRelabelings":[],"relabelings":[],"scrapeTimeout":"10s"}` | Enable ServiceMonitor to get metrics </br> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitor |

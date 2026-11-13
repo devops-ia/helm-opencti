@@ -1,0 +1,6 @@
+values:
+  - values.yaml
+output: values.schema.json
+draft: 7
+indent: 2
+useHelmDocs: true

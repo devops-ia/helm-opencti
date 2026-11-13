@@ -1,7 +1,7 @@
 {{- $connectorsGlobal := .Values.connectorsGlobal }}
 {{- range .Values.connectors }}
 {{- $connectorName := .name }}
-{{- $exposeMetrics := (hasKey .env "CONNECTOR_EXPOSE_METRICS") | ternary .env.CONNECTOR_EXPOSE_METRICS $connectorsGlobal.env.CONNECTOR_EXPOSE_METRICS }}
+{{- $exposeMetrics := (hasKey (.env | default dict) "CONNECTOR_EXPOSE_METRICS") | ternary (.env).CONNECTOR_EXPOSE_METRICS $connectorsGlobal.env.CONNECTOR_EXPOSE_METRICS }}
 {{- if and .enabled $exposeMetrics }}
 ---
 apiVersion: v1
