@@ -34,8 +34,7 @@ jobs:
 
       - name: Update dependencies
         run: |
-          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee > $GITHUB_WORKSPACE/major-output.log
-          cat $GITHUB_WORKSPACE/major-output.log
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee "$GITHUB_WORKSPACE/major-output.log"
         shell: bash
         env:
           UPDATECLI_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -60,7 +59,7 @@ jobs:
           signoff: false
           branch: fix/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
           delete-branch: true
-          title: '[opencti] upgrade major dependencies (${{ steps.date.outputs.date }})'
+          title: 'fix: [opencti] upgrade major dependencies (${{ steps.date.outputs.date }})'
           body-path: major-output.log
           draft: true
           labels: |
@@ -74,7 +73,7 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: update major dependencies version"
           signoff: false
-          branch: chore/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
+          branch: fix/upgrade-opencti-major-dependencies-${{ steps.date.outputs.date }}
           delete-branch: true
           title: 'fix: [opencti] upgrade major dependencies (${{ steps.date.outputs.date }})'
           body-path: major-output.log

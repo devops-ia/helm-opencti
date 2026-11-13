@@ -3,6 +3,7 @@ name: opencti
 description: A Helm chart to deploy Open Cyber Threat Intelligence platform
 icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
 type: application
+kubeVersion: ">=1.23.0-0"
 maintainers:
   - name: ialejandro
     email: hello@ialejandro.rocks
@@ -20,6 +21,16 @@ keywords:
   - cti
   - threat
   - analysis
+annotations:
+  artifacthub.io/license: MIT
+  artifacthub.io/category: security
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://docs.opencti.io
+    - name: source
+      url: https://github.com/devops-ia/helm-opencti
+    - name: support
+      url: https://github.com/devops-ia/helm-opencti/issues
 dependencies:
   - name: eck-stack
     version: 0.20.0

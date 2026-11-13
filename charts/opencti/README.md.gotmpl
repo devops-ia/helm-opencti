@@ -12,6 +12,7 @@
 ## Prerequisites
 
 * Helm 3+
+* Kubernetes 1.23+
 
 {{ template "chart.requirementsSection" . }}
 
@@ -63,6 +64,22 @@ See [basic installation](docs/configuration.md), [clustering installation](docs/
 ## Upgrades
 
 See [Upgrade guide: v2 to v3](docs/guides/UPGRADE-v2-to-v3.md)
+
+## Sizing
+
+Minimum sizing from the [upstream documentation](https://docs.opencti.io/latest/deployment/overview/):
+
+| Component | CPU | Memory | Disk | In this chart |
+|---|---|---|---|---|
+| OpenCTI server | 2 cores | 8 GB | none | chart default (requests) |
+| Worker | 1 core | 128 MB | none | chart default (requests) |
+| Connector | 1 core | 128 MB | none | set per item |
+| OpenSearch / Elasticsearch | 2 cores | 8 GB | 16 GB SSD | set `opensearch.resources` |
+| Redis (Dragonfly) | 1 core | 1 GB | 16 GB SSD | set `redis.resources` |
+| RabbitMQ | 1 core | 512 MB | 2 GB | set `rabbitmq.resources` |
+| S3 storage (RustFS) | 1 core | 128 MB | 16 GB SSD | set `rustfs.resources` |
+
+The server requests 2 CPU and 8Gi by default, so it will not schedule on a small node. Lower `resources.requests` for local or test clusters, as [`ci/ci-standalone-values.yaml`](./ci/ci-standalone-values.yaml) does. The bundled dependencies keep small defaults and no persistence. Size them before going to production.
 
 ## Configuration
 

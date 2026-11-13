@@ -57,7 +57,7 @@ testConnection: false
 
 # -- Environment variables to configure application
 # </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
-env:
+env:  # @schema skipProperties:true
   # APP OPENCTI
   APP__ADMIN__EMAIL: admin@opencti.io
   APP__ADMIN__PASSWORD: ChangeMe
@@ -503,19 +503,20 @@ gateway:
 
 # -- The resources limits and requested
 # </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-resources: {}
+# </br> Defaults follow the OpenCTI Core minimum (2 cores, 8 GB).
+# </br> Ref: https://docs.opencti.io/latest/deployment/overview/
+resources:  # @schema skipProperties:true
+  requests:
+    cpu: 2
+    memory: 8Gi
   # limits:
-  #   cpu: "1500m"
-  #   memory: 2048Mi
-  # requests:
-  #   cpu: 1
-  #   memory: 256Mi
+  #   memory: 8Gi
 
 # -- Pod Disruption Budget
 # </br> Ref: https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/
 podDisruptionBudget:
   enabled: false
-  maxUnavailable: 1
+  maxUnavailable: 1  # @schema type:[integer, string]
   # minAvailable:
 
 # -- Autoscaling with CPU or memory utilization percentage
@@ -730,7 +731,7 @@ clustering:
     # -- Frontend pod disruption budget
     podDisruptionBudget:
       enabled: false
-      maxUnavailable: 1
+      maxUnavailable: 1  # @schema type:[integer, string]
       # minAvailable:
 
     # -- Frontend network policy
@@ -845,7 +846,7 @@ clustering:
     # -- Ingestion pod disruption budget
     podDisruptionBudget:
       enabled: false
-      maxUnavailable: 2
+      maxUnavailable: 2  # @schema type:[integer, string]
       # minAvailable:
 
     # -- Ingestion network policy
@@ -962,13 +963,13 @@ connectors: []
 #     #   readOnly: true
 #
 #   # Resources and scheduling
+#   # Documented minimum: 1 core, 128 MB
 #   resources: {}
+#     # requests:
+#     #   cpu: 1
+#     #   memory: 128Mi
 #     # limits:
 #     #   memory: 256Mi
-#     #   cpu: "250m"
-#     # requests:
-#     #   memory: 56Mi
-#     #   cpu: "50m"
 #   nodeSelector: {}
 #   tolerations: []
 #     # - key: "nodepool"
@@ -1175,7 +1176,7 @@ worker:
 
   # -- Environment variables to configure application
   # </br> Ref: https://docs.opencti.io/latest/deployment/configuration/#platform
-  env:
+  env:  # @schema skipProperties:true
     WORKER_LOG_LEVEL: info
     # METRICS
     WORKER_TELEMETRY_ENABLED: true
@@ -1302,19 +1303,20 @@ worker:
 
   # -- The resources limits and requested
   # </br> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  resources: {}
+  # </br> Defaults follow the OpenCTI worker minimum (1 core, 128 MB).
+  # </br> Ref: https://docs.opencti.io/latest/deployment/overview/
+  resources:  # @schema skipProperties:true
+    requests:
+      cpu: 1
+      memory: 128Mi
     # limits:
-    #   cpu: "250m"
     #   memory: 256Mi
-    # requests:
-    #   cpu: "100m"
-    #   memory: 56Mi
 
   # -- Pod Disruption Budget
   # </br> Ref: https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/pod-disruption-budget-v1/
   podDisruptionBudget:
     enabled: false
-    maxUnavailable: 1
+    maxUnavailable: 1  # @schema type:[integer, string]
     # minAvailable:
 
   # -- Autoscaling with CPU or memory utilization percentage
@@ -1381,7 +1383,8 @@ worker:
 
 # -- OpenSearch subchart deployment
 # </br> Ref: https://github.com/opensearch-project/helm-charts/blob/main/charts/opensearch/values.yaml
-opensearch:
+# </br> Recommended for production: 2 cores, 8 GB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself.
+opensearch:  # @schema skipProperties:true
   # -- Enable or disable OpenSearch subchart
   enabled: true
 
@@ -1400,7 +1403,8 @@ opensearch:
 
 # -- ECK stack subchart deployment
 # </br> Ref: https://github.com/elastic/cloud-on-k8s/blob/main/deploy/eck-stack/values.yaml
-eck-stack:
+# </br> Recommended for production: 2 cores, 8 GB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself.
+eck-stack:  # @schema skipProperties:true
   # -- Enable or disable ElasticSearch subchart
   enabled: false
 
@@ -1427,7 +1431,7 @@ eck-stack:
           spec:
             containers:
               - name: elasticsearch
-                resources:
+                resources:  # @schema skipProperties:true
                   requests:
                     cpu: "500m"
                     memory: "2Gi"
@@ -1445,7 +1449,8 @@ eck-stack:
 
 # -- RustFS subchart deployment (S3-compatible object storage, standalone mode)
 # </br> Ref: https://github.com/rustfs/rustfs/tree/main/helm/rustfs
-rustfs:
+# </br> Recommended for production: 1 core, 128 MB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself.
+rustfs:  # @schema skipProperties:true
   # -- Enable or disable RustFS subchart
   enabled: true
 
@@ -1480,13 +1485,14 @@ rustfs:
     name: ""
 
   # Resources
-  resources:
+  resources:  # @schema skipProperties:true
     requests:
       memory: 512Mi
 
 # -- RabbitMQ subchart deployment
 # </br> Ref: https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
-rabbitmq:
+# </br> Recommended for production: 1 core, 512 MB RAM, 2 GB disk. Defaults stay small; set resources and persistence yourself.
+rabbitmq:  # @schema skipProperties:true
   # -- Enable or disable RabbitMQ subchart
   enabled: true
 
@@ -1525,7 +1531,8 @@ rabbitmq:
 
 # -- Dragonfly subchart deployment (alias: Redis)
 # </br> Ref: https://github.com/dragonflydb/dragonfly/blob/main/contrib/charts/dragonfly/values.yaml
-redis:
+# </br> Recommended for production: 1 core, 1 GB RAM, 16 GB SSD. Defaults stay small; set resources and persistence yourself.
+redis:  # @schema skipProperties:true
   # -- Enable or disable Dragonfly subchart
   enabled: true
 

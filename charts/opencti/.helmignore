@@ -1,5 +1,7 @@
-docs
-connector-examples
-ci
+# Not needed inside the chart package
+.schema.yaml
 README.md.gotmpl
 artifacthub-repo.yml
+ci/
+docs/
+connector-examples/

@@ -35,8 +35,7 @@ jobs:
 
       - name: Update dependencies
         run: |
-          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false | tee > $GITHUB_WORKSPACE/minor-output.log
-          cat $GITHUB_WORKSPACE/minor-output.log
+          updatecli apply --config .github/updatecli/helm-dependencies.yaml --commit=false 2>&1 | tee "$GITHUB_WORKSPACE/minor-output.log"
         shell: bash
         env:
           UPDATECLI_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -51,7 +50,6 @@ jobs:
         run: |
           echo "date=$(date -I)" >> $GITHUB_OUTPUT
 
-
       - name: Create PR with changes (dry-run)
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: github.event_name == 'workflow_dispatch'
@@ -62,7 +60,7 @@ jobs:
           signoff: false
           branch: fix/upgrade-opencti-minor-dependencies-${{ steps.date.outputs.date }}
           delete-branch: true
-          title: '[opencti] upgrade minor dependencies (${{ steps.date.outputs.date }})'
+          title: 'fix: [opencti] upgrade minor dependencies (${{ steps.date.outputs.date }})'
           body-path: minor-output.log
           draft: true
           labels: |
@@ -76,7 +74,7 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: update minor dependencies version"
           signoff: false
-          branch: chore/upgrade-opencti-minor-dependencies-${{ steps.date.outputs.date }}
+          branch: fix/upgrade-opencti-minor-dependencies-${{ steps.date.outputs.date }}
           delete-branch: true
           title: 'fix: [opencti] upgrade minor dependencies (${{ steps.date.outputs.date }})'
           body-path: minor-output.log

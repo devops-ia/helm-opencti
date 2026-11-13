@@ -112,7 +112,7 @@ readyChecker:
   # -- Pull policy for the image
   pullPolicy: IfNotPresent
   # -- Overrides the image tag
-  tag: latest
+  tag: 1.37.0
   # -- Number of retries before giving up
   retries: 30
   # -- Timeout for each check
@@ -185,7 +185,7 @@ Output:
 ...
       initContainers:
         - name: ready-checker-elasticsearch
-          image: busybox:latest
+          image: busybox:1.37.0
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'
@@ -208,7 +208,7 @@ Output:
                 fi;
               done
         - name: ready-checker-rustfs
-          image: busybox:latest
+          image: busybox:1.37.0
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'
@@ -231,7 +231,7 @@ Output:
                 fi;
               done
         - name: ready-checker-rabbitmq
-          image: busybox:latest
+          image: busybox:1.37.0
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'
@@ -254,7 +254,7 @@ Output:
                 fi;
               done
         - name: ready-checker-redis-master
-          image: busybox:latest
+          image: busybox:1.37.0
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'

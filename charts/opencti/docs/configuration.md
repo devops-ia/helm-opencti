@@ -900,6 +900,21 @@ startupProbe:
 
 ## Resources
 
+### Defaults
+
+The server requests 2 CPU and 8Gi and each worker 1 CPU and 128Mi. These are the minimums from the [upstream documentation](https://docs.opencti.io/latest/deployment/overview/); the full table is in the [chart README](../README.md#sizing).
+
+Connectors have no default: set `resources` on each item (documented minimum: 1 core, 128 MB). The bundled dependencies keep small defaults for test installs, so size them for production.
+
+On a small or local cluster, lower the requests:
+
+```yaml
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+```
+
 ### Limits
 
 Configure appropriate resource limits for all components:

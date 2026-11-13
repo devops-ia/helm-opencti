@@ -16,6 +16,7 @@ repos:
         args: [--maxdepth=3]
         files: ^(README\.md|CONTRIBUTING\.md|TESTING\.md)$
 
+  # helm lint also checks Chart.yaml and validates values.yaml against the schema
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.30
     hooks:
@@ -23,6 +24,18 @@ repos:
         args:
           - charts/opencti
       - id: shellcheck
+
+  - repo: local
+    hooks:
+      # built from source so it works without the Helm plugin (Helm 4 refuses unverified plugins)
+      - id: helm-schema
+        name: Generate values.schema.json
+        language: golang
+        additional_dependencies:
+          - github.com/losisin/helm-values-schema-json/v2@v2.6.0
+        entry: bash -c 'cd charts/opencti && helm-values-schema-json'
+        files: ^charts/opencti/(values\.yaml|\.schema\.yaml)$
+        pass_filenames: false
 
   - repo: https://github.com/norwoodj/helm-docs
     rev: v1.14.2
@@ -34,25 +47,9 @@ repos:
           - --document-dependency-values
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.3
+    rev: 0.39.0
     hooks:
       - id: check-jsonschema
         name: "Check values.schema.json"
         files: values\.schema\.json$
         args: ["--schemafile", "https://json-schema.org/draft-07/schema"]
-
-  - repo: local
-    hooks:
-      - id: helm-check-version
-        name: Check Helm Chart Version
-        entry: bash -c 'if ! grep -q "version:" charts/opencti/Chart.yaml; then echo "Version field missing in Chart.yaml"; exit 1; fi'
-        language: system
-        files: ^charts/opencti/Chart\.yaml$
-        pass_filenames: false
-
-      - id: helm-check-values
-        name: Check values.yaml against schema
-        entry: bash -c 'if [ -f values.schema.json ]; then if ! helm template charts/opencti --validate --values charts/opencti/values.yaml > /dev/null; then exit 1; fi; fi'
-        language: system
-        files: ^charts/opencti/values\.yaml$
-        pass_filenames: false

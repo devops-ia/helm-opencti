@@ -1,13 +1,13 @@
 name: Check new releases
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # every day
-
-permissions:
-  contents: read
-  pull-requests: write
 
 jobs:
   check-and-update-opencti:
@@ -57,7 +57,7 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           commit-message: "fix: update OpenCTI version to ${{ steps.latest_release.outputs.latest_release }}"
           signoff: false
-          branch: chore/upgrade-opencti-appversion-${{ steps.latest_release.outputs.latest_release }}
+          branch: fix/upgrade-opencti-appversion-${{ steps.latest_release.outputs.latest_release }}
           delete-branch: true
           title: 'fix: [opencti] new release: ${{ steps.latest_release.outputs.latest_release }}'
           body: |
