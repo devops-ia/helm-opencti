@@ -1,6 +1,65 @@
 apiVersion: v1
 entries:
   opencti:
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Documentation
+          url: https://docs.opencti.io
+        - name: source
+          url: https://github.com/devops-ia/helm-opencti
+        - name: support
+          url: https://github.com/devops-ia/helm-opencti/issues
+    apiVersion: v2
+    appVersion: 7.261109.3
+    created: "2026-11-13T21:57:00.377992123Z"
+    dependencies:
+    - condition: eck-stack.enabled
+      name: eck-stack
+      repository: https://helm.elastic.co
+      version: 0.20.0
+    - condition: rustfs.enabled
+      name: rustfs
+      repository: https://charts.rustfs.com
+      version: 1.0.4
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts/
+      version: 3.9.0
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.0.13
+    - alias: redis
+      condition: redis.enabled
+      name: dragonfly
+      repository: oci://ghcr.io/dragonflydb/dragonfly/helm
+      version: v2.1.0
+    description: A Helm chart to deploy Open Cyber Threat Intelligence platform
+    digest: f8e00fe43b4dfef7cadb6d7c611f151670d30b100142c11abf828416184289a3
+    home: https://www.filigran.io/en/solutions/products/opencti/
+    icon: https://raw.githubusercontent.com/OpenCTI-Platform/docs/da9fcbaea4c1f02f86eca1bb8099876858082e13/docs/assets/images/favicon.png
+    keywords:
+    - opencti
+    - cybersecurity
+    - threat-intelligence
+    - cti
+    - threat
+    - analysis
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: hello@ialejandro.rocks
+      name: ialejandro
+      url: https://ialejandro.rocks
+    name: opencti
+    sources:
+    - https://github.com/devops-ia/helm-opencti
+    - https://github.com/OpenCTI-Platform/opencti
+    type: application
+    urls:
+    - https://github.com/devops-ia/helm-opencti/releases/download/v4.0.0/opencti-4.0.0.tgz
+    version: 4.0.0
   - apiVersion: v2
     appVersion: 7.261109.3
     created: "2026-11-10T07:09:34.157927121Z"
@@ -13861,4 +13920,4 @@ entries:
     urls:
     - https://devops-ia.github.io/helm-opencti/opencti-1.2.4.tgz
     version: 1.2.4
-generated: "2026-11-10T07:09:34.158766374Z"
+generated: "2026-11-13T21:57:00.379202988Z"
