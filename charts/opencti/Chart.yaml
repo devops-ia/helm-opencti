@@ -12,7 +12,7 @@ sources:
   - https://github.com/devops-ia/helm-opencti
   - https://github.com/OpenCTI-Platform/opencti
 version: 2.0.0
-appVersion: 7.261116.0
+appVersion: 7.261117.0
 home: https://www.filigran.io/en/solutions/products/opencti/
 keywords:
   - opencti
