@@ -286,8 +286,10 @@ opensearch:
       memory: "1Gi"
       cpu: "500m"
 
+  # Keep indices across upgrade tests: the OpenCTI server is not restarted when only OpenSearch changes
   persistence:
-    enabled: false
+    enabled: true
+    size: 1Gi
 
 ##
 # RUSTFS
