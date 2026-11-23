@@ -26,7 +26,7 @@ Kubernetes: `>=1.23.0-0`
 |------------|------|---------|
 | https://charts.rustfs.com | rustfs | 1.0.6 |
 | https://helm.elastic.co | eck-stack | 0.20.0 |
-| https://opensearch-project.github.io/helm-charts/ | opensearch | 3.9.0 |
+| https://opensearch-project.github.io/helm-charts/ | opensearch | 3.10.0 |
 | oci://ghcr.io/dragonflydb/dragonfly/helm | redis(dragonfly) | v2.1.0 |
 | oci://registry-1.docker.io/bitnamicharts | rabbitmq | 16.0.13 |
 
